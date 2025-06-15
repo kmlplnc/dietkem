@@ -1,0 +1,31 @@
+
+> @dietkem/api@0.0.0 build C:\dietkem\apps\api
+> tsc
+
+../web/src/App.tsx(6,33): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+../web/src/components/dashboard/ClientProfile.tsx(1,1): error TS6133: 'useState' is declared but its value is never read.
+../web/src/components/dashboard/ClientProfile.tsx(6,30): error TS2307: Cannot find module './tabs/Measurements' or its corresponding type declarations.
+../web/src/components/dashboard/ClientProfile.tsx(7,27): error TS2307: Cannot find module './tabs/MealPlans' or its corresponding type declarations.
+../web/src/components/dashboard/ClientProfile.tsx(8,22): error TS2307: Cannot find module './tabs/Logs' or its corresponding type declarations.
+../web/src/components/dashboard/ClientProfile.tsx(9,23): error TS2307: Cannot find module './tabs/Notes' or its corresponding type declarations.
+../web/src/components/dashboard/tabs/ProfileInfo.tsx(5,26): error TS2306: File 'C:/dietkem/apps/web/src/components/ui/Textarea.tsx' is not a module.
+../web/src/components/dashboard/tabs/ProfileInfo.tsx(6,24): error TS2306: File 'C:/dietkem/apps/web/src/components/ui/Select.tsx' is not a module.
+../web/src/components/dashboard/tabs/ProfileInfo.tsx(203,20): error TS7006: Parameter 'e' implicitly has an 'any' type.
+../web/src/components/dashboard/tabs/ProfileInfo.tsx(216,20): error TS7006: Parameter 'e' implicitly has an 'any' type.
+../web/src/components/dashboard/tabs/ProfileInfo.tsx(229,20): error TS7006: Parameter 'e' implicitly has an 'any' type.
+../web/src/components/dashboard/tabs/ProfileInfo.tsx(242,20): error TS7006: Parameter 'e' implicitly has an 'any' type.
+../web/src/main.tsx(6,27): error TS2307: Cannot find module '@dietkem/api' or its corresponding type declarations.
+../web/src/main.tsx(12,25): error TS2339: Property 'createClient' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useContext' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useUtils' in your router collides with a built...'.
+  Property 'createClient' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend."'.
+../web/src/main.tsx(22,11): error TS2339: Property 'Provider' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useContext' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useUtils' in your router collides with a built...'.
+  Property 'Provider' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend."'.
+../web/src/main.tsx(26,12): error TS2339: Property 'Provider' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useContext' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useUtils' in your router collides with a built...'.
+  Property 'Provider' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend."'.
+../web/src/pages/Dashboard.tsx(5,9): error TS6133: 'user' is declared but its value is never read.
+../web/src/pages/Dashboard.tsx(6,59): error TS2339: Property 'users' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useContext' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useUtils' in your router collides with a built...'.
+  Property 'users' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend."'.
+../web/src/pages/Dashboard.tsx(7,53): error TS2339: Property 'users' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useContext' in your router collides with a built-in method, rename this router or procedure on your backend." | "The property 'useUtils' in your router collides with a built...'.
+  Property 'users' does not exist on type '"The property 'createClient' in your router collides with a built-in method, rename this router or procedure on your backend."'.
+../web/src/pages/Dashboard.tsx(54,32): error TS7006: Parameter 'user' implicitly has an 'any' type.
+../web/src/utils/trpc.ts(2,32): error TS2307: Cannot find module '@dietkem/api' or its corresponding type declarations.
+ ELIFECYCLE  Command failed with exit code 2.
