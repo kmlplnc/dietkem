@@ -1,115 +1,218 @@
+import { useState, useEffect, useRef } from 'react';
 import { SignIn } from "@clerk/clerk-react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export default function SignInPage() {
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(true);
+  const [typedText, setTypedText] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const welcomeText = "Merhaba, hoş geldiniz.";
+  const [visibleChars, setVisibleChars] = useState(0);
 
-  const features = [
-    {
-      title: "Profesyonel Diyetisyenler",
-      description: "Alanında uzman diyetisyenlerle çalışın",
-    },
-    {
-      title: "Kişiselleştirilmiş Programlar",
-      description: "Size özel beslenme planları oluşturun",
-    },
-    {
-      title: "Kolay Takip",
-      description: "İlerlemenizi anlık olarak takip edin",
-    },
-  ];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisibleChars(prev => {
+        if (prev >= welcomeText.length) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 80);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const textDuration = welcomeText.length * 80;
+    const extraWaitTime = 1000;
+    const totalDuration = textDuration + extraWaitTime;
+
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      setTimeout(() => setShowForm(true), 100);
+    }, totalDuration);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-emerald-50 to-teal-50">
-      {/* Left Section */}
-      <div className="lg:w-1/2 flex flex-col justify-center px-10 py-20">
-        <div className="max-w-lg mx-auto space-y-8">
-          <h1 className="text-4xl font-bold text-emerald-800 leading-snug">
-            Dietkem'e Hoş Geldiniz
-          </h1>
-          <p className="text-lg text-gray-700">
-            Beslenme sürecinizi profesyonelce yönetin. Takip kolay, danışmanlık hızlı.
-          </p>
-
-          <div className="space-y-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-4">
-                <div className="h-7 w-7 flex items-center justify-center bg-emerald-100 rounded-full">
-                  <svg
-                    className="h-4 w-4 text-emerald-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900">{feature.title}</h3>
-                  <p className="text-sm text-gray-600">{feature.description}</p>
-                </div>
-              </div>
+    <>
+      {isLoading && (
+        <div className="welcome-overlay">
+          <h1 className="welcome-typewriter">
+            {welcomeText.split('').map((char, index) => (
+              <span 
+                key={index} 
+                style={{ 
+                  opacity: index < visibleChars ? 1 : 0,
+                  transition: 'opacity 0.1s ease-in'
+                }}
+              >
+                {char}
+              </span>
             ))}
-          </div>
-
-          <img
-            src="/auth-illustration.svg"
-            alt="Auth Illustration"
-            className="mt-10 w-full max-w-sm mx-auto"
-          />
+          </h1>
         </div>
-      </div>
-
-      {/* Right Section */}
-      <div className="lg:w-1/2 bg-white flex items-center justify-center px-6 py-20">
-        <div className="w-full max-w-xl bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Giriş Yap</h2>
-            <p className="mt-2 text-sm text-gray-600">Hesabınızla devam edin</p>
-          </div>
-
+      )}
+      <div className="sign-in-bg">
+        <div className={`sign-in-card minimal single-col sign-in-fade ${showForm ? 'show' : ''}`}>
+          <h1 className="sign-in-title">Hoş Geldiniz</h1>
           <SignIn
             appearance={{
-              layout: {
-                socialButtonsPlacement: "bottom",
-                logoPlacement: "inside",
-                logoImageUrl: "/logo.png",
-              },
               elements: {
-                card: "p-0 shadow-none",
+                card: "p-0 shadow-none bg-transparent",
                 formButtonPrimary:
-                  "bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-lg w-full text-sm font-medium transition",
+                  "bg-black hover:bg-gray-800 text-white py-3 px-4 rounded-lg text-sm font-medium w-full transition-all duration-200",
                 formFieldInput:
-                  "w-full rounded-lg border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 text-sm",
-                formFieldLabel: "text-gray-700 text-sm font-medium",
-                formFieldAction: "text-emerald-600 hover:text-emerald-700 text-sm",
+                  "w-full rounded-lg border-gray-200 text-sm focus:border-black focus:ring-black bg-white",
+                formFieldLabel: "text-sm text-gray-700 font-medium",
                 footer: "hidden",
-                alert: "bg-red-50 text-red-600 text-sm rounded-lg p-3",
+                formField: "mb-4",
+                formFieldAction: "text-black hover:text-gray-800",
+                identityPreviewEditButton: "text-black hover:text-gray-800",
+                identityPreviewText: "text-gray-700",
+                otpCodeFieldInput: "rounded-lg border-gray-200 focus:border-black focus:ring-black",
+                socialButtonsBlockButton: "rounded-lg border-gray-200 hover:bg-gray-50",
+                socialButtonsBlockButtonText: "text-gray-700",
+                socialButtonsBlockButtonArrow: "text-gray-700",
+                socialButtonsBlockButtonIcon: "text-gray-700",
+                dividerLine: "bg-gray-200",
+                dividerText: "text-gray-500",
+                formFieldInputShowPasswordButton: "text-gray-500 hover:text-gray-700",
+                formFieldInputShowPasswordIcon: "text-gray-500",
+                formFieldInputShowPasswordIconActive: "text-black",
+                formFieldInputShowPasswordIconInactive: "text-gray-500",
+                formFieldInputShowPasswordButtonActive: "text-black hover:text-gray-800",
+                formFieldInputShowPasswordButtonInactive: "text-gray-500 hover:text-gray-700",
               },
               variables: {
-                colorPrimary: "#059669",
-                borderRadius: "0.5rem",
+                colorPrimary: "#000000",
+                colorText: "#000000",
+                colorTextSecondary: "#666666",
+                colorBackground: "#FFFFFF",
+                colorInputBackground: "#FFFFFF",
+                colorInputText: "#000000",
               },
             }}
             routing="path"
             path="/sign-in"
             signUpUrl="/sign-up"
-            afterSignInUrl="/dashboard"
+            afterSignInUrl={searchParams.get('after_sign_in_url') || '/dashboard'}
+            afterSignUpUrl={searchParams.get('after_sign_up_url') || '/dashboard'}
+            redirectUrl={searchParams.get('redirect_url') || '/sign-in'}
           />
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Hesabınız yok mu?{" "}
-              <button
-                onClick={() => navigate("/sign-up")}
-                className="font-medium text-emerald-600 hover:text-emerald-700"
-              >
-                Kayıt olun
-              </button>
-            </p>
-          </div>
         </div>
       </div>
-    </div>
+      <style>{`
+        .welcome-overlay {
+          width: 100vw;
+          height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #fff;
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 1000;
+          opacity: 1;
+          animation: fadeInOut 3.2s cubic-bezier(0.4,0,0.2,1) forwards;
+          animation-delay: 0s;
+        }
+        .welcome-typewriter {
+          font-size: 2.5rem;
+          font-weight: bold;
+          color: #000;
+          text-align: center;
+          font-family: 'Noto Sans', 'Inter', system-ui, -apple-system, sans-serif;
+          letter-spacing: 0.5px;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        .letter-animation {
+          display: inline-block;
+          opacity: 0;
+          transform: translateY(20px);
+          animation: fadeInUp 0.3s ease forwards;
+        }
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes fadeInOut {
+          0% { opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .sign-in-bg {
+          min-height: 100vh;
+          width: 100vw;
+          background: #f5f5f5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .sign-in-card.minimal.single-col {
+          background: #fff;
+          border-radius: 18px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          max-width: 400px;
+          width: 100%;
+          padding: 36px 24px;
+          opacity: 0;
+          transform: translateY(32px);
+          transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1);
+        }
+        .sign-in-card.minimal.single-col.show {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .cl-card, .cl-internal-1fsg6zy {
+          box-shadow: 0 1px 4px rgba(0,0,0,0.025) !important;
+          background: transparent !important;
+        }
+        /* Hide Clerk powered by badge (comprehensive) */
+        .clerk-powered, 
+        .clerk-powered-by, 
+        .cl-internal-1r47j3i, 
+        .cl-internal-1r47j3i *,
+        .cl-internal-1r47j3i > *,
+        .cl-internal-1r47j3i > div,
+        .cl-internal-1r47j3i > span,
+        .cl-internal-1r47j3i > a,
+        .cl-internal-1r47j3i > svg {
+          display: none !important;
+        }
+        .sign-in-title {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #000;
+          margin-bottom: 24px;
+          text-align: center;
+        }
+        @media (max-width: 700px) {
+          .sign-in-card.minimal.single-col {
+            max-width: 98vw;
+            padding: 24px 8px;
+          }
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap');
+      `}</style>
+    </>
   );
 }
