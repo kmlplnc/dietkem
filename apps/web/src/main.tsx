@@ -13,23 +13,6 @@ if (!clerkPubKey) {
   throw new Error('Missing Clerk Publishable Key');
 }
 
-// Initialize Clerk with proper configuration
-const clerkOptions = {
-  publishableKey: clerkPubKey,
-  appearance: {
-    layout: {
-      socialButtonsVariant: "iconButton",
-      logoPlacement: "inside",
-      showOptionalFields: true,
-    },
-  },
-  routing: "path",
-  signInUrl: "/sign-in",
-  signUpUrl: "/sign-up",
-  afterSignInUrl: "/dashboard",
-  afterSignUpUrl: "/dashboard",
-};
-
 // Create root element
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
@@ -40,7 +23,7 @@ const root = ReactDOM.createRoot(rootElement);
 // Render app with error boundary
 root.render(
   <React.StrictMode>
-    <ClerkProvider {...clerkOptions}>
+    <ClerkProvider publishableKey={clerkPubKey}>
       <App />
     </ClerkProvider>
   </React.StrictMode>

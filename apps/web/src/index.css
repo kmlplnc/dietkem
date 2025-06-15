@@ -8,6 +8,15 @@
   html {
     font-family: 'Inter var', system-ui, sans-serif;
   }
+
+  svg {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    width: 1em !important;
+    height: 1em !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
 }
 
 @layer components {

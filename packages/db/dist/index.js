@@ -68,8 +68,8 @@ var userRoleEnum = (0, import_pg_core.pgEnum)("user_role", ["dietitian", "client
 var mealTypeEnum = (0, import_pg_core.pgEnum)("meal_type", ["breakfast", "lunch", "dinner", "snack"]);
 var users = (0, import_pg_core.pgTable)("users", {
   id: (0, import_pg_core.serial)("id").primaryKey(),
+  clerk_id: (0, import_pg_core.varchar)("clerk_id", { length: 255 }).notNull().unique(),
   email: (0, import_pg_core.varchar)("email", { length: 255 }).notNull().unique(),
-  password_hash: (0, import_pg_core.varchar)("password_hash", { length: 255 }).notNull(),
   role: userRoleEnum("role").notNull(),
   created_at: (0, import_pg_core.timestamp)("created_at").defaultNow().notNull(),
   updated_at: (0, import_pg_core.timestamp)("updated_at").defaultNow().notNull()

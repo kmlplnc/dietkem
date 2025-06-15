@@ -21,7 +21,7 @@ interface ProfileInfoProps {
 
 export const ProfileInfo = ({ client }: ProfileInfoProps) => {
   const { user } = useUser();
-  const { data: me, isLoading } = trpc.users.me.useQuery();
+  const { isLoading } = trpc.users.me.useQuery();
 
   const [formData, setFormData] = useState({
     name: user?.firstName || '',

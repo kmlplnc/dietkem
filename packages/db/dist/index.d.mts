@@ -20,8 +20,8 @@ declare const users: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
-        email: drizzle_orm_pg_core.PgColumn<{
-            name: "email";
+        clerk_id: drizzle_orm_pg_core.PgColumn<{
+            name: "clerk_id";
             tableName: "users";
             dataType: "string";
             columnType: "PgVarchar";
@@ -32,8 +32,8 @@ declare const users: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: [string, ...string[]];
             baseColumn: never;
         }, {}, {}>;
-        password_hash: drizzle_orm_pg_core.PgColumn<{
-            name: "password_hash";
+        email: drizzle_orm_pg_core.PgColumn<{
+            name: "email";
             tableName: "users";
             dataType: "string";
             columnType: "PgVarchar";
