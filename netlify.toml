@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "pnpm install && pnpm turbo run build --filter @dietkem/web"
+  command = "cd apps/web && pnpm install && pnpm build:prod"
   publish = "apps/web/dist"
 
 [build.environment]

@@ -4,20 +4,12 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "build/**"],
-      "env": ["NODE_ENV", "VITE_CLERK_PUBLISHABLE_KEY"]
+      "outputs": ["dist/**"]
     },
-    "lint": {
-      "outputs": []
-    },
+    "lint": {},
     "dev": {
       "cache": false,
-      "persistent": true,
-      "dependsOn": ["^build"],
-      "env": ["NODE_ENV", "VITE_CLERK_PUBLISHABLE_KEY"]
-    },
-    "db:push": {
-      "cache": false
+      "persistent": true
     }
   }
 } 
