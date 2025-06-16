@@ -1,7 +1,7 @@
 [build]
   base = "."
-  command = "cd apps/web && pnpm install && pnpm build:prod"
-  publish = "dist"
+  command = "pnpm install && pnpm turbo run build --filter @dietkem/web"
+  publish = "apps/web/dist"
 
 [build.environment]
   NODE_VERSION = "20.11.1"

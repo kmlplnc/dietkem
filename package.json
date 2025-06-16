@@ -18,7 +18,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "drizzle-orm": "^0.29.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "turbo": "^1.12.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
