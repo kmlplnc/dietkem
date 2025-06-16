@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: dietkem-web
+    env: node
+    buildCommand: corepack enable && corepack prepare pnpm@8.15.4 --activate && pnpm install --no-frozen-lockfile && npx turbo run build --filter=@dietkem/web
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.x
+      - key: PNPM_VERSION
+        value: 8.15.4 
