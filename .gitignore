@@ -75,3 +75,8 @@ next-env.d.ts
 
 # System
 Thumbs.db
+
+# Package manager
+# package-lock.json is allowed
+yarn.lock
+pnpm-lock.yaml

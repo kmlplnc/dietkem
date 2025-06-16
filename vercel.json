@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm build",
-  "installCommand": "corepack enable && corepack prepare pnpm@8.15.4 --activate && pnpm install --no-frozen-lockfile",
+  "buildCommand": "npm install && npm run build",
+  "installCommand": "npm install",
   "framework": "vite",
   "outputDirectory": "dist",
   "rewrites": [
