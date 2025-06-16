@@ -1,6 +1,7 @@
 [build]
-  command = "pnpm install && cd apps/web && pnpm build:prod"
-  publish = "apps/web/dist"
+  base = "."
+  command = "cd apps/web && pnpm install && pnpm build:prod"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
