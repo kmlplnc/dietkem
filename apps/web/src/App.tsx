@@ -14,16 +14,14 @@ import BlogPost from './pages/blog-post';
 import { LanguageProvider } from "./context/LanguageContext";
 
 function App() {
-  const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          url: "http://localhost:3000/trpc",
-        }),
-      ],
-    })
-  );
+  const queryClient = new QueryClient();
+  const trpcClient = trpc.createClient({
+    links: [
+      httpBatchLink({
+        url: "http://localhost:3000/trpc",
+      }),
+    ],
+  });
 
   return (
     <LanguageProvider>
