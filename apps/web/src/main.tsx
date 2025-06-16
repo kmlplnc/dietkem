@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { ClerkProvider } from '@clerk/clerk-react';
 import { ClerkLocalizationProvider } from './components/ClerkLocalization';
 import { LanguageProvider } from './context/LanguageContext';
 import './index.css';
@@ -22,15 +21,13 @@ if (!rootElement) throw new Error('Failed to find the root element');
 // Create root
 const root = ReactDOM.createRoot(rootElement);
 
-// ✅ ClerkProvider eklendi
+// Render app with error boundary
 root.render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={clerkPubKey}>
-      <LanguageProvider>
-        <ClerkLocalizationProvider>
-          <App />
-        </ClerkLocalizationProvider>
-      </LanguageProvider>
-    </ClerkProvider>
+    <LanguageProvider>
+      <ClerkLocalizationProvider>
+        <App />
+      </ClerkLocalizationProvider>
+    </LanguageProvider>
   </React.StrictMode>
 );

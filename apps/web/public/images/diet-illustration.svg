@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f8fafc"/>
+  
+  <!-- Plate -->
+  <circle cx="400" cy="300" r="200" fill="#e2e8f0" stroke="#94a3b8" stroke-width="4"/>
+  
+  <!-- Food items -->
+  <circle cx="350" cy="250" r="40" fill="#4ade80"/> <!-- Green vegetable -->
+  <circle cx="450" cy="250" r="30" fill="#f87171"/> <!-- Red food -->
+  <circle cx="400" cy="350" r="35" fill="#fbbf24"/> <!-- Yellow food -->
+  
+  <!-- Utensils -->
+  <line x1="200" y1="200" x2="250" y2="400" stroke="#64748b" stroke-width="8"/> <!-- Fork -->
+  <line x1="550" y1="200" x2="500" y2="400" stroke="#64748b" stroke-width="8"/> <!-- Knife -->
+</svg> 
