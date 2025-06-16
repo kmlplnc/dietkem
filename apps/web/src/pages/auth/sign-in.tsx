@@ -1,76 +1,41 @@
-import { useState } from 'react';
 import { SignIn } from "@clerk/clerk-react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { useSignIn } from '@clerk/clerk-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SignInPage() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { signIn } = useSignIn();
+  const { currentLang } = useLanguage();
 
   return (
     <div className="sign-in-container">
       <div className="sign-in-content">
         <div className="sign-in-card">
           <div className="sign-in-header">
-            <h1>Giriş Yap</h1>
-            <p className="subtitle">Modern diyetisyenler için akıllı çözüm ortağı.</p>
+            <h1>{currentLang === 'tr' ? 'Giriş Yap' : 'Sign In'}</h1>
+            <p className="subtitle">{currentLang === 'tr' ? 'Modern diyetisyenler için akıllı çözüm ortağı.' : 'Smart solution partner for modern dietitians.'}</p>
             <SignIn 
+              appearance={{
+                elements: {
+                  headerTitle: "hidden",
+                  headerSubtitle: "hidden",
+                  card: "shadow-none",
+                  rootBox: "mx-auto",
+                  cardContent: "p-0",
+                  header: "hidden",
+                  formButtonPrimary: "w-full",
+                  formFieldInput: "w-full",
+                  formFieldLabel: "hidden",
+                  formFieldAction: "hidden",
+                  identityPreviewEditButton: "hidden",
+                  identityPreviewText: "hidden",
+                  formFieldInputShowPasswordButton: "hidden",
+                  formFieldInputShowPasswordIcon: "hidden",
+                  formFieldInputShowPasswordIconContainer: "hidden"
+                }
+              }}
               afterSignInUrl="/welcome"
               signUpUrl="/sign-up"
               redirectUrl="/welcome"
               routing="path"
               path="/sign-in"
-              forgotPasswordUrl="/reset-password"
-              appearance={{
-                elements: {
-                  rootBox: "w-full",
-                  card: "bg-white rounded-2xl shadow-lg p-8 w-full max-w-[400px] mx-auto",
-                  headerTitle: { display: 'none' },
-                  headerSubtitle: { display: 'none' },
-                  cardHeader: { display: 'none' },
-                  formButtonPrimary: 
-                    "bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 px-4 rounded-lg w-full transition-colors",
-                  formFieldInput: 
-                    "w-full rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm pl-10",
-                  formFieldLabel: 
-                    "text-gray-700 text-sm font-medium",
-                  formFieldAction: 
-                    "text-blue-600 hover:text-blue-700 text-sm",
-                  identityPreviewEditButton: 
-                    "text-blue-600 hover:text-blue-700 text-sm",
-                  footerActionLink: 
-                    "text-blue-600 hover:text-blue-700 text-sm",
-                  socialButtonsBlockButton: 
-                    "border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm rounded-lg",
-                  socialButtonsBlockButtonText: 
-                    "text-gray-700 text-sm",
-                  formFieldInputShowPasswordButton: 
-                    "text-gray-500 hover:text-gray-700",
-                  footer: "hidden",
-                  formFieldError: "text-red-500 text-sm",
-                  alert: "bg-red-50 text-red-500 text-sm rounded-lg p-3",
-                  alertText: "text-red-500 text-sm",
-                  alertIcon: "text-red-500",
-                  identityPreviewText: "text-gray-700 text-sm",
-                  otpCodeFieldInput: 
-                    "w-12 h-12 rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-center text-lg",
-                  formFieldWarningText: "text-yellow-600 text-sm",
-                  formFieldSuccessText: "text-green-600 text-sm",
-                },
-                variables: {
-                  colorPrimary: "#3b82f6",
-                  colorText: "#1f2937",
-                  colorTextSecondary: "#6b7280",
-                  colorBackground: "#ffffff",
-                  colorInputBackground: "#ffffff",
-                  colorInputText: "#1f2937",
-                  colorDanger: "#ef4444",
-                  colorSuccess: "#22c55e",
-                  colorWarning: "#f59e0b",
-                  borderRadius: "0.5rem",
-                },
-              }}
             />
             <div className="brand-footer">
               <img src="/logo/logo3.png" alt="Dietkem Logo" className="brand-logo" />

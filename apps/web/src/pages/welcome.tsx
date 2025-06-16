@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function WelcomePage() {
   const { user, isLoaded } = useUser();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [visibleChars, setVisibleChars] = useState(0);
   const [isFading, setIsFading] = useState(false);
-  const welcomeText = `Hoş geldiniz, ${user?.firstName || ''} ${user?.lastName || ''}.`;
+  const welcomeText = `${t('welcome.title')}, ${user?.firstName || ''} ${user?.lastName || ''}!`;
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -20,11 +22,11 @@ export default function WelcomePage() {
           }
           return prev + 1;
         });
-      }, 50); // Slightly slower for smoother animation
+      }, 50);
 
       // Shorter animation duration
       const textDuration = welcomeText.length * 50;
-      const extraWaitTime = 800; // Slightly longer wait time
+      const extraWaitTime = 800;
       const totalDuration = textDuration + extraWaitTime;
 
       // Start fade out before navigation
@@ -34,7 +36,7 @@ export default function WelcomePage() {
         // Navigate after fade out animation
         setTimeout(() => {
           navigate('/', { replace: true });
-        }, 600); // Fade out duration
+        }, 600);
       }, totalDuration);
 
       return () => clearInterval(interval);

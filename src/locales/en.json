@@ -1,0 +1,28 @@
+{
+  "welcome": "Welcome",
+  "login": "Sign In",
+  "signup": "Sign Up",
+  "hero": {
+    "title": "Your Health Journey Starts Here",
+    "subtitle": "Track your nutrition, achieve your goals, and transform your life with our comprehensive diet tracking platform."
+  },
+  "features": {
+    "title": "Why Choose Us",
+    "tracking": "Smart Tracking",
+    "trackingDesc": "Easily track your meals and nutrition",
+    "goals": "Goal Setting",
+    "goalsDesc": "Set and achieve your health goals",
+    "community": "Community Support",
+    "communityDesc": "Join a supportive community"
+  },
+  "blog": {
+    "title": "Latest Articles",
+    "readMore": "Read More"
+  },
+  "footer": {
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  }
+} 

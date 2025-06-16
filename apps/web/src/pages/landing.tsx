@@ -1,15 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser, SignedIn, SignedOut, useClerk } from '@clerk/clerk-react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import { useEffect, useState, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
-export default function LandingPage() {
-  const { user, isLoaded } = useUser();
+const LandingPage = () => {
+  const { user } = useUser();
   const { signOut } = useClerk();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
   const navigate = useNavigate();
+  const { currentLang, changeLanguage, t } = useLanguage();
 
   // Dropdown dışına tıklandığında kapatma
   useEffect(() => {
@@ -35,6 +35,45 @@ export default function LandingPage() {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const gender = (form.querySelector('input[name="gender"]:checked') as HTMLInputElement)?.value;
+    const age = (form.querySelector('#age') as HTMLInputElement)?.value;
+    const height = (form.querySelector('#height') as HTMLInputElement)?.value;
+    const weight = (form.querySelector('#weight') as HTMLInputElement)?.value;
+    const activity = (form.querySelector('#activity') as HTMLSelectElement)?.value;
+
+    if (gender && age && height && weight && activity) {
+      // BMR calculation using Mifflin-St Jeor formula
+      let bmr = 10 * Number(weight) + 6.25 * Number(height) - 5 * Number(age);
+      bmr = gender === 'male' ? bmr + 5 : bmr - 161;
+      
+      // TDEE calculation
+      let tdee = Math.round(bmr * Number(activity));
+      
+      // Adjust calories based on goal
+      const goal = (form.querySelector('#goal') as HTMLSelectElement)?.value;
+      if (goal === 'lose') {
+        tdee = Math.round(tdee - 500); // 500 calorie deficit for weight loss
+      } else if (goal === 'gain') {
+        tdee = Math.round(tdee + 500); // 500 calorie surplus for weight gain
+      }
+      
+      // Update result
+      const resultNumber = document.querySelector('.result-value .number');
+      if (resultNumber) {
+        resultNumber.textContent = tdee.toLocaleString();
+      }
+      
+      // Show result section
+      const resultSection = document.querySelector('.result-section');
+      if (resultSection) {
+        resultSection.classList.add('show');
+      }
+    }
+  };
+
   return (
     <>
       <header className="top-bar">
@@ -47,40 +86,50 @@ export default function LandingPage() {
 
           {/* Main Navigation */}
           <nav className="main-nav">
-            <Link to="/about" className="nav-link">Hakkımızda</Link>
-            <Link to="/blog" className="nav-link">Blog</Link>
-            <Link to="/tools" className="nav-link">Araçlar</Link>
-            <Link to="/contact" className="nav-link">İletişim</Link>
+            <a href="#about" className="nav-link">{t('nav.about')}</a>
+            <Link to="/blog" className="nav-link">{t('nav.blog')}</Link>
+            <Link to="/tools" className="nav-link">{t('nav.tools')}</Link>
+            <Link to="/contact" className="nav-link">{t('nav.contact')}</Link>
           </nav>
 
           {/* User Actions & Language */}
           <div className="right-section">
             <div className="language-switcher">
-              <button className="lang-btn">TR</button>
+              <button 
+                className={`lang-btn ${currentLang === 'tr' ? 'active' : ''}`}
+                onClick={() => changeLanguage('tr')}
+              >
+                TR
+              </button>
               <span className="separator">|</span>
-              <button className="lang-btn">EN</button>
+              <button 
+                className={`lang-btn ${currentLang === 'en' ? 'active' : ''}`}
+                onClick={() => changeLanguage('en')}
+              >
+                EN
+              </button>
             </div>
             <div className="auth-buttons">
-              {isLoaded && user ? (
+              {user ? (
                 <div className="user-welcome" ref={dropdownRef}>
                   <button 
                     className="user-button"
                     onClick={() => setShowDropdown(!showDropdown)}
                   >
-                    <span className="welcome-text">Merhaba, {user.firstName || user.username || 'Hoş Geldiniz'}</span>
+                    <span className="welcome-text">{t('nav.welcome', { name: user.firstName || user.username || t('nav.guest') })}</span>
                   </button>
                   {showDropdown && (
                     <div className="dropdown-menu">
                       <button onClick={handleSignOut} className="dropdown-item">
-                        Çıkış Yap
+                        {t('nav.signOut')}
                       </button>
                     </div>
                   )}
                 </div>
               ) : (
                 <>
-                  <Link to="/sign-in" className="btn btn-text">Giriş Yap</Link>
-                  <Link to="/sign-up" className="btn btn-primary">Kayıt Ol</Link>
+                  <Link to="/sign-in" className="btn btn-text">{t('nav.signIn')}</Link>
+                  <Link to="/sign-up" className="btn btn-primary">{t('nav.signUp')}</Link>
                 </>
               )}
             </div>
@@ -90,11 +139,11 @@ export default function LandingPage() {
 
       <section className="hero">
         <div className="hero-content">
-          <h1 className="hero-title">Sağlıklı Yaşam İçin Yeni Nesil Diyet Yönetimi</h1>
-          <p className="hero-subtitle">Diyetisyenler ve danışanlar için basit, güçlü ve akıllı bir platform.</p>
+          <h1 className="hero-title">{t('hero.title')}</h1>
+          <p className="hero-subtitle">{t('hero.subtitle')}</p>
           <div className="hero-cta">
-            <Link to="/sign-up" className="btn btn-primary">Ücretsiz Başla</Link>
-            <Link to="/about" className="btn btn-outline">Hakkımızda</Link>
+            <Link to="/sign-up" className="btn btn-primary">{t('hero.startFree')}</Link>
+            <Link to="/about" className="btn btn-outline">{t('hero.learnMore')}</Link>
           </div>
         </div>
       </section>
@@ -102,7 +151,7 @@ export default function LandingPage() {
       <section className="why-dietkem">
         <div className="container why-dietkem-inner">
           <div className="content-wrapper">
-            <h2 className="section-title">Neden Dietkem?</h2>
+            <h2 className="section-title">{t('features.title')}</h2>
             <div className="envelope-row">
               <div className="envelope-trigger" onClick={() => {
                 const title = document.querySelector('.section-title');
@@ -120,7 +169,7 @@ export default function LandingPage() {
                 <div className="envelope">
                   <div className="envelope-flap"></div>
                   <div className="envelope-content">
-                    <span>Keşfet</span>
+                    <span>{t('features.explore')}</span>
                   </div>
                 </div>
               </div>
@@ -129,40 +178,49 @@ export default function LandingPage() {
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">🌿</div>
-              <h3 className="feature-title">Bilimsel Tabanlı Planlama</h3>
+              <h3 className="feature-title">{t('features.science.title')}</h3>
               <p className="feature-description">
-                En güncel beslenme bilimine dayalı, kişiye özel diyet planları oluşturun. 
-                Makro ve mikro besin dengesi, kalori hesaplaması ve besin değeri analizi ile 
-                optimal sonuçlar elde edin.
+                {t('features.science.description')}
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">📊</div>
-              <h3 className="feature-title">Gelişmiş Takip ve Analiz</h3>
+              <h3 className="feature-title">{t('features.tracking.title')}</h3>
               <p className="feature-description">
-                Detaylı ilerleme grafikleri, vücut kompozisyonu analizi ve kapsamlı raporlarla 
-                hedeflerinize ulaşın. Haftalık ve aylık performans değerlendirmesi ile 
-                sürecinizi optimize edin.
+                {t('features.tracking.description')}
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🌍</div>
-              <h3 className="feature-title">Türkçe Destek + GDPR Uyumlu</h3>
+              <h3 className="feature-title">{t('features.local.title')}</h3>
               <p className="feature-description">
-                Tamamen Türkçe arayüz, yerel besin veritabanı ve veri güvenliği standartlarına 
-                uygun altyapı. Kişisel verileriniz güvende, tüm içerik Türkçe.
+                {t('features.local.description')}
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🤖</div>
-              <h3 className="feature-title">AI Destekli Otomatik Planlama</h3>
+              <h3 className="feature-title">{t('features.ai.title')}</h3>
               <p className="feature-description">
-                Yapay zeka destekli önerilerle daha etkili beslenme planları oluşturun. 
-                Öğrenen algoritmalar ile kişisel tercihlerinize ve hedeflerinize göre 
-                sürekli optimize edilen programlar.
+                {t('features.ai.description')}
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">📚</div>
+              <h3 className="feature-title">{t('features.blog.title')}</h3>
+              <p className="feature-description">
+                {t('features.blog.description')}
+              </p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">💰</div>
+              <h3 className="feature-title">{t('features.pricing.title')}</h3>
+              <p className="feature-description">
+                {t('features.pricing.description')}
               </p>
             </div>
           </div>
@@ -171,110 +229,214 @@ export default function LandingPage() {
 
       <section className="bmr-calculator">
         <div className="calculator-container">
-          <h2 className="calculator-title">Günlük Kalori İhtiyacınızı Öğrenin</h2>
-          <p className="calculator-subtitle">BMH + Aktivite oranı ile yaklaşık günlük enerji ihtiyacınızı hesaplayın.</p>
+          <h2 className="calculator-title">{t('calculator.title')}</h2>
+          <p className="calculator-subtitle">{t('calculator.subtitle')}</p>
           
           <div className="calculator-card">
-            <form className="calculator-form" onSubmit={(e) => {
-              e.preventDefault();
-              const form = e.target as HTMLFormElement;
-              const gender = form.querySelector('input[name="gender"]:checked')?.value;
-              const age = (form.querySelector('#age') as HTMLInputElement)?.value;
-              const height = (form.querySelector('#height') as HTMLInputElement)?.value;
-              const weight = (form.querySelector('#weight') as HTMLInputElement)?.value;
-              const activity = (form.querySelector('#activity') as HTMLSelectElement)?.value;
-
-              if (gender && age && height && weight && activity) {
-                // BMR calculation using Mifflin-St Jeor formula
-                let bmr = 10 * Number(weight) + 6.25 * Number(height) - 5 * Number(age);
-                bmr = gender === 'male' ? bmr + 5 : bmr - 161;
-                
-                // TDEE calculation
-                let tdee = Math.round(bmr * Number(activity));
-                
-                // Adjust calories based on goal
-                const goal = (form.querySelector('#goal') as HTMLSelectElement)?.value;
-                if (goal === 'lose') {
-                  tdee = Math.round(tdee - 500); // 500 calorie deficit for weight loss
-                } else if (goal === 'gain') {
-                  tdee = Math.round(tdee + 500); // 500 calorie surplus for weight gain
-                }
-                
-                // Update result
-                const resultNumber = document.querySelector('.result-value .number');
-                if (resultNumber) {
-                  resultNumber.textContent = tdee.toLocaleString();
-                }
-                
-                // Show result section
-                const resultSection = document.querySelector('.result-section');
-                if (resultSection) {
-                  resultSection.classList.add('show');
-                }
-              }
-            }}>
+            <form className="calculator-form" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Cinsiyet</label>
+                <label>{t('calculator.gender')}</label>
                 <div className="radio-group">
-                  <label className="radio-label">
+                  <label>
                     <input type="radio" name="gender" value="male" />
-                    <span>Erkek</span>
+                    {t('calculator.genderOptions.male')}
                   </label>
-                  <label className="radio-label">
+                  <label>
                     <input type="radio" name="gender" value="female" />
-                    <span>Kadın</span>
+                    {t('calculator.genderOptions.female')}
                   </label>
                 </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="age">Yaş</label>
-                <input type="number" id="age" placeholder="Yaşınızı girin" />
+                <label htmlFor="age">{t('calculator.age')}</label>
+                <input type="number" id="age" name="age" required />
               </div>
 
               <div className="form-group">
-                <label htmlFor="height">Boy (cm)</label>
-                <input type="number" id="height" placeholder="Boyunuzu girin" />
+                <label htmlFor="height">{t('calculator.height')}</label>
+                <input type="number" id="height" name="height" required />
               </div>
 
               <div className="form-group">
-                <label htmlFor="weight">Kilo (kg)</label>
-                <input type="number" id="weight" placeholder="Kilonuzu girin" />
+                <label htmlFor="weight">{t('calculator.weight')}</label>
+                <input type="number" id="weight" name="weight" required />
               </div>
 
               <div className="form-group">
-                <label htmlFor="activity">Aktivite Seviyesi</label>
-                <select id="activity">
-                  <option value="1.2">Hareketsiz (BMR × 1.2)</option>
-                  <option value="1.375">Hafif Aktif (BMR × 1.375)</option>
-                  <option value="1.55">Orta Aktif (BMR × 1.55)</option>
-                  <option value="1.725">Çok Aktif (BMR × 1.725)</option>
-                  <option value="1.9">Aşırı Aktif (BMR × 1.9)</option>
+                <label htmlFor="activity">{t('calculator.activity')}</label>
+                <select id="activity" name="activity" required>
+                  <option value="1.2">{t('calculator.activityOptions.sedentary')}</option>
+                  <option value="1.375">{t('calculator.activityOptions.light')}</option>
+                  <option value="1.55">{t('calculator.activityOptions.moderate')}</option>
+                  <option value="1.725">{t('calculator.activityOptions.active')}</option>
+                  <option value="1.9">{t('calculator.activityOptions.veryActive')}</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="goal">Hedefiniz</label>
-                <select id="goal">
-                  <option value="maintain">Kilo Koruma</option>
-                  <option value="lose">Kilo Verme</option>
-                  <option value="gain">Kilo Alma</option>
+                <label htmlFor="goal">{t('calculator.goal')}</label>
+                <select id="goal" name="goal" required>
+                  <option value="lose">{t('calculator.goalOptions.lose')}</option>
+                  <option value="maintain">{t('calculator.goalOptions.maintain')}</option>
+                  <option value="gain">{t('calculator.goalOptions.gain')}</option>
                 </select>
               </div>
 
-              <button type="submit" className="calculate-btn">Hesapla</button>
+              <button type="submit" className="calculate-btn">
+                {t('calculator.calculate')}
+              </button>
             </form>
+          </div>
 
-            <div className="result-section">
-              <div className="result-card">
-                <h3 className="result-title">Günlük Enerji İhtiyacınız</h3>
-                <div className="result-value">
-                  <span className="number">0</span>
-                  <span className="unit">kcal</span>
+          <div className="result-section">
+            <h3>{t('calculator.result.title')}</h3>
+            <div className="result-value">
+              <span className="number">0</span>
+              <span className="unit">{t('calculator.result.unit')}</span>
+            </div>
+            <p className="result-description">{t('calculator.result.description')}</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" className="about-section">
+        <div className="container">
+          <div className="about-content">
+            <h2 className="about-title">{currentLang === 'tr' ? 'Hakkımızda' : 'About Us'}</h2>
+            
+            <div className="about-text">
+              <p className="main-description">
+                {currentLang === 'tr' 
+                  ? 'Dietkem, diyetisyenlerin gerçek ihtiyaçlarından yola çıkarak geliştirilmiş bir dijital çözümdür. Günümüzde danışan takibi, veri analizi ve kişiye özel diyet planlama süreçleri oldukça zaman alıcı olabilir. Dietkem, bu süreçleri sadeleştirmek ve hızlandırmak amacıyla 2025 yılında kuruldu.'
+                  : 'Dietkem is a digital solution developed based on the real needs of dietitians. Today, client tracking, data analysis, and personalized diet planning processes can be very time-consuming. Dietkem was founded in 2025 to simplify and speed up these processes.'}
+              </p>
+
+              <div className="about-boxes-grid">
+                <div className="about-box">
+                  <div className="icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-why">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                      <path d="M12 2v20"/>
+                      <path d="M2 7h20"/>
+                      <path d="M2 17h20"/>
+                    </svg>
+                  </div>
+                  <h3>{currentLang === 'tr' ? 'Neden Geliştirildi?' : 'Why was it developed?'}</h3>
+                  <ul>
+                    <li>{currentLang === 'tr' ? 'Diyetisyenlerin kağıt, Excel ve WhatsApp gibi dağınık sistemler arasında boğulmasını önlemek' : 'Preventing dietitians from drowning in scattered systems like paper, Excel, and WhatsApp'}</li>
+                    <li>{currentLang === 'tr' ? 'Tüm danışan bilgilerini tek merkezde toplamak' : 'Gathering all client information in one central location'}</li>
+                    <li>{currentLang === 'tr' ? 'Bilimsel temelli, kişisel öneriler sunan bir sistem oluşturmak' : 'Creating a system that offers scientific, personalized recommendations'}</li>
+                    <li>{currentLang === 'tr' ? 'Yapay zekâ ile desteklenen modern bir altyapı sunmak' : 'Providing a modern infrastructure supported by artificial intelligence'}</li>
+                  </ul>
                 </div>
-                <p className="result-description">
-                  Bu değer, günlük aktivite seviyenize ve hedefinize göre yaklaşık kalori ihtiyacınızı gösterir.
+
+                <div className="about-box">
+                  <div className="icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-who">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                      <path d="M12 2v4"/>
+                      <path d="M12 18v4"/>
+                    </svg>
+                  </div>
+                  <h3>{currentLang === 'tr' ? 'Kim Geliştirdi?' : 'Who developed it?'}</h3>
+                  <p>
+                    {currentLang === 'tr'
+                      ? 'Platform, Antalya Bilim Üniversitesi Beslenme ve Diyetetik bölümü öğrencisi Mehmet Kemal Palancı tarafından geliştirilmeye başlandı. Hem mesleki ihtiyaçları hem de teknik çözümleri birleştiren bir girişim olarak yola çıktı.'
+                      : 'The platform was initially developed by Mehmet Kemal Palancı, a student at Antalya Science University\'s Nutrition and Dietetics department. It started as an initiative combining both professional needs and technical solutions.'}
+                  </p>
+                </div>
+
+                <div className="about-box">
+                  <div className="icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-mission">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </div>
+                  <h3>{currentLang === 'tr' ? 'Misyonumuz' : 'Our Mission'}</h3>
+                  <p>
+                    {currentLang === 'tr'
+                      ? 'Bilimsel, hızlı ve sade bir sistemle diyetisyenlerin günlük iş yükünü azaltmak.'
+                      : 'To reduce the daily workload of dietitians with a scientific, fast, and simple system.'}
+                  </p>
+                </div>
+
+                <div className="about-box">
+                  <div className="icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-vision">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </div>
+                  <h3>{currentLang === 'tr' ? 'Vizyonumuz' : 'Our Vision'}</h3>
+                  <p>
+                    {currentLang === 'tr'
+                      ? 'Türkiye\'nin en güvenilir ve akıllı diyetisyen platformu olmak. Gelecekte klinikler, spor salonları ve mobil takip uygulamaları ile entegre çalışmak.'
+                      : 'To become Turkey\'s most reliable and intelligent dietitian platform. To work integrated with clinics, gyms, and mobile tracking applications in the future.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="timeline-section">
+                <h3>{currentLang === 'tr' ? 'Yolculuğumuz' : 'Our Journey'}</h3>
+                <div className="timeline">
+                  <div className="timeline-item">
+                    <div className="timeline-icon icon-idea">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18h6"/>
+                        <path d="M10 22h4"/>
+                        <path d="M12 2v8"/>
+                        <path d="M12 2a8 8 0 0 0-8 8c0 1.892.402 3.13 1.5 4.5L12 22l6.5-7.5c1.098-1.37 1.5-2.608 1.5-4.5a8 8 0 0 0-8-8z"/>
+                      </svg>
+                    </div>
+                    <div className="timeline-content">
+                      <h4>2023</h4>
+                      <p>{currentLang === 'tr' ? 'Fikir aşaması' : 'Ideation Phase'}</p>
+                    </div>
+                  </div>
+                  <div className="timeline-item">
+                    <div className="timeline-icon icon-dev">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 18l6-6-6-6"/>
+                        <path d="M8 6l-6 6 6 6"/>
+                        <path d="M12 2v20"/>
+                      </svg>
+                    </div>
+                    <div className="timeline-content">
+                      <h4>2024</h4>
+                      <p>{currentLang === 'tr' ? 'İlk prototip geliştirildi' : 'First prototype developed'}</p>
+                    </div>
+                  </div>
+                  <div className="timeline-item">
+                    <div className="timeline-icon icon-launch">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                        <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+                      </svg>
+                    </div>
+                    <div className="timeline-content">
+                      <h4>2025</h4>
+                      <p>{currentLang === 'tr' ? 'Yayın ve büyüme hedefi' : 'Launch and growth target'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="founder-message">
+                <h3>{currentLang === 'tr' ? 'Kurucumuzdan Mesaj' : 'Message from Our Founder'}</h3>
+                <p>
+                  {currentLang === 'tr'
+                    ? 'Diyetisyenlerin dijital yardımcısı olmak için yola çıktık. Bilimsel temelli, sade ve güvenilir bir platform sunarak mesleki süreci verimli hale getirmeyi hedefliyoruz.'
+                    : 'We set out to be the digital assistant for dietitians. We aim to make the professional process efficient by offering a scientific, simple and reliable platform.'}
                 </p>
+                <div className="founder-signature">
+                  <span>– Mehmet Kemal Palancı</span>
+                  <span className="founder-title">{currentLang === 'tr' ? 'Dietkem Kurucusu' : 'Founder of Dietkem'}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -393,20 +555,24 @@ export default function LandingPage() {
         .lang-btn {
           background: none;
           border: none;
-          color: var(--gray-600);
-          font-size: 0.8rem;
+          padding: 0.25rem 0.5rem;
           cursor: pointer;
-          padding: 0.2rem 0.4rem;
-          transition: color 0.2s ease;
+          font-size: 0.875rem;
+          color: #6b7280;
+          transition: all 0.2s ease;
         }
 
         .lang-btn:hover {
-          color: var(--text-color);
+          color: #111827;
+        }
+
+        .lang-btn.active {
+          color: #111827;
+          font-weight: 600;
         }
 
         .separator {
-          color: var(--gray-300);
-          font-size: 0.8rem;
+          color: #e5e7eb;
         }
 
         /* Buttons */
@@ -556,14 +722,11 @@ export default function LandingPage() {
         }
 
         @keyframes float {
-          0% {
-            transform: translateY(0px);
+          0%, 100% {
+            transform: translateY(0) rotate(0deg) scale(1);
           }
           50% {
-            transform: translateY(-4px);
-          }
-          100% {
-            transform: translateY(0px);
+            transform: translateY(-5px) rotate(2deg) scale(1.05);
           }
         }
 
@@ -1274,6 +1437,438 @@ export default function LandingPage() {
         }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        html {
+          scroll-behavior: smooth;
+        }
+
+        .about-section {
+          padding: 80px 20px;
+          background-color: #f9f9f9;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .about-section::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 300px;
+          height: 300px;
+          background: url('/images/diet-illustration.svg') no-repeat;
+          background-size: contain;
+          opacity: 0.1;
+          z-index: 0;
+        }
+
+        .about-content {
+          position: relative;
+          z-index: 1;
+        }
+
+        .about-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #111827;
+          margin-bottom: 1.5rem;
+          text-align: center;
+        }
+
+        .main-description {
+          font-size: 1.125rem;
+          line-height: 1.75;
+          color: #4b5563;
+          margin-bottom: 2rem;
+          text-align: center;
+          max-width: 800px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .about-boxes-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .about-box {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .about-box:hover {
+          transform: scale(1.02);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .icon-wrapper {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 1rem;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .icon-wrapper::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .icon-why .icon-wrapper::before {
+          background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #1d4ed8 100%);
+        }
+
+        .icon-who .icon-wrapper::before {
+          background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #047857 100%);
+        }
+
+        .icon-mission .icon-wrapper::before {
+          background: linear-gradient(135deg, #f472b6 0%, #db2777 50%, #be185d 100%);
+        }
+
+        .icon-vision .icon-wrapper::before {
+          background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 50%, #5b21b6 100%);
+        }
+
+        .about-box:hover .icon-wrapper {
+          transform: scale(1.1);
+          box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-box:hover .icon-wrapper::before {
+          transform: scale(1.1) rotate(5deg);
+        }
+
+        .icon-wrapper svg {
+          position: relative;
+          z-index: 1;
+          color: #2563eb;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .about-box:hover .icon-wrapper svg {
+          color: white;
+          transform: scale(1.1);
+          filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+        }
+
+        .about-box h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 1rem;
+        }
+
+        .about-box p, .about-box li {
+          font-size: 1rem;
+          line-height: 1.5;
+          color: #4b5563;
+        }
+
+        .about-box ul {
+          list-style-type: none;
+          padding: 0;
+        }
+
+        .about-box li {
+          margin-bottom: 0.75rem;
+          padding-left: 1.5rem;
+          position: relative;
+        }
+
+        .about-box li:before {
+          content: "•";
+          position: absolute;
+          left: 0;
+          color: #6b7280;
+        }
+
+        .timeline-section {
+          margin: 3rem 0;
+          text-align: center;
+        }
+
+        .timeline-section h3 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 2rem;
+        }
+
+        .timeline {
+          display: flex;
+          justify-content: space-between;
+          max-width: 800px;
+          margin: 0 auto;
+          position: relative;
+        }
+
+        .timeline::before {
+          content: '';
+          position: absolute;
+          top: 24px;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: #e5e7eb;
+          z-index: 0;
+        }
+
+        .timeline-item {
+          position: relative;
+          z-index: 1;
+          text-align: center;
+          flex: 1;
+        }
+
+        .timeline-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 1rem;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .timeline-icon::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .icon-idea .timeline-icon::before {
+          background: linear-gradient(135deg, #fbbf24 0%, #d97706 50%, #b45309 100%);
+        }
+
+        .icon-dev .timeline-icon::before {
+          background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+        }
+
+        .icon-launch .timeline-icon::before {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+        }
+
+        .timeline-icon svg {
+          position: relative;
+          z-index: 1;
+          color: #2563eb;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .timeline-item:hover .timeline-icon {
+          transform: scale(1.1);
+          box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-item:hover .timeline-icon::before {
+          transform: scale(1.1) rotate(5deg);
+        }
+
+        .timeline-item:hover .timeline-icon svg {
+          color: white;
+          transform: scale(1.1);
+          filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+        }
+
+        .timeline-content h4 {
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 0.5rem;
+        }
+
+        .timeline-content p {
+          font-size: 0.875rem;
+          color: #6b7280;
+        }
+
+        .founder-message {
+          background: #f3f4f6;
+          padding: 2rem;
+          border-radius: 12px;
+          margin-top: 2rem;
+          max-width: 800px;
+          margin-left: auto;
+          margin-right: auto;
+          text-align: center;
+        }
+
+        .founder-message h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 1rem;
+        }
+
+        .founder-message p {
+          font-size: 1.125rem;
+          line-height: 1.6;
+          color: #4b5563;
+          font-style: italic;
+          margin-bottom: 1.5rem;
+        }
+
+        .founder-signature {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .founder-signature span {
+          font-weight: 500;
+          color: #111827;
+        }
+
+        .founder-title {
+          font-size: 0.875rem;
+          color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+          .about-boxes-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .timeline {
+            flex-direction: column;
+            gap: 2rem;
+          }
+
+          .timeline::before {
+            display: none;
+          }
+
+          .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-align: left;
+          }
+
+          .timeline-icon {
+            margin: 0;
+          }
+
+          .about-title {
+            font-size: 2rem;
+          }
+
+          .main-description {
+            font-size: 1rem;
+          }
+        }
+
+        /* Icon Animations */
+        .icon-why {
+          animation: float 3s ease-in-out infinite;
+        }
+
+        .icon-who {
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        .icon-mission {
+          animation: rotate 4s linear infinite;
+        }
+
+        .icon-vision {
+          animation: bounce 2s ease-in-out infinite;
+        }
+
+        /* Timeline Icon Animations */
+        .icon-idea {
+          animation: glow 2s ease-in-out infinite;
+        }
+
+        .icon-dev {
+          animation: glowDev 2s ease-in-out infinite;
+        }
+
+        .icon-launch {
+          animation: glowLaunch 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+          0%, 100% {
+            filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.3)) brightness(1);
+          }
+          50% {
+            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6)) brightness(1.2);
+          }
+        }
+
+        @keyframes glowDev {
+          0%, 100% {
+            filter: drop-shadow(0 0 2px rgba(34, 197, 94, 0.3)) brightness(1);
+          }
+          50% {
+            filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6)) brightness(1.2);
+          }
+        }
+
+        @keyframes glowLaunch {
+          0%, 100% {
+            filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.3)) brightness(1);
+          }
+          50% {
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6)) brightness(1.2);
+          }
+        }
+
+        .timeline-item:hover .icon-idea {
+          animation: glow 1.2s ease-in-out infinite;
+        }
+
+        .timeline-item:hover .icon-dev {
+          animation: glowDev 1.2s ease-in-out infinite;
+        }
+
+        .timeline-item:hover .icon-launch {
+          animation: glowLaunch 1.2s ease-in-out infinite;
+        }
+
+        /* Update icon background colors */
+        .icon-idea .timeline-icon::before {
+          background: linear-gradient(135deg, #fbbf24 0%, #d97706 50%, #b45309 100%);
+        }
+
+        .icon-dev .timeline-icon::before {
+          background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+        }
+
+        .icon-launch .timeline-icon::before {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+        }
       `}</style>
       <script dangerouslySetInnerHTML={{
         __html: `
@@ -1284,4 +1879,6 @@ export default function LandingPage() {
       }} />
     </>
   );
-} 
+}
+
+export default LandingPage; 

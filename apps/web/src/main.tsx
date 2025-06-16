@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ClerkProvider } from '@clerk/clerk-react';
 import App from './App';
+import { ClerkLocalizationProvider } from './components/ClerkLocalization';
+import { LanguageProvider } from './context/LanguageContext';
 import './index.css';
 
 // Debug environment variables
@@ -23,8 +24,10 @@ const root = ReactDOM.createRoot(rootElement);
 // Render app with error boundary
 root.render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={clerkPubKey}>
-      <App />
-    </ClerkProvider>
+    <LanguageProvider>
+      <ClerkLocalizationProvider>
+        <App />
+      </ClerkLocalizationProvider>
+    </LanguageProvider>
   </React.StrictMode>
 ); 

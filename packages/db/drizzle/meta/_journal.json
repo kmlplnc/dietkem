@@ -8,6 +8,13 @@
       "when": 1749982523692,
       "tag": "0000_lyrical_lady_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1750080545712,
+      "tag": "0001_silky_mindworm",
+      "breakpoints": true
     }
   ]
 }

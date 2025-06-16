@@ -1,0 +1,28 @@
+{
+  "welcome": "Hoş Geldiniz",
+  "login": "Giriş Yap",
+  "signup": "Kayıt Ol",
+  "hero": {
+    "title": "Sağlık Yolculuğunuz Burada Başlıyor",
+    "subtitle": "Kapsamlı diyet takip platformumuzla beslenmenizi takip edin, hedeflerinize ulaşın ve hayatınızı değiştirin."
+  },
+  "features": {
+    "title": "Neden Bizi Seçmelisiniz",
+    "tracking": "Akıllı Takip",
+    "trackingDesc": "Öğünlerinizi ve beslenmenizi kolayca takip edin",
+    "goals": "Hedef Belirleme",
+    "goalsDesc": "Sağlık hedeflerinizi belirleyin ve başarın",
+    "community": "Topluluk Desteği",
+    "communityDesc": "Destekleyici bir topluluğa katılın"
+  },
+  "blog": {
+    "title": "Son Yazılar",
+    "readMore": "Devamını Oku"
+  },
+  "footer": {
+    "about": "Hakkımızda",
+    "contact": "İletişim",
+    "privacy": "Gizlilik Politikası",
+    "terms": "Kullanım Koşulları"
+  }
+} 

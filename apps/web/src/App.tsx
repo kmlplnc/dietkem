@@ -9,8 +9,9 @@ import SignInPage from "./pages/auth/sign-in";
 import SignUpPage from "./pages/auth/sign-up";
 import LandingPage from "./pages/landing";
 import WelcomePage from './pages/welcome';
-
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+import BlogPage from './pages/blog';
+import BlogPost from './pages/blog-post';
+import { LanguageProvider } from "./context/LanguageContext";
 
 function App() {
   const [queryClient] = useState(() => new QueryClient());
@@ -25,52 +26,60 @@ function App() {
   );
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/welcome"
-          element={
-            <SignedIn>
-              <WelcomePage />
-            </SignedIn>
-          }
-        />
-        <Route
-          path="/"
-          element={<LandingPage />}
-        />
-        <Route
-          path="/sign-in"
-          element={
-            <SignedOut>
-              <SignInPage />
-            </SignedOut>
-          }
-        />
-        <Route
-          path="/sign-up"
-          element={
-            <SignedOut>
-              <SignUpPage />
-            </SignedOut>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <>
-              <SignedIn>
-                <Dashboard />
-              </SignedIn>
-              <SignedOut>
-                <Navigate to="/sign-in" replace />
-              </SignedOut>
-            </>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+    <LanguageProvider>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <Routes>
+              <Route
+                path="/welcome"
+                element={
+                  <SignedIn>
+                    <WelcomePage />
+                  </SignedIn>
+                }
+              />
+              <Route
+                path="/"
+                element={<LandingPage />}
+              />
+              <Route
+                path="/sign-in"
+                element={
+                  <SignedOut>
+                    <SignInPage />
+                  </SignedOut>
+                }
+              />
+              <Route
+                path="/sign-up"
+                element={
+                  <SignedOut>
+                    <SignUpPage />
+                  </SignedOut>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <>
+                    <SignedIn>
+                      <Dashboard />
+                    </SignedIn>
+                    <SignedOut>
+                      <Navigate to="/sign-in" replace />
+                    </SignedOut>
+                  </>
+                }
+              />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        </QueryClientProvider>
+      </trpc.Provider>
+    </LanguageProvider>
   );
 }
 

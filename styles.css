@@ -91,17 +91,78 @@ body {
     font-size: 1rem;
 }
 
-/* Showcase Section */
-.showcase {
-    padding: 4rem 0;
-}
-
 .hero-image {
     max-width: 80%;
     height: auto;
     border-radius: 12px;
     display: block;
     margin: 0 auto;
+}
+
+/* Blog Info Section */
+.blog-info {
+    padding: 6rem 0;
+    background-color: #f9fafb;
+}
+
+.blog-info-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.blog-info .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #111827;
+}
+
+.blog-info .section-description {
+    font-size: 1.25rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+    line-height: 1.6;
+}
+
+.blog-categories {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.category-card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+}
+
+.category-card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #111827;
+}
+
+.category-card p {
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.blog-cta {
+    margin-top: 2rem;
+}
+
+.blog-cta .btn {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
 }
 
 /* Features Section */
@@ -213,6 +274,18 @@ footer {
     .hero-image {
         max-width: 100%;
     }
+
+    .blog-categories {
+        grid-template-columns: 1fr;
+    }
+    
+    .blog-info {
+        padding: 4rem 0;
+    }
+    
+    .blog-info .section-title {
+        font-size: 2rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -227,4 +300,30 @@ footer {
     .signup-button {
         padding: 0.5rem 1rem;
     }
+}
+
+/* Language Switcher */
+.language-switcher {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.lang-button {
+    background: none;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.lang-button:hover {
+    color: #111827;
+}
+
+.lang-button.active {
+    color: #111827;
+    font-weight: 600;
 } 

@@ -1,7 +1,15 @@
 import { pgTable, serial, varchar, timestamp, integer, decimal, text, pgEnum } from 'drizzle-orm/pg-core';
 
 // Enums
-export const userRoleEnum = pgEnum('user_role', ['dietitian', 'client']);
+export const userRoleEnum = pgEnum('user_role', [
+  'subscriber_basic',
+  'subscriber_pro',
+  'clinic_admin',
+  'dietitian_team_member',
+  'admin',
+  'superadmin'
+]);
+
 export const mealTypeEnum = pgEnum('meal_type', ['breakfast', 'lunch', 'dinner', 'snack']);
 
 // Users table
@@ -9,7 +17,7 @@ export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   clerk_id: varchar('clerk_id', { length: 255 }).notNull().unique(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  role: userRoleEnum('role').notNull(),
+  role: userRoleEnum('role').notNull().default('subscriber_basic'),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
