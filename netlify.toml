@@ -1,11 +1,14 @@
 [build]
-  command = "pnpm install --frozen-lockfile=false && cd apps/web && pnpm build"
+  command = "pnpm install --frozen-lockfile && cd apps/web && pnpm build"
   publish = "apps/web/dist"
 
 [build.environment]
   NODE_VERSION = "22.1.0"
   PNPM_VERSION = "10.12.1"
   NPM_FLAGS = "--no-optional"
+  NETLIFY_USE_YARN = "false"
+  NETLIFY_USE_NPM = "false"
+  NETLIFY_USE_PNPM = "true"
 
 [[redirects]]
   from = "/*"
