@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "cd apps/web && pnpm install && pnpm build:prod"
+  command = "cd apps/web && pnpm install --no-frozen-lockfile && pnpm build:prod"
   publish = "apps/web/dist"
 
 [build.environment]
@@ -12,6 +12,8 @@
   NETLIFY_USE_PNPM = "true"
   NODE_ENV = "production"
   CI = "true"
+  PNPM_HOME = "/opt/buildhome/.pnpm"
+  PATH = "/opt/buildhome/.pnpm:$PATH"
 
 [[redirects]]
   from = "/*"
