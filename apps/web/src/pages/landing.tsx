@@ -3,10 +3,19 @@ import { useUser, useClerk } from '@clerk/clerk-react';
 import { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
-const LandingPage = () => {
+interface FormData {
+  gender: string;
+  age: string;
+  height: string;
+  weight: string;
+  activity: string;
+  goal: string;
+}
+
+const LandingPage: React.FC = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentLang, changeLanguage, t } = useLanguage();
@@ -25,7 +34,7 @@ const LandingPage = () => {
     };
   }, []);
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (): Promise<void> => {
     try {
       await signOut();
       setShowDropdown(false);
@@ -35,28 +44,30 @@ const LandingPage = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     const form = e.currentTarget;
-    const gender = (form.querySelector('input[name="gender"]:checked') as HTMLInputElement)?.value;
-    const age = (form.querySelector('#age') as HTMLInputElement)?.value;
-    const height = (form.querySelector('#height') as HTMLInputElement)?.value;
-    const weight = (form.querySelector('#weight') as HTMLInputElement)?.value;
-    const activity = (form.querySelector('#activity') as HTMLSelectElement)?.value;
+    const formData: FormData = {
+      gender: (form.querySelector('input[name="gender"]:checked') as HTMLInputElement)?.value || '',
+      age: (form.querySelector('#age') as HTMLInputElement)?.value || '',
+      height: (form.querySelector('#height') as HTMLInputElement)?.value || '',
+      weight: (form.querySelector('#weight') as HTMLInputElement)?.value || '',
+      activity: (form.querySelector('#activity') as HTMLSelectElement)?.value || '',
+      goal: (form.querySelector('#goal') as HTMLSelectElement)?.value || ''
+    };
 
-    if (gender && age && height && weight && activity) {
+    if (formData.gender && formData.age && formData.height && formData.weight && formData.activity) {
       // BMR calculation using Mifflin-St Jeor formula
-      let bmr = 10 * Number(weight) + 6.25 * Number(height) - 5 * Number(age);
-      bmr = gender === 'male' ? bmr + 5 : bmr - 161;
+      let bmr = 10 * Number(formData.weight) + 6.25 * Number(formData.height) - 5 * Number(formData.age);
+      bmr = formData.gender === 'male' ? bmr + 5 : bmr - 161;
       
       // TDEE calculation
-      let tdee = Math.round(bmr * Number(activity));
+      let tdee = Math.round(bmr * Number(formData.activity));
       
       // Adjust calories based on goal
-      const goal = (form.querySelector('#goal') as HTMLSelectElement)?.value;
-      if (goal === 'lose') {
+      if (formData.goal === 'lose') {
         tdee = Math.round(tdee - 500); // 500 calorie deficit for weight loss
-      } else if (goal === 'gain') {
+      } else if (formData.goal === 'gain') {
         tdee = Math.round(tdee + 500); // 500 calorie surplus for weight gain
       }
       
