@@ -16,7 +16,6 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
-    "drizzle-orm": "^0.29.3",
     "postgres": "^3.4.7",
     "svix": "^1.67.0"
   },

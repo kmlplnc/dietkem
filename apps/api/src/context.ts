@@ -2,7 +2,7 @@ import { inferAsyncReturnType } from '@trpc/server';
 import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 import { clerkClient } from '@clerk/clerk-sdk-node';
 import { db } from '@dietkem/db';
-import { users } from '@dietkem/db/schema';
+import { users, userRoleEnum } from '@dietkem/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const createContext = async ({ req, res }: CreateExpressContextOptions) => {
@@ -13,7 +13,7 @@ export const createContext = async ({ req, res }: CreateExpressContextOptions) =
   });
 
   const userId = req.auth?.userId;
-  const userRole = req.auth?.user?.publicMetadata?.role as 'dietitian' | 'client';
+  const userRole = req.auth?.user?.publicMetadata?.role as typeof userRoleEnum.enumValues[number];
 
   // If user is authenticated, ensure they exist in our database
   if (userId) {
@@ -33,7 +33,7 @@ export const createContext = async ({ req, res }: CreateExpressContextOptions) =
         await db.insert(users).values({
           clerk_id: userId,
           email: clerkUser.emailAddresses[0]?.emailAddress || '',
-          role: userRole || 'client', // Default to client if no role is set
+          role: userRole || 'subscriber_basic', // Default to subscriber_basic if no role is set
         });
       } else if (!existingUser.clerk_id) {
         console.log('Updating existing user with clerk_id');

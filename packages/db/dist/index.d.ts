@@ -2,7 +2,7 @@ import * as drizzle_orm_postgres_js from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as drizzle_orm_pg_core from 'drizzle-orm/pg-core';
 
-declare const userRoleEnum: drizzle_orm_pg_core.PgEnum<["dietitian", "client"]>;
+declare const userRoleEnum: drizzle_orm_pg_core.PgEnum<["subscriber_basic", "subscriber_pro", "clinic_admin", "dietitian_team_member", "admin", "superadmin"]>;
 declare const mealTypeEnum: drizzle_orm_pg_core.PgEnum<["breakfast", "lunch", "dinner", "snack"]>;
 declare const users: drizzle_orm_pg_core.PgTableWithColumns<{
     name: "users";
@@ -49,11 +49,11 @@ declare const users: drizzle_orm_pg_core.PgTableWithColumns<{
             tableName: "users";
             dataType: "string";
             columnType: "PgEnumColumn";
-            data: "dietitian" | "client";
+            data: "subscriber_basic" | "subscriber_pro" | "clinic_admin" | "dietitian_team_member" | "admin" | "superadmin";
             driverParam: string;
             notNull: true;
-            hasDefault: false;
-            enumValues: ["dietitian", "client"];
+            hasDefault: true;
+            enumValues: ["subscriber_basic", "subscriber_pro", "clinic_admin", "dietitian_team_member", "admin", "superadmin"];
             baseColumn: never;
         }, {}, {}>;
         created_at: drizzle_orm_pg_core.PgColumn<{

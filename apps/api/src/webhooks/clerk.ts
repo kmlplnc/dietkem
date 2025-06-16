@@ -1,32 +1,28 @@
 import { Webhook } from 'svix';
-import { headers } from 'next/headers';
-import { WebhookEvent } from '@clerk/nextjs/server';
+import { Request, Response } from 'express';
 import { db } from '@dietkem/db';
 import { users } from '@dietkem/db/src/schema';
 import { eq } from 'drizzle-orm';
 
-export async function POST(req: Request) {
+export async function handleClerkWebhook(req: Request, res: Response) {
   // Get the headers
-  const headerPayload = headers();
-  const svix_id = headerPayload.get('svix-id');
-  const svix_timestamp = headerPayload.get('svix-timestamp');
-  const svix_signature = headerPayload.get('svix-signature');
+  const svix_id = req.headers['svix-id'] as string;
+  const svix_timestamp = req.headers['svix-timestamp'] as string;
+  const svix_signature = req.headers['svix-signature'] as string;
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occured -- no svix headers', {
-      status: 400
-    });
+    return res.status(400).json({ error: 'Error occurred -- no svix headers' });
   }
 
   // Get the body
-  const payload = await req.json();
+  const payload = req.body;
   const body = JSON.stringify(payload);
 
   // Create a new Svix instance with your webhook secret
   const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET || '');
 
-  let evt: WebhookEvent;
+  let evt: any;
 
   // Verify the payload with the headers
   try {
@@ -34,12 +30,10 @@ export async function POST(req: Request) {
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
-    }) as WebhookEvent;
+    });
   } catch (err) {
     console.error('Error verifying webhook:', err);
-    return new Response('Error occured', {
-      status: 400
-    });
+    return res.status(400).json({ error: 'Error occurred' });
   }
 
   // Handle the webhook
@@ -50,13 +44,13 @@ export async function POST(req: Request) {
     const primaryEmail = email_addresses?.[0]?.email_address;
 
     if (!primaryEmail) {
-      return new Response('No email found', { status: 400 });
+      return res.status(400).json({ error: 'No email found' });
     }
 
     try {
       // Check if user exists
       const existingUser = await db.query.users.findFirst({
-        where: eq(users.clerkId, id),
+        where: eq(users.clerk_id, id),
       });
 
       if (existingUser) {
@@ -66,7 +60,7 @@ export async function POST(req: Request) {
             email: primaryEmail,
             updated_at: new Date(),
           })
-          .where(eq(users.clerkId, id));
+          .where(eq(users.clerk_id, id));
       } else {
         // Create new user
         await db.insert(users).values({
@@ -76,10 +70,10 @@ export async function POST(req: Request) {
         });
       }
 
-      return new Response('User synced successfully', { status: 200 });
+      return res.status(200).json({ message: 'User synced successfully' });
     } catch (error) {
       console.error('Error syncing user:', error);
-      return new Response('Error syncing user', { status: 500 });
+      return res.status(500).json({ error: 'Error syncing user' });
     }
   }
 
@@ -89,14 +83,14 @@ export async function POST(req: Request) {
     try {
       // Delete user from database
       await db.delete(users)
-        .where(eq(users.clerkId, id));
+        .where(eq(users.clerk_id, id));
 
-      return new Response('User deleted successfully', { status: 200 });
+      return res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
       console.error('Error deleting user:', error);
-      return new Response('Error deleting user', { status: 500 });
+      return res.status(500).json({ error: 'Error deleting user' });
     }
   }
 
-  return new Response('Webhook received', { status: 200 });
+  return res.status(200).json({ message: 'Webhook received' });
 } 
