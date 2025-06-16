@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm install && pnpm build"
+  command = "pnpm install && cd apps/web && pnpm build"
   publish = "apps/web/dist"
 
 [build.environment]
