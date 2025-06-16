@@ -1,21 +1,8 @@
 [build]
-  base = "."
-  command = "pnpm install && npx turbo run build --filter=@dietkem/web"
-  publish = "apps/web/dist"
+base = "."
+command = "pnpm install && npx turbo run build --filter=@dietkem/web"
+publish = "apps/web/dist"
 
 [build.environment]
-  NODE_VERSION = "20"
-  PNPM_VERSION = "10.12.1"
-  NPM_FLAGS = "--no-optional"
-  NETLIFY_USE_YARN = "false"
-  NETLIFY_USE_NPM = "false"
-  NETLIFY_USE_PNPM = "true"
-  NODE_ENV = "production"
-  CI = "true"
-  PNPM_HOME = "/opt/buildhome/.pnpm"
-  PATH = "/opt/buildhome/.pnpm:$PATH"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200 
+NODE_VERSION = "20"
+NETLIFY_USE_PNPM = "true" 
