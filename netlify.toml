@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "cd apps/web && pnpm install && pnpm build:prod"
+  command = "corepack enable && corepack prepare pnpm@10.12.1 --activate && cd apps/web && pnpm install && pnpm build:prod"
   publish = "apps/web/dist"
 
 [build.environment]
