@@ -3,7 +3,7 @@
   publish = "apps/web/dist"
 
 [build.environment]
-  NODE_VERSION = "20.11.1"
+  NODE_VERSION = "20.x"
   PNPM_VERSION = "10.12.1"
   NPM_FLAGS = "--no-optional"
 
