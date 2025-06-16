@@ -3,8 +3,8 @@
   "private": true,
   "packageManager": "pnpm@8.15.4",
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.15.4"
+    "node": "18.x",
+    "pnpm": "8.x"
   },
   "scripts": {
     "dev": "turbo run dev",
@@ -12,7 +12,8 @@
     "start": "turbo run start",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "postinstall": "turbo run build"
   },
   "dependencies": {
     "react": "^18.2.0",
