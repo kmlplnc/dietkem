@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm install --no-frozen-lockfile && cd apps/web && pnpm build:prod"
+  command = "pnpm install --no-frozen-lockfile && pnpm turbo run build --filter @dietkem/web"
   publish = "apps/web/dist"
 
 [build.environment]
