@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm build",
-  "installCommand": "pnpm install --no-frozen-lockfile",
+  "installCommand": "corepack enable && corepack prepare pnpm@8.15.4 --activate && pnpm install --no-frozen-lockfile",
   "framework": "vite",
   "outputDirectory": "dist",
   "rewrites": [
