@@ -1,14 +1,10 @@
 [build]
-  command = "corepack enable && corepack prepare pnpm@10.12.1 --activate && pnpm install --no-frozen-lockfile && pnpm dlx turbo run build --filter @dietkem/web"
+  command = "npm install && npx turbo run build --filter @dietkem/web"
   publish = "apps/web/dist"
 
 [build.environment]
   NODE_VERSION = "20.11.1"
-  PNPM_VERSION = "10.12.1"
   NPM_FLAGS = "--no-optional"
-  NETLIFY_USE_YARN = "false"
-  NETLIFY_USE_NPM = "false"
-  NETLIFY_USE_PNPM = "true"
   NODE_ENV = "production"
   CI = "true"
 
