@@ -2,7 +2,7 @@
   "name": "dietkem",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "18.x"
   },
   "scripts": {
     "dev": "turbo run dev",
