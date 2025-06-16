@@ -9,7 +9,7 @@ import LandingPage from "./pages/landing";
 import SignInPage from "./pages/auth/sign-in";
 import SignUpPage from "./pages/auth/sign-up";
 import WelcomePage from "./pages/welcome";
-import DashboardPage from "./pages/dashboard";
+import Dashboard from "./pages/dashboard";
 import ProfilePage from "./pages/profile";
 import SettingsPage from "./pages/settings";
 import NotFoundPage from "./pages/404";
@@ -22,7 +22,7 @@ function App() {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "http://localhost:3000/trpc",
+          url: import.meta.env.VITE_API_URL || "http://localhost:3000/trpc",
         }),
       ],
     })
@@ -39,7 +39,7 @@ function App() {
                 <Route path="/sign-in" element={<SignInPage />} />
                 <Route path="/sign-up" element={<SignUpPage />} />
                 <Route path="/welcome" element={<WelcomePage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFoundPage />} />

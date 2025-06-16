@@ -25,5 +25,18 @@ export default defineConfig(({ mode }) => {
     define: {
       'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': JSON.stringify(env.VITE_CLERK_PUBLISHABLE_KEY),
     },
+    build: {
+      sourcemap: true,
+      outDir: 'dist',
+      assetsDir: 'assets',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom'],
+            clerk: ['@clerk/clerk-react'],
+          },
+        },
+      },
+    },
   };
 }); 

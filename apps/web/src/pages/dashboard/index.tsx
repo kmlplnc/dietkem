@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import "./dashboard.css";
+import "../dashboard.css";
 
-export const Dashboard = () => {
+const Dashboard = () => {
   const { signOut } = useAuth();
   const { user, isLoaded } = useUser();
   const navigate = useNavigate();
@@ -161,4 +161,6 @@ export const Dashboard = () => {
       </div>
     </>
   );
-}; 
+};
+
+export default Dashboard; 

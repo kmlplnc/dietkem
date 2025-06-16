@@ -37,6 +37,10 @@ export default function SignUpPage() {
               routing="path"
               path="/sign-up"
             />
+            <div className="brand-footer">
+              <img src="/logo/logo3.png" alt="Dietkem Logo" className="brand-logo" />
+              <span className="brand-name">Dietkem</span>
+            </div>
           </div>
         </div>
       </div>
