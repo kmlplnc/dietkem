@@ -177,10 +177,10 @@ importers:
         specifier: ^0.4.5
         version: 0.4.20(eslint@8.57.1)
       typescript:
-        specifier: ^5.2.2
+        specifier: ^5.4.0
         version: 5.8.3
       vite:
-        specifier: ^5.1.0
+        specifier: ^5.2.0
         version: 5.4.19(@types/node@20.19.1)
 
   packages/db:
