@@ -2,6 +2,7 @@
 node_modules
 .pnp
 .pnp.js
+.pnpm-store/
 
 # Testing
 coverage
@@ -51,3 +52,25 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Build outputs
+.next
+.output
+
+# Environment
+.env.*
+!.env.example
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Cache
+.cache
+.eslintcache
+.stylelintcache
+
+# System
+Thumbs.db

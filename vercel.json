@@ -12,14 +12,22 @@
   "builds": [
     {
       "src": "apps/api/src/index.ts",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["apps/api/src/**"]
+      }
     },
     {
       "src": "apps/web/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "dist",
+        "buildCommand": "cd ../.. && pnpm build --filter=web"
       }
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+} 
 } 
