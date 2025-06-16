@@ -62,13 +62,13 @@ const LandingPage = () => {
       
       // Update result
       const resultNumber = document.querySelector('.result-value .number');
-      if (resultNumber) {
+      if (resultNumber instanceof HTMLElement) {
         resultNumber.textContent = tdee.toLocaleString();
       }
       
       // Show result section
       const resultSection = document.querySelector('.result-section');
-      if (resultSection) {
+      if (resultSection instanceof HTMLElement) {
         resultSection.classList.add('show');
       }
     }
@@ -157,7 +157,7 @@ const LandingPage = () => {
                 const title = document.querySelector('.section-title');
                 const features = document.querySelector('.features-grid');
                 const envelope = document.querySelector('.envelope-trigger');
-                if (title && features && envelope) {
+                if (title instanceof HTMLElement && features instanceof HTMLElement && envelope instanceof HTMLElement) {
                   envelope.classList.add('opened');
                   title.classList.add('hide');
                   envelope.classList.add('slide-down');
