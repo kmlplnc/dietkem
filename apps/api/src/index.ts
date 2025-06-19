@@ -11,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import { db } from '@dietkem/db';
 import { users } from '@dietkem/db/src/schema';
 import { eq } from 'drizzle-orm';
+import recipesRouter from './routers/recipes';
 
 // Debug environment variables
 console.log('Environment variables:', {
@@ -32,7 +33,7 @@ app.use(cors({
 // CLERK_DISABLED_TEMP: app.use(ClerkExpressWithAuth());
 
 // Register webhook route
-// CLERK_DISABLED_TEMP: app.post('/webhooks/clerk', express.json(), handleClerkWebhook);
+// CLERK_DISABLED_TEMP: app.post('/webhooks/clerk', express.json({ limit: '10mb' }), handleClerkWebhook);
 
 // NextAuth.js route
 app.use('/api/auth', (req, res, next) => {
@@ -42,7 +43,8 @@ app.use('/api/auth', (req, res, next) => {
 });
 
 // Register endpoint
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.post('/api/register', async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password || !name) {
@@ -70,6 +72,9 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
+// Recipes routes
+app.use('/api/recipes', recipesRouter);
+
 // Create tRPC middleware
 const trpcMiddleware = createExpressMiddleware({
   router: appRouter,
@@ -92,25 +97,7 @@ const trpcMiddleware = createExpressMiddleware({
 // Use tRPC middleware
 app.use('/trpc', trpcMiddleware);
 
-const startServer = (port: number): Promise<number> => {
-  return new Promise((resolve, reject) => {
-    const server = app.listen(port, () => {
-      console.log(`API server listening on port ${port}`);
-      resolve(port);
-    }).on('error', (err: NodeJS.ErrnoException) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} is in use, trying port ${port + 1}...`);
-        resolve(startServer(port + 1));
-      } else {
-        console.error('Error starting server:', err);
-        reject(err);
-      }
-    });
-  });
-};
-
-// Start server with port fallback
-startServer(3001).catch((err) => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
+const port = process.env.PORT ? Number(process.env.PORT) : 3001;
+app.listen(port, () => {
+  console.log(`API server listening on port ${port}`);
 }); 

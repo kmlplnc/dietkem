@@ -23,9 +23,6 @@ const RealNavbar = () => {
   const jwtUser = token ? decodeJWT(token) : null;
   const displayUser = user || jwtUser;
 
-  // Check if user is admin
-  const isAdmin = displayUser?.role === 'admin' || displayUser?.role === 'super_admin' || displayUser?.role === 'superadmin';
-
   return (
     <header className="navbar-top-bar">
       <div className="navbar-container">
@@ -46,7 +43,7 @@ const RealNavbar = () => {
         </div>
         <nav className="main-nav">
           <Link className="nav-link" to="/blog">Blog</Link>
-          <Link className="nav-link" to="/recipes">Tarifler</Link>
+          <Link className="nav-link" to="/tarifler">Tarifler</Link>
           <Link className="nav-link" to="/calorimatik">Kalorimatik</Link>
           <Link className="nav-link" to="/ai-plan">AI Planı</Link>
           <Link className="nav-link" to="/abonelikler">Abonelikler</Link>
@@ -58,29 +55,19 @@ const RealNavbar = () => {
             <button className="lang-btn">EN</button>
           </div>
           {isLoggedIn || displayUser ? (
-            <div className="user-dropdown">
-              <div className="user-trigger">
-                <div className="user-avatar">
-                  <img 
-                    src={displayUser?.avatar_url || "/logo/logo3.png"} 
-                    alt="Avatar" 
-                    className="avatar-img"
-                  />
-                </div>
+            <div className="user-section">
+              <div className="user-avatar">
+                <img 
+                  src={displayUser?.avatar_url || "/logo/logo3.png"} 
+                  alt="Avatar" 
+                  className="avatar-img"
+                />
+              </div>
+              <div className="user-info">
                 <span className="user-name">
                   {displayUser?.firstName || displayUser?.email || 'Kullanıcı'}
                 </span>
-              </div>
-              <div className="dropdown-menu">
-                <Link className="dropdown-item" to="/profile">
-                  Profil
-                </Link>
-                {isAdmin && (
-                  <Link className="dropdown-item" to="/admin">
-                    Admin Paneli
-                  </Link>
-                )}
-                <button className="dropdown-item logout-item" onClick={logout}>
+                <button className="logout-btn" onClick={logout}>
                   Çıkış
                 </button>
               </div>
@@ -241,24 +228,11 @@ const RealNavbar = () => {
           content: none !important;
         }
         
-        /* User Dropdown Styles */
-        .user-dropdown {
-          position: relative;
-          display: inline-block;
-        }
-        
-        .user-trigger {
+        /* User Section Styles */
+        .user-section {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-        }
-        
-        .user-trigger:hover {
-          background-color: rgba(0, 0, 0, 0.05);
+          gap: 0.75rem;
         }
         
         .user-avatar {
@@ -275,8 +249,15 @@ const RealNavbar = () => {
           object-fit: cover;
         }
         
+        .user-info {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25rem;
+        }
+        
         .user-name {
-          font-size: 0.87rem;
+          font-size: 0.875rem;
           font-weight: 500;
           color: var(--gray-600);
           white-space: nowrap;
@@ -285,57 +266,18 @@ const RealNavbar = () => {
           text-overflow: ellipsis;
         }
         
-        .dropdown-menu {
-          position: absolute;
-          top: 100%;
-          left: 50%;
-          transform: translateX(-50%) translateY(-10px);
-          margin-top: 0.5rem;
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-          min-width: 180px;
-          opacity: 0;
-          visibility: hidden;
-          transition: all 0.2s ease;
-          z-index: 1001;
-        }
-        
-        .user-dropdown:hover .dropdown-menu {
-          opacity: 1;
-          visibility: visible;
-          transform: translateX(-50%) translateY(0);
-        }
-        
-        .dropdown-item {
-          display: flex;
-          align-items: center;
-          padding: 0.75rem 1rem;
-          color: var(--gray-600);
-          text-decoration: none;
-          font-size: 0.87rem;
-          font-weight: 500;
-          transition: all 0.2s ease;
-          border: none;
+        .logout-btn {
           background: none;
-          width: 100%;
-          text-align: left;
-          cursor: pointer;
-        }
-        
-        .dropdown-item:hover {
-          background-color: #f9fafb;
-          color: var(--text-color);
-        }
-        
-        .logout-item {
+          border: none;
           color: #ef4444;
-          border-top: 1px solid #e5e7eb;
+          font-size: 0.75rem;
+          cursor: pointer;
+          padding: 0;
+          text-decoration: underline;
+          transition: color 0.2s ease;
         }
         
-        .logout-item:hover {
-          background-color: #fef2f2;
+        .logout-btn:hover {
           color: #dc2626;
         }
         
@@ -378,7 +320,10 @@ const RealNavbar = () => {
             min-width: 70px;
             height: 28px;
           }
-          .user-name {
+          .user-section {
+            gap: 0.5rem;
+          }
+          .user-info {
             display: none;
           }
         }

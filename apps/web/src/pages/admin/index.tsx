@@ -29,6 +29,14 @@ const AdminDashboard = () => {
         : 'View pending blog posts',
       icon: '⏳',
       path: '/admin/pending-posts'
+    },
+    {
+      title: currentLang === 'tr' ? 'Tarif Yönetimi' : 'Recipe Management',
+      description: currentLang === 'tr'
+        ? 'Tarifleri görüntüleyin, ekleyin ve yönetin'
+        : 'View, add and manage recipes',
+      icon: '🍽️',
+      path: '/admin/recipes'
     }
   ];
 

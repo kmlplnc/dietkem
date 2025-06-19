@@ -157,46 +157,46 @@ export const authRouter = router({
   me: publicProcedure
     .query(async ({ ctx }) => {
       try {
-        // Get user from JWT token
+        // If user is already authenticated through context (JWT or Clerk)
+        if (ctx.user && ctx.userId) {
+          return {
+            id: ctx.user.id,
+            email: ctx.user.email,
+            firstName: ctx.user.first_name,
+            lastName: ctx.user.last_name,
+            role: ctx.user.role,
+            avatar_url: ctx.user.avatar_url,
+          };
+        }
+
+        // If no user in context, try to get from JWT token
         const authHeader = ctx.headers?.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-          throw new TRPCError({
-            code: 'UNAUTHORIZED',
-            message: 'No token provided',
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          const token = authHeader.substring(7);
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+
+          const user = await db.query.users.findFirst({
+            where: eq(users.id, decoded.userId),
           });
+
+          if (user) {
+            return {
+              id: user.id,
+              email: user.email,
+              firstName: user.first_name,
+              lastName: user.last_name,
+              role: user.role,
+              avatar_url: user.avatar_url,
+            };
+          }
         }
 
-        const token = authHeader.substring(7);
-        const decoded = jwt.verify(token, JWT_SECRET) as any;
-
-        const user = await db.query.users.findFirst({
-          where: eq(users.id, decoded.userId),
-        });
-
-        if (!user) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'User not found',
-          });
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          role: user.role,
-          avatar_url: user.avatar_url,
-        };
+        // If no authentication found, return null instead of throwing error
+        return null;
       } catch (error) {
         console.error('Get user error:', error);
-        if (error instanceof TRPCError) {
-          throw error;
-        }
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Invalid token',
-        });
+        // Return null instead of throwing error for unauthenticated users
+        return null;
       }
     }),
 

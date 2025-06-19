@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
 // CLERK_DISABLED_TEMP: import { useAuth, useUser } from "@clerk/clerk-react";
@@ -18,6 +19,7 @@ import SSOCallbackPage from "./pages/auth/sso-callback";
 import AdminUsers from './pages/admin/users';
 import AdminBlogs from './pages/admin/blogs';
 import PendingPosts from './pages/admin/pending-posts';
+import AdminRecipesPage from './pages/admin/recipes';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/admin';
 import BlogManagement from './pages/admin/blog-management';
@@ -37,6 +39,8 @@ import DietitianInfo from './pages/DietitianInfo';
 import ClientInfo from './pages/ClientInfo';
 import ClinicInfo from './pages/ClinicInfo';
 import SubscriptionPage from './pages/subscription';
+import RecipesPage from './pages/recipes/RecipesPage';
+import RecipeDetailPage from './pages/recipes/RecipeDetailPage';
 
 function AppRoutes() {
   return (
@@ -89,6 +93,14 @@ function AppRoutes() {
           } 
         />
         <Route 
+          path="/admin/recipes" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminRecipesPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/admin/blog-management"
           element={
             <ProtectedRoute requiredRole="admin">
@@ -116,6 +128,8 @@ function AppRoutes() {
         <Route path="/clinic-info" element={<ClinicInfo />} />
         <Route path="/subscription" element={<SubscriptionPage />} />
         <Route path="/abonelikler" element={<SubscriptionPage />} />
+        <Route path="/recipes" element={<RecipesPage />} />
+        <Route path="/recipes/:id" element={<RecipeDetailPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>

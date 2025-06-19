@@ -21,6 +21,9 @@ declare global {
       auth?: {
         userId?: string;
       };
+      user?: {
+        userId?: string | number;
+      };
     }
   }
 }
@@ -86,4 +89,30 @@ export const requireRole = (roles: UserRole[]) => {
 };
 
 // Export Clerk's authentication middleware
-export const requireAuth = ClerkExpressRequireAuth(); 
+export const requireAuth = ClerkExpressRequireAuth();
+
+// Geliştirme/test için basit bir authenticateToken middleware
+export function authenticateToken(req: Request, res: Response, next: NextFunction) {
+  try {
+    // Authorization header'dan token'ı al
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+      return res.status(401).json({ error: 'Access token required' });
+    }
+
+    // Gerçek uygulamada JWT decode işlemi yapılmalı
+    // Şimdilik basit bir kontrol yapıyoruz
+    if (token === 'test-token') {
+      // Gerçek kullanıcı ID'si kullanıyoruz
+      req.user = { userId: 4 };
+      next();
+    } else {
+      return res.status(403).json({ error: 'Invalid token' });
+    }
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return res.status(500).json({ error: 'Authentication failed' });
+  }
+} 
