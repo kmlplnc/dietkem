@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     enabled: !!token && token.trim() !== '', // Only run if token exists and is not empty
     retry: false,
     onSuccess: (data) => {
-      console.log('AuthProvider - User authenticated:', data.email);
+      console.log('AuthProvider - User authenticated:', data?.email);
       setUser(data);
       setLoading(false);
     },

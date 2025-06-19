@@ -523,18 +523,6 @@ declare const clients: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
-        user_id: drizzle_orm_pg_core.PgColumn<{
-            name: "user_id";
-            tableName: "clients";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-        }, {}, {}>;
         name: drizzle_orm_pg_core.PgColumn<{
             name: "name";
             tableName: "clients";
@@ -583,23 +571,23 @@ declare const clients: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
-        weight_kg: drizzle_orm_pg_core.PgColumn<{
-            name: "weight_kg";
+        email: drizzle_orm_pg_core.PgColumn<{
+            name: "email";
             tableName: "clients";
             dataType: "string";
-            columnType: "PgNumeric";
+            columnType: "PgVarchar";
             data: string;
             driverParam: string;
             notNull: false;
             hasDefault: false;
-            enumValues: undefined;
+            enumValues: [string, ...string[]];
             baseColumn: never;
         }, {}, {}>;
-        goal: drizzle_orm_pg_core.PgColumn<{
-            name: "goal";
+        phone: drizzle_orm_pg_core.PgColumn<{
+            name: "phone";
             tableName: "clients";
             dataType: "string";
-            columnType: "PgText";
+            columnType: "PgVarchar";
             data: string;
             driverParam: string;
             notNull: false;
@@ -619,6 +607,66 @@ declare const clients: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: [string, ...string[]];
             baseColumn: never;
         }, {}, {}>;
+        diseases: drizzle_orm_pg_core.PgColumn<{
+            name: "diseases";
+            tableName: "clients";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        allergies: drizzle_orm_pg_core.PgColumn<{
+            name: "allergies";
+            tableName: "clients";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        medications: drizzle_orm_pg_core.PgColumn<{
+            name: "medications";
+            tableName: "clients";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        has_active_plan: drizzle_orm_pg_core.PgColumn<{
+            name: "has_active_plan";
+            tableName: "clients";
+            dataType: "boolean";
+            columnType: "PgBoolean";
+            data: boolean;
+            driverParam: boolean;
+            notNull: false;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        status: drizzle_orm_pg_core.PgColumn<{
+            name: "status";
+            tableName: "clients";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
         created_at: drizzle_orm_pg_core.PgColumn<{
             name: "created_at";
             tableName: "clients";
@@ -629,6 +677,18 @@ declare const clients: drizzle_orm_pg_core.PgTableWithColumns<{
             notNull: true;
             hasDefault: true;
             enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        activity_level: drizzle_orm_pg_core.PgColumn<{
+            name: "activity_level";
+            tableName: "clients";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
             baseColumn: never;
         }, {}, {}>;
     };
@@ -662,16 +722,16 @@ declare const measurements: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
-        date: drizzle_orm_pg_core.PgColumn<{
-            name: "date";
+        measured_at: drizzle_orm_pg_core.PgColumn<{
+            name: "measured_at";
             tableName: "measurements";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
             driverParam: string;
-            notNull: true;
+            notNull: false;
             hasDefault: false;
-            enumValues: undefined;
+            enumValues: [string, ...string[]];
             baseColumn: never;
         }, {}, {}>;
         weight_kg: drizzle_orm_pg_core.PgColumn<{
@@ -698,6 +758,66 @@ declare const measurements: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
+        hip_cm: drizzle_orm_pg_core.PgColumn<{
+            name: "hip_cm";
+            tableName: "measurements";
+            dataType: "string";
+            columnType: "PgNumeric";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        neck_cm: drizzle_orm_pg_core.PgColumn<{
+            name: "neck_cm";
+            tableName: "measurements";
+            dataType: "string";
+            columnType: "PgNumeric";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        chest_cm: drizzle_orm_pg_core.PgColumn<{
+            name: "chest_cm";
+            tableName: "measurements";
+            dataType: "string";
+            columnType: "PgNumeric";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        arm_cm: drizzle_orm_pg_core.PgColumn<{
+            name: "arm_cm";
+            tableName: "measurements";
+            dataType: "string";
+            columnType: "PgNumeric";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        thigh_cm: drizzle_orm_pg_core.PgColumn<{
+            name: "thigh_cm";
+            tableName: "measurements";
+            dataType: "string";
+            columnType: "PgNumeric";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
         body_fat_percent: drizzle_orm_pg_core.PgColumn<{
             name: "body_fat_percent";
             tableName: "measurements";
@@ -707,6 +827,30 @@ declare const measurements: drizzle_orm_pg_core.PgTableWithColumns<{
             driverParam: string;
             notNull: false;
             hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        note: drizzle_orm_pg_core.PgColumn<{
+            name: "note";
+            tableName: "measurements";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        created_at: drizzle_orm_pg_core.PgColumn<{
+            name: "created_at";
+            tableName: "measurements";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: false;
+            hasDefault: true;
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;

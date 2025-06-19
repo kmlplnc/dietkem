@@ -26,6 +26,9 @@ const RealNavbar = () => {
   // Check if user is admin
   const isAdmin = displayUser?.role === 'admin' || displayUser?.role === 'super_admin' || displayUser?.role === 'superadmin';
 
+  // Check if user is dietitian
+  const isDietitian = displayUser?.role === 'dietitian' || displayUser?.role === 'dietician';
+
   return (
     <header className="navbar-top-bar">
       <div className="navbar-container">
@@ -36,8 +39,8 @@ const RealNavbar = () => {
               alt="Dietkem Logo" 
               className="logo-img"
               onError={(e) => {
-                console.error('Logo failed to load:', e.target.src);
-                e.target.style.display = 'none';
+                console.error('Logo failed to load:', (e.target as HTMLImageElement).src);
+                (e.target as HTMLImageElement).style.display = 'none';
               }}
               onLoad={() => console.log('Logo loaded successfully')}
             />
@@ -49,6 +52,9 @@ const RealNavbar = () => {
           <Link className="nav-link" to="/recipes">Tarifler</Link>
           <Link className="nav-link" to="/calorimatik">Kalorimatik</Link>
           <Link className="nav-link" to="/ai-plan">AI Planı</Link>
+          {(isDietitian || isAdmin) && (
+            <Link className="nav-link" to="/dietitian-panel">Diyetisyen Paneli</Link>
+          )}
           <Link className="nav-link" to="/abonelikler">Abonelikler</Link>
         </nav>
         <div className="right-section">
@@ -75,6 +81,11 @@ const RealNavbar = () => {
                 <Link className="dropdown-item" to="/profile">
                   Profil
                 </Link>
+                {(isDietitian || isAdmin) && (
+                  <Link className="dropdown-item" to="/dietitian-panel">
+                    Diyetisyen Paneli
+                  </Link>
+                )}
                 {isAdmin && (
                   <Link className="dropdown-item" to="/admin">
                     Admin Paneli
@@ -176,6 +187,7 @@ const RealNavbar = () => {
         .nav-link:hover::after {
           width: 100%;
         }
+        
         .right-section {
           display: flex;
           align-items: center;

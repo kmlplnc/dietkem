@@ -1,32 +1,33 @@
 export interface Client {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  dateOfBirth: string;
-  gender: 'male' | 'female' | 'other';
-  height: number;
-  weight: number;
-  lastUpdate: string;
-  goals: string[];
-  medicalConditions?: string[];
-  allergies?: string[];
-  dietaryRestrictions?: string[];
-  notes?: string;
+  id: number;
+  name: string | null;
+  gender: string | null;
+  birth_date: string | null;
+  height_cm: number | null;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+  diseases: string | null; // JSON stringified array
+  allergies: string | null; // JSON stringified array
+  medications: string | null; // JSON stringified array
+  has_active_plan: boolean;
+  status: string;
+  created_at: string | null;
+  activity_level: string | null;
 }
 
 export interface Measurement {
-  id: string;
-  clientId: string;
-  date: string;
-  weight: number;
-  bodyFat?: number;
-  waist?: number;
-  hips?: number;
-  chest?: number;
-  arms?: number;
-  thighs?: number;
-  notes?: string;
+  id: number;
+  client_id: number;
+  measured_at: string;
+  weight_kg: number | null;
+  body_fat_percentage: number | null;
+  waist_cm: number | null;
+  hips_cm: number | null;
+  chest_cm: number | null;
+  arms_cm: number | null;
+  thighs_cm: number | null;
+  notes: string | null;
 }
 
 export interface MealPlan {

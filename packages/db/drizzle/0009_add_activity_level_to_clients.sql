@@ -1,0 +1,1 @@
+ALTER TABLE clients ADD COLUMN activity_level VARCHAR(32); 

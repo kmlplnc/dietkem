@@ -41,6 +41,10 @@ import ClinicInfo from './pages/ClinicInfo';
 import SubscriptionPage from './pages/subscription';
 import RecipesPage from './pages/recipes/RecipesPage';
 import RecipeDetailPage from './pages/recipes/RecipeDetailPage';
+import CalorieCalculator from './pages/calorie-calculator';
+import DietitianPanel from './pages/dietitian-panel';
+import ClientsPage from './pages/ClientsPage';
+import ClientDetail from './pages/ClientDetail';
 
 function AppRoutes() {
   return (
@@ -56,6 +60,7 @@ function AppRoutes() {
         <Route path="/sign-up/verify-email-address" element={<VerifyEmailPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dietitian-panel" element={<DietitianPanel />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/complete-profile" element={<CompleteProfilePage />} />
@@ -130,6 +135,9 @@ function AppRoutes() {
         <Route path="/abonelikler" element={<SubscriptionPage />} />
         <Route path="/recipes" element={<RecipesPage />} />
         <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+        <Route path="/calorimatik" element={<CalorieCalculator />} />
+        <Route path="/clients" element={<ClientsPage />} />
+        <Route path="/client-detail/:id" element={<ClientDetail />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>

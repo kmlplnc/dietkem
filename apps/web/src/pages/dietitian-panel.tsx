@@ -1,19 +1,30 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 // CLERK_DISABLED_TEMP: import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../../context/LanguageContext';
-import "../dashboard.css";
+import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../lib/auth';
+import { trpc } from '../utils/trpc';
+import CreateClientForm from '../components/CreateClientForm';
+import ClientsPage from './ClientsPage';
+import ClientDetail from './ClientDetail';
+import "./dashboard.css";
 
 const DietitianPanel = () => {
   // CLERK_DISABLED_TEMP: const { signOut } = useAuth();
   // CLERK_DISABLED_TEMP: const { user, isLoaded } = useUser();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const { t } = useLanguage() || { t: (key: string) => key };
+  const { user } = useAuth();
+
+  // Danışan sayısını çek
+  const { data: clientCount, isLoading: isLoadingClientCount } = trpc.clients.getCount.useQuery();
 
   const handleSignOut = async () => {
     // CLERK_DISABLED_TEMP: await signOut();
-    navigate('/sign-in');
+    navigate('/');
   };
 
   // CLERK_DISABLED_TEMP: if (!isLoaded) {
@@ -24,6 +35,98 @@ const DietitianPanel = () => {
   // CLERK_DISABLED_TEMP:   navigate("/sign-in");
   // CLERK_DISABLED_TEMP:   return null;
   // CLERK_DISABLED_TEMP: }
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (user?.firstName) {
+      return user.firstName;
+    } else if (user?.email) {
+      return user.email.split('@')[0];
+    } else {
+      return 'Diyetisyen';
+    }
+  };
+
+  // Danışan detayına git
+  const handleClientDetail = (clientId: number) => {
+    setSelectedClientId(clientId);
+    setActiveTab('client-detail');
+  };
+
+  // Danışanlar listesine geri dön
+  const handleBackToClients = () => {
+    setSelectedClientId(null);
+    setActiveTab('clients');
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return (
+          <main className="dashboard-content">
+            <section className="quick-actions">
+              <h2>Hızlı İşlemler</h2>
+              <div className="action-cards">
+                <div className="action-card" onClick={() => setActiveTab('new-client')}>
+                  <i className="fas fa-user-plus"></i>
+                  <h3>Yeni Danışan</h3>
+                  <p>Yeni danışan kaydı oluşturun</p>
+                </div>
+                <div className="action-card">
+                  <i className="fas fa-plus"></i>
+                  <h3>Yeni Beslenme Planı</h3>
+                  <p>Danışanınız için özel beslenme planı oluşturun</p>
+                </div>
+                <div className="action-card">
+                  <i className="fas fa-calendar-plus"></i>
+                  <h3>Görüşme Ekle</h3>
+                  <p>Yeni görüşme randevusu oluşturun</p>
+                </div>
+              </div>
+            </section>
+
+            <section className="dashboard-stats">
+              <h2>Genel Bakış</h2>
+              <div className="stat-cards">
+                <div className="stat-card">
+                  <h3>Toplam Danışan</h3>
+                  <p className="stat-number">
+                    {isLoadingClientCount ? 'Yükleniyor...' : String(clientCount || 0)}
+                  </p>
+                </div>
+                <div className="stat-card">
+                  <h3>Aktif Planlar</h3>
+                  <p className="stat-number">-</p>
+                </div>
+                <div className="stat-card">
+                  <h3>Bugünkü Görüşmeler</h3>
+                  <p className="stat-number">-</p>
+                </div>
+              </div>
+            </section>
+
+            <section className="upcoming-section">
+              <h2>Yaklaşan Görüşmeler</h2>
+              <div className="appointment-list">
+                <div className="empty-state">
+                  <i className="fas fa-calendar-times"></i>
+                  <h3>Henüz görüşme yok</h3>
+                  <p>Yeni görüşme eklemek için yukarıdaki "Görüşme Ekle" butonunu kullanın</p>
+                </div>
+              </div>
+            </section>
+          </main>
+        );
+      case 'new-client':
+        return <CreateClientForm />;
+      case 'clients':
+        return <ClientsPage onClientDetail={handleClientDetail} />;
+      case 'client-detail':
+        return <ClientDetail clientId={selectedClientId} onBack={handleBackToClients} />;
+      default:
+        return <div>Sayfa bulunamadı</div>;
+    }
+  };
 
   return (
     <>
@@ -50,14 +153,22 @@ const DietitianPanel = () => {
             <h2>Diyetisyen Paneli</h2>
           </div>
           <nav className="nav-menu">
-            <a href="#" className="nav-link active">
+            <a 
+              href="#" 
+              className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); setActiveTab('dashboard'); }}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
               Ana Sayfa
             </a>
-            <a href="#" className="nav-link">
+            <a 
+              href="#" 
+              className={`nav-link ${activeTab === 'clients' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); setActiveTab('clients'); }}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
@@ -104,72 +215,15 @@ const DietitianPanel = () => {
         </aside>
 
         <div className="main-content">
-          <header className="topbar">
-            <div className="user-info">
-              <span className="greeting">Hoş geldiniz, Diyetisyen!</span>
-            </div>
-          </header>
-
-          <main className="dashboard-content">
-            <section className="quick-actions">
-              <h2>Hızlı İşlemler</h2>
-              <div className="action-cards">
-                <div className="action-card">
-                  <i className="fas fa-plus"></i>
-                  <h3>Yeni Beslenme Planı</h3>
-                  <p>Danışanınız için özel beslenme planı oluşturun</p>
-                </div>
-                <div className="action-card">
-                  <i className="fas fa-user-plus"></i>
-                  <h3>Yeni Danışan</h3>
-                  <p>Yeni danışan kaydı oluşturun</p>
-                </div>
-                <div className="action-card">
-                  <i className="fas fa-calendar-plus"></i>
-                  <h3>Görüşme Ekle</h3>
-                  <p>Yeni görüşme randevusu oluşturun</p>
-                </div>
+          {activeTab === 'dashboard' && (
+            <header className="topbar">
+              <div className="user-info">
+                <span className="greeting">Hoş geldiniz, {getUserDisplayName()}!</span>
               </div>
-            </section>
+            </header>
+          )}
 
-            <section className="dashboard-stats">
-              <h2>Genel Bakış</h2>
-              <div className="stat-cards">
-                <div className="stat-card">
-                  <h3>Toplam Danışan</h3>
-                  <p className="stat-number">24</p>
-                </div>
-                <div className="stat-card">
-                  <h3>Aktif Planlar</h3>
-                  <p className="stat-number">18</p>
-                </div>
-                <div className="stat-card">
-                  <h3>Bugünkü Görüşmeler</h3>
-                  <p className="stat-number">5</p>
-                </div>
-              </div>
-            </section>
-
-            <section className="upcoming-section">
-              <h2>Yaklaşan Görüşmeler</h2>
-              <div className="appointment-list">
-                <div className="appointment-card">
-                  <div className="appointment-time">09:00</div>
-                  <div className="appointment-details">
-                    <h4>Ayşe Yılmaz</h4>
-                    <p>Kontrol Görüşmesi</p>
-                  </div>
-                </div>
-                <div className="appointment-card">
-                  <div className="appointment-time">11:30</div>
-                  <div className="appointment-details">
-                    <h4>Mehmet Demir</h4>
-                    <p>İlk Görüşme</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </main>
+          {renderContent()}
         </div>
       </div>
     </>

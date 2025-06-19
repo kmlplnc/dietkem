@@ -16,7 +16,12 @@ router.get('/', async (req, res) => {
     const dishType = req.query.dishType as string;
     const offset = (page - 1) * limit;
 
-    let query = db
+    const filters = [eq(recipes.is_public, true)];
+    if (search) filters.push(like(recipes.title, `%${search}%`));
+    if (cuisine) filters.push(eq(recipes.cuisine, cuisine));
+    if (dishType) filters.push(eq(recipes.dish_type, dishType));
+
+    const results = await db
       .select({
         id: recipes.id,
         title: recipes.title,
@@ -31,24 +36,7 @@ router.get('/', async (req, res) => {
         updated_at: recipes.updated_at,
       })
       .from(recipes)
-      .where(eq(recipes.is_public, true));
-
-    // Arama filtresi
-    if (search) {
-      query = query.where(like(recipes.title, `%${search}%`));
-    }
-
-    // Mutfak filtresi
-    if (cuisine) {
-      query = query.where(eq(recipes.cuisine, cuisine));
-    }
-
-    // Yemek türü filtresi
-    if (dishType) {
-      query = query.where(eq(recipes.dish_type, dishType));
-    }
-
-    const results = await query
+      .where(and(...filters))
       .orderBy(desc(recipes.created_at))
       .limit(limit)
       .offset(offset);
@@ -70,12 +58,15 @@ router.get('/', async (req, res) => {
     );
 
     // Toplam sayıyı al
-    const totalQuery = db
+    const totalFilters = [eq(recipes.is_public, true)];
+    if (search) totalFilters.push(like(recipes.title, `%${search}%`));
+    if (cuisine) totalFilters.push(eq(recipes.cuisine, cuisine));
+    if (dishType) totalFilters.push(eq(recipes.dish_type, dishType));
+
+    const totalResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(recipes)
-      .where(eq(recipes.is_public, true));
-
-    const totalResult = await totalQuery;
+      .where(and(...totalFilters));
     const total = totalResult[0]?.count || 0;
 
     res.json({
@@ -145,8 +136,8 @@ router.get('/:id', async (req, res) => {
     // Görüntülenme sayısını artır
     if (userId) {
       await db.insert(recipe_views).values({
-        recipe_id: recipeId,
-        user_id: userId,
+        recipe_id: Number(recipeId),
+        user_id: Number(userId),
       });
     }
 
@@ -167,8 +158,8 @@ router.get('/:id', async (req, res) => {
         .select()
         .from(favorite_recipes)
         .where(and(
-          eq(favorite_recipes.recipe_id, recipeId),
-          eq(favorite_recipes.user_id, userId)
+          eq(favorite_recipes.recipe_id, Number(recipeId)),
+          eq(favorite_recipes.user_id, Number(userId))
         ))
         .limit(1);
       
@@ -228,7 +219,7 @@ router.post('/', authenticateToken, async (req, res) => {
         cuisine,
         dish_type,
         instructions,
-        created_by: userId,
+        created_by: Number(userId),
         is_public: true,
       })
       .returning();
@@ -251,8 +242,8 @@ router.post('/', authenticateToken, async (req, res) => {
 
         if (ingredientId) {
           await db.insert(recipe_ingredients).values({
-            recipe_id: newRecipe.id,
-            ingredient_id: ingredientId,
+            recipe_id: Number(newRecipe.id),
+            ingredient_id: Number(ingredientId),
             amount: Math.round(parseFloat(ingredient.amount) || 0),
             notes: ingredient.notes,
           });
@@ -263,7 +254,7 @@ router.post('/', authenticateToken, async (req, res) => {
     // Besin değerlerini ekle
     if (nutrition) {
       await db.insert(nutrition_info).values({
-        recipe_id: newRecipe.id,
+        recipe_id: Number(newRecipe.id),
         calories: nutrition.calories,
         protein: nutrition.protein,
         carbohydrates: nutrition.carbohydrates,
@@ -278,8 +269,8 @@ router.post('/', authenticateToken, async (req, res) => {
     if (recipeCategories && recipeCategories.length > 0) {
       for (const categoryId of recipeCategories) {
         await db.insert(recipe_categories).values({
-          recipe_id: newRecipe.id,
-          category_id: categoryId,
+          recipe_id: Number(newRecipe.id),
+          category_id: Number(categoryId),
         });
       }
     }
@@ -307,7 +298,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       .from(recipes)
       .where(and(
         eq(recipes.id, recipeId),
-        eq(recipes.created_by, userId)
+        eq(recipes.created_by, Number(userId))
       ))
       .limit(1);
 
@@ -366,7 +357,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     const user = await db
       .select()
       .from(users)
-      .where(eq(users.id, userId))
+      .where(eq(users.id, Number(userId)))
       .limit(1);
 
     const isAdmin = user[0]?.role === 'superadmin';
@@ -383,7 +374,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     }
 
     // Admin değilse, tarifin kendisine ait olup olmadığını kontrol et
-    if (!isAdmin && existingRecipe[0].created_by !== userId) {
+    if (!isAdmin && existingRecipe[0].created_by !== Number(userId)) {
       return res.status(403).json({ error: 'Bu tarifi silme yetkiniz yok' });
     }
 
@@ -420,8 +411,8 @@ router.post('/:id/favorite', authenticateToken, async (req, res) => {
       .select()
       .from(favorite_recipes)
       .where(and(
-        eq(favorite_recipes.recipe_id, recipeId),
-        eq(favorite_recipes.user_id, userId)
+        eq(favorite_recipes.recipe_id, Number(recipeId)),
+        eq(favorite_recipes.user_id, Number(userId))
       ))
       .limit(1);
 
@@ -430,16 +421,16 @@ router.post('/:id/favorite', authenticateToken, async (req, res) => {
       await db
         .delete(favorite_recipes)
         .where(and(
-          eq(favorite_recipes.recipe_id, recipeId),
-          eq(favorite_recipes.user_id, userId)
+          eq(favorite_recipes.recipe_id, Number(recipeId)),
+          eq(favorite_recipes.user_id, Number(userId))
         ));
       
       res.json({ message: 'Tarif favorilerden çıkarıldı', isFavorite: false });
     } else {
       // Favorilere ekle
       await db.insert(favorite_recipes).values({
-        recipe_id: recipeId,
-        user_id: userId,
+        recipe_id: Number(recipeId),
+        user_id: Number(userId),
       });
       
       res.json({ message: 'Tarif favorilere eklendi', isFavorite: true });
@@ -470,8 +461,8 @@ router.post('/:id/rate', authenticateToken, async (req, res) => {
       .select()
       .from(recipe_ratings)
       .where(and(
-        eq(recipe_ratings.recipe_id, recipeId),
-        eq(recipe_ratings.user_id, userId)
+        eq(recipe_ratings.recipe_id, Number(recipeId)),
+        eq(recipe_ratings.user_id, Number(userId))
       ))
       .limit(1);
 
@@ -485,14 +476,14 @@ router.post('/:id/rate', authenticateToken, async (req, res) => {
           created_at: new Date(),
         })
         .where(and(
-          eq(recipe_ratings.recipe_id, recipeId),
-          eq(recipe_ratings.user_id, userId)
+          eq(recipe_ratings.recipe_id, Number(recipeId)),
+          eq(recipe_ratings.user_id, Number(userId))
         ));
     } else {
       // Yeni değerlendirme ekle
       await db.insert(recipe_ratings).values({
-        recipe_id: recipeId,
-        user_id: userId,
+        recipe_id: Number(recipeId),
+        user_id: Number(userId),
         rating,
         comment,
       });

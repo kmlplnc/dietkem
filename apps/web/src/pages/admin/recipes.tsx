@@ -131,7 +131,7 @@ const AdminRecipesPage: React.FC = () => {
         difficulty: detailedRecipe.difficulty || 'Orta',
         dish_type: detailedRecipe.dish_type || 'Ana Yemek',
         instructions: detailedRecipe.instructions || '',
-        ingredients: detailedRecipe.ingredients?.length > 0 ? detailedRecipe.ingredients.map(ing => ({
+        ingredients: detailedRecipe.ingredients && detailedRecipe.ingredients.length > 0 ? detailedRecipe.ingredients.map(ing => ({
           name: ing.name || '',
           amount: ing.amount?.toString() || '',
           unit: ing.unit || ''
@@ -403,17 +403,17 @@ const AdminRecipesPage: React.FC = () => {
                       <textarea 
                         placeholder="Örn: 2 su bardağı un&#10;1 adet yumurta&#10;1 çay kaşığı tuz&#10;1/2 su bardağı süt"
                         value={form.ingredients.map(ing => `${ing.amount} ${ing.unit} ${ing.name}`.trim()).filter(text => text).join('\n')} 
-                        onChange={(e) => {
+                              onChange={(e) => {
                           const lines = e.target.value.split('\n').filter(line => line.trim());
                           const newIngredients = lines.map(line => {
                             const parts = line.split(' ');
-                            const amount = parts[0] || '';
-                            const unit = parts[1] || '';
-                            const name = parts.slice(2).join(' ') || '';
+                                const amount = parts[0] || '';
+                                const unit = parts[1] || '';
+                                const name = parts.slice(2).join(' ') || '';
                             return { name, amount, unit };
                           });
                           setForm({ ...form, ingredients: newIngredients.length > 0 ? newIngredients : [{ name: '', amount: '', unit: '' }] });
-                        }}
+                              }}
                         className="form-textarea ingredients-textarea"
                         rows={12}
                       />

@@ -17,18 +17,28 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   React.useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+  
   // Determine if current route is public
   const isPublic = !/^\/(admin|dashboard|dietitian)/.test(location.pathname);
+  
+  // Check if current route is dietitian panel
+  const isDietitianPanel = location.pathname === '/dietitian-panel';
+  
   return (
     <CookieConsentProvider>
-      <RealNavbar />
-      {(location.pathname === '/' || location.pathname === '/abonelikler' || location.pathname === '/subscription') && <TawkToWidget />}
+      {!isDietitianPanel && <RealNavbar />}
+      {(location.pathname === '/' || location.pathname === '/abonelikler' || location.pathname === '/subscription') && !isDietitianPanel && <TawkToWidget />}
       <CookieConsentBar />
       <CookieConsentModal />
       <FloatingSettingsButton />
-      <div style={{ paddingTop: NAVBAR_HEIGHT, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <div style={{ 
+        paddingTop: isDietitianPanel ? 0 : NAVBAR_HEIGHT, 
+        minHeight: "100vh", 
+        display: "flex", 
+        flexDirection: "column" 
+      }}>
         <main style={{ flex: 1 }}>{children}</main>
-        <Footer />
+        {!isDietitianPanel && <Footer />}
       </div>
     </CookieConsentProvider>
   );

@@ -155,7 +155,7 @@ const ProfilePage = () => {
 
       // Update database using mutation
       await updateProfile.mutateAsync({
-        clerkId: currentUser?.clerk_id || '',
+        clerkId: '', // TODO: Get actual clerk ID when available
         email: currentUser?.email || '',
         firstName,
         lastName: currentUser?.last_name || '',

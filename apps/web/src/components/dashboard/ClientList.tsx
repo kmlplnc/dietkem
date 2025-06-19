@@ -47,11 +47,11 @@ export function ClientList({
             <div>
               <h3 className="text-sm font-medium text-gray-900">{client.name}</h3>
               <p className="text-sm text-gray-500">
-                Weight: {client.weight} kg
+                Height: {client.height_cm} cm
               </p>
             </div>
             <div className="text-xs text-gray-500">
-              Last update: {new Date(client.lastUpdate).toLocaleDateString()}
+              Created: {client.created_at ? new Date(client.created_at).toLocaleDateString() : 'N/A'}
             </div>
           </div>
         </button>

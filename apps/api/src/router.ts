@@ -3,6 +3,8 @@ import { router, publicProcedure, dietitianProcedure, clientProcedure } from './
 import { usersRouter } from './routers/users';
 import { blogsRouter } from './routers/blogs';
 import { authRouter } from './routers/auth';
+import { clientsRouter } from './routers/clients';
+import { measurementsRouter } from './routers/measurements';
 import { db } from '@dietkem/db';
 import { users as dbUsers } from '@dietkem/db/src/schema';
 import { eq } from 'drizzle-orm';
@@ -13,6 +15,8 @@ export const appRouter = router({
   users: usersRouter,
   blogs: blogsRouter,
   auth: authRouter,
+  clients: clientsRouter,
+  measurements: measurementsRouter,
 
   // Dietitian-only routes
   addClient: dietitianProcedure

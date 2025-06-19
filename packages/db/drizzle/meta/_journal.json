@@ -15,6 +15,34 @@
       "when": 1750338339343,
       "tag": "0001_complete_banshee",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1750357368337,
+      "tag": "0002_cute_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1750357444185,
+      "tag": "0003_abandoned_shadowcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1750338339344,
+      "tag": "0006_rename_date_to_measured_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1750338339345,
+      "tag": "0007_add_missing_measurement_columns",
+      "breakpoints": true
     }
   ]
 }

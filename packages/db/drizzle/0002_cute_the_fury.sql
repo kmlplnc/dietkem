@@ -1,0 +1,1 @@
+ALTER TABLE "clients" ADD COLUMN "has_active_plan" boolean DEFAULT false;

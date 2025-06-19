@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, timestamp, integer, decimal, text, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, timestamp, integer, decimal, text, pgEnum, boolean } from 'drizzle-orm/pg-core';
 
 // Enums
 export const userRoleEnum = pgEnum('user_role', [
@@ -72,25 +72,37 @@ export const verificationTokens = pgTable('verification_tokens', {
 // Clients table
 export const clients = pgTable('clients', {
   id: serial('id').primaryKey(),
-  user_id: integer('user_id').references(() => users.id).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   gender: varchar('gender', { length: 50 }),
   birth_date: timestamp('birth_date'),
   height_cm: decimal('height_cm', { precision: 5, scale: 2 }),
-  weight_kg: decimal('weight_kg', { precision: 5, scale: 2 }),
-  goal: text('goal'),
+  email: varchar('email', { length: 255 }),
+  phone: varchar('phone', { length: 20 }),
   notes: text('notes'),
+  diseases: text('diseases'),
+  allergies: text('allergies'),
+  medications: text('medications'),
+  has_active_plan: boolean('has_active_plan').default(false),
+  status: varchar('status', { length: 10 }).notNull().default('active'),
   created_at: timestamp('created_at').defaultNow().notNull(),
+  activity_level: varchar('activity_level', { length: 32 }),
 });
 
 // Measurements table
 export const measurements = pgTable('measurements', {
   id: serial('id').primaryKey(),
   client_id: integer('client_id').references(() => clients.id).notNull(),
-  date: timestamp('date').notNull(),
+  measured_at: text('measured_at'),
   weight_kg: decimal('weight_kg', { precision: 5, scale: 2 }).notNull(),
   waist_cm: decimal('waist_cm', { precision: 5, scale: 2 }),
+  hip_cm: decimal('hip_cm', { precision: 5, scale: 2 }),
+  neck_cm: decimal('neck_cm', { precision: 5, scale: 2 }),
+  chest_cm: decimal('chest_cm', { precision: 5, scale: 2 }),
+  arm_cm: decimal('arm_cm', { precision: 5, scale: 2 }),
+  thigh_cm: decimal('thigh_cm', { precision: 5, scale: 2 }),
   body_fat_percent: decimal('body_fat_percent', { precision: 4, scale: 2 }),
+  note: text('note'),
+  created_at: timestamp('created_at').defaultNow(),
 });
 
 // Meal plans table

@@ -120,16 +120,12 @@ const BlogPage = () => {
             ))}
           </div>
 
-          {/* CLERK_DISABLED_TEMP:
-          {user && (
-            <button
-              className="new-post-btn"
-              onClick={() => setShowNewPostForm(true)}
-            >
-              {currentLang === 'tr' ? 'Yeni Yazı Ekle' : 'Add New Post'}
-            </button>
-          )}
-          */}
+          <button
+            className="new-post-btn"
+            onClick={() => setShowNewPostForm(true)}
+          >
+            {currentLang === 'tr' ? 'Yeni Yazı Ekle' : 'Add New Post'}
+          </button>
         </div>
 
         {showNewPostForm && (
