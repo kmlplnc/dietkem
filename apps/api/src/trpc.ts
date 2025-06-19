@@ -24,5 +24,11 @@ const createRoleProtectedProcedure = (allowedRoles: UserRole[]) => {
 };
 
 // Role-specific procedures
-export const dietitianProcedure = createRoleProtectedProcedure(['dietitian']);
-export const clientProcedure = createRoleProtectedProcedure(['client']); 
+export const dietitianProcedure = createRoleProtectedProcedure(['dietitian_team_member']);
+export const clientProcedure = createRoleProtectedProcedure(['subscriber_basic', 'subscriber_pro']);
+export const clinicAdminProcedure = createRoleProtectedProcedure(['clinic_admin']);
+export const adminProcedure = createRoleProtectedProcedure(['admin', 'superadmin']);
+
+// Export router and types
+export { appRouter } from './router';
+export type { AppRouter } from './router'; 

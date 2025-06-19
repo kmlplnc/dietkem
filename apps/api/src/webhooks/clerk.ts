@@ -67,6 +67,9 @@ export async function handleClerkWebhook(req: Request, res: Response) {
           clerk_id: id,
           email: primaryEmail,
           role: 'subscriber_basic',
+          first_name: attributes.first_name || '',
+          last_name: attributes.last_name || '',
+          username: attributes.username || '',
         });
       }
 

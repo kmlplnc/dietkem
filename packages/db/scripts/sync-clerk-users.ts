@@ -31,7 +31,7 @@ async function syncClerkUsers() {
       try {
         // Check if user exists in our database
         const existingUser = await db.query.users.findFirst({
-          where: eq(users.clerkId, clerkUser.id),
+          where: eq(users.clerk_id, clerkUser.id),
         });
 
         if (!existingUser) {
@@ -56,10 +56,8 @@ async function syncClerkUsers() {
   } catch (error) {
     console.error('Error syncing users:', error);
     process.exit(1);
-  } finally {
-    // Close the database connection
-    await db.queryClient.end();
   }
 }
 
-syncClerkUsers(); 
+// Run the sync
+syncClerkUsers().catch(console.error); 

@@ -7,7 +7,7 @@ type Language = 'tr' | 'en';
 interface LanguageContextType {
   currentLang: Language;
   changeLanguage: (lang: Language) => void;
-  t: (key: string, params?: Record<string, string>) => string;
+  t: (key: string, params?: Record<string, string | boolean | number>) => string | string[] | any;
 }
 
 const translations = {
@@ -15,7 +15,7 @@ const translations = {
   en
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -29,7 +29,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = lang;
   };
 
-  const t = (key: string, params?: Record<string, string>) => {
+  const t = (key: string, params?: Record<string, string | boolean | number>): string | string[] | any => {
     const keys = key.split('.');
     let value: any = translations[currentLang];
     
@@ -42,12 +42,22 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    if (params) {
+    // If returnObjects is true, return the value as is
+    if (params?.returnObjects) {
+      return value;
+    }
+
+    // Handle string values with parameters
+    if (typeof value === 'string' && params) {
       return Object.entries(params).reduce((str, [key, val]) => {
-        return str.replace(`{${key}}`, val);
+        if (typeof val === 'string' || typeof val === 'number') {
+          return str.replace(new RegExp(`{${key}}`, 'g'), String(val));
+        }
+        return str;
       }, value);
     }
 
+    // Return the value as is for arrays and other types
     return value;
   };
 

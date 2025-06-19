@@ -32,6 +32,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
+  accounts: () => accounts,
   clients: () => clients,
   db: () => db,
   foods: () => foods,
@@ -41,8 +42,10 @@ __export(index_exports, {
   meals: () => meals,
   measurements: () => measurements,
   queryClient: () => queryClient,
+  sessions: () => sessions,
   userRoleEnum: () => userRoleEnum,
   users: () => users,
+  verificationTokens: () => verificationTokens,
   water_logs: () => water_logs,
   weight_logs: () => weight_logs
 });
@@ -5114,6 +5117,7 @@ var import_postgres = __toESM(require("postgres"));
 // src/schema.ts
 var schema_exports = {};
 __export(schema_exports, {
+  accounts: () => accounts,
   clients: () => clients,
   foods: () => foods,
   mealTypeEnum: () => mealTypeEnum,
@@ -5121,8 +5125,10 @@ __export(schema_exports, {
   meal_plans: () => meal_plans,
   meals: () => meals,
   measurements: () => measurements,
+  sessions: () => sessions,
   userRoleEnum: () => userRoleEnum,
   users: () => users,
+  verificationTokens: () => verificationTokens,
   water_logs: () => water_logs,
   weight_logs: () => weight_logs
 });
@@ -5137,11 +5143,41 @@ var userRoleEnum = pgEnum("user_role", [
 var mealTypeEnum = pgEnum("meal_type", ["breakfast", "lunch", "dinner", "snack"]);
 var users = pgTable("users", {
   id: serial("id").primaryKey(),
-  clerk_id: varchar("clerk_id", { length: 255 }).notNull().unique(),
+  clerk_id: varchar("clerk_id", { length: 255 }).unique(),
   email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }),
   role: userRoleEnum("role").notNull().default("subscriber_basic"),
   created_at: timestamp("created_at").defaultNow().notNull(),
-  updated_at: timestamp("updated_at").defaultNow().notNull()
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+  first_name: varchar("first_name", { length: 255 }),
+  last_name: varchar("last_name", { length: 255 }),
+  username: varchar("username", { length: 255 }),
+  avatar_url: varchar("avatar_url", { length: 512 }).default("https://res.cloudinary.com/dietkem/image/upload/v1/avatar.jpg")
+});
+var sessions = pgTable("sessions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  sessionToken: varchar("session_token", { length: 255 }).notNull().unique(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  expires: timestamp("expires").notNull()
+});
+var accounts = pgTable("accounts", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }).notNull(),
+  provider: varchar("provider", { length: 255 }).notNull(),
+  providerAccountId: varchar("provider_account_id", { length: 255 }).notNull(),
+  refresh_token: text("refresh_token"),
+  access_token: text("access_token"),
+  expires_at: serial("expires_at"),
+  token_type: varchar("token_type", { length: 255 }),
+  scope: varchar("scope", { length: 255 }),
+  id_token: text("id_token"),
+  session_state: varchar("session_state", { length: 255 })
+});
+var verificationTokens = pgTable("verification_tokens", {
+  identifier: varchar("identifier", { length: 255 }).notNull(),
+  token: varchar("token", { length: 255 }).notNull(),
+  expires: timestamp("expires").notNull()
 });
 var clients = pgTable("clients", {
   id: serial("id").primaryKey(),
@@ -5218,6 +5254,7 @@ var queryClient = (0, import_postgres.default)(connectionString);
 var db = drizzle(queryClient, { schema: schema_exports });
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  accounts,
   clients,
   db,
   foods,
@@ -5227,8 +5264,10 @@ var db = drizzle(queryClient, { schema: schema_exports });
   meals,
   measurements,
   queryClient,
+  sessions,
   userRoleEnum,
   users,
+  verificationTokens,
   water_logs,
   weight_logs
 });

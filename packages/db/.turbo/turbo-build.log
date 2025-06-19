@@ -7,16 +7,20 @@
 [34mCLI[39m tsup v8.5.0
 [34mCLI[39m Using tsup config: C:\dietkem\packages\db\tsup.config.ts
 [34mCLI[39m Target: es2020
-[34mCLI[39m Cleaning output folder
-[34mCJS[39m Build start
-[34mESM[39m Build start
-[32mCJS[39m [1mdist\index.js     [22m[32m164.08 KB[39m
-[32mCJS[39m [1mdist\index.js.map [22m[32m393.36 KB[39m
-[32mCJS[39m ⚡️ Build success in 180ms
-[32mESM[39m [1mdist\index.mjs     [22m[32m162.27 KB[39m
-[32mESM[39m [1mdist\index.mjs.map [22m[32m393.23 KB[39m
-[32mESM[39m ⚡️ Build success in 182ms
+[31mError: EPERM: operation not permitted, unlink 'C:\dietkem\packages\db\dist\index.mjs'
+    at Object.unlinkSync (node:fs:1886:11)
+    at C:\dietkem\node_modules\tsup\dist\chunk-TWFEYLU4.js:143:73
+    at Array.forEach (<anonymous>)
+    at removeFiles (C:\dietkem\node_modules\tsup\dist\chunk-TWFEYLU4.js:143:9)
+    at async buildAll (C:\dietkem\node_modules\tsup\dist\index.js:1595:17)
+    at async mainTasks (C:\dietkem\node_modules\tsup\dist\index.js:1699:13)
+    at async Promise.all (index 1)
+    at async C:\dietkem\node_modules\tsup\dist\index.js:1703:9
+    at async Promise.all (index 0)
+    at async build (C:\dietkem\node_modules\tsup\dist\index.js:1494:3)[39m
 [34mDTS[39m Build start
-[32mDTS[39m ⚡️ Build success in 2173ms
-[32mDTS[39m [1mdist\index.d.ts  [22m[32m25.26 KB[39m
-[32mDTS[39m [1mdist\index.d.mts [22m[32m25.26 KB[39m
+[32mDTS[39m ⚡️ Build success in 2947ms
+[32mDTS[39m [1mdist\index.d.ts  [22m[32m35.37 KB[39m
+[32mDTS[39m [1mdist\index.d.mts [22m[32m35.37 KB[39m
+ ELIFECYCLE  Command failed with exit code 1.
+ WARN   Local package.json exists, but node_modules missing, did you mean to install?

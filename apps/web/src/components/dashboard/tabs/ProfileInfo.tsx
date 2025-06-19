@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/Label';
 import { Textarea } from '@/components/ui/TextareaComponent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/SelectComponent';
 import { trpc } from '@/utils/trpc';
-import { useUser } from '@clerk/clerk-react';
+// CLERK_DISABLED_TEMP: import { useUser } from '@clerk/clerk-react';
 
 interface ProfileInfoProps {
   client?: {
@@ -20,12 +20,20 @@ interface ProfileInfoProps {
 }
 
 export const ProfileInfo = ({ client }: ProfileInfoProps) => {
-  const { user } = useUser();
-  const { isLoading } = trpc.users.me.useQuery();
+  // CLERK_DISABLED_TEMP: const { user } = useUser();
+  
+  // Only run the query if there's a token
+  const token = localStorage.getItem('token');
+  const { isLoading } = trpc.users.me.useQuery(undefined, {
+    enabled: !!token && token.trim() !== '',
+    retry: false,
+  });
 
   const [formData, setFormData] = useState({
-    name: user?.firstName || '',
-    email: user?.emailAddresses[0]?.emailAddress || '',
+    // CLERK_DISABLED_TEMP: name: user?.firstName || '',
+    // CLERK_DISABLED_TEMP: email: user?.emailAddresses[0]?.emailAddress || '',
+    name: '',
+    email: '',
     phone: client?.phone || '',
     address: client?.address || '',
     notes: client?.notes || '',

@@ -7,9 +7,12 @@ interface NewPostFormProps {
     category: string;
     summary: string;
     content: string;
-    image?: File;
+    image?: string;
   }) => void;
 }
+
+const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dup6ahhjt/image/upload';
+const CLOUDINARY_UPLOAD_PRESET = 'dietkem';
 
 const NewPostForm = ({ onSubmit }: NewPostFormProps) => {
   const { currentLang } = useLanguage();
@@ -17,8 +20,11 @@ const NewPostForm = ({ onSubmit }: NewPostFormProps) => {
   const [category, setCategory] = useState('');
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
-  const [image, setImage] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +36,7 @@ const NewPostForm = ({ onSubmit }: NewPostFormProps) => {
         category,
         summary,
         content,
-        image: image || undefined
+        image: imageUrl || undefined
       });
 
       // Reset form
@@ -38,7 +44,8 @@ const NewPostForm = ({ onSubmit }: NewPostFormProps) => {
       setCategory('');
       setSummary('');
       setContent('');
-      setImage(null);
+      setImageFile(null);
+      setImageUrl('');
     } catch (error) {
       console.error('Error submitting post:', error);
     } finally {
@@ -46,9 +53,31 @@ const NewPostForm = ({ onSubmit }: NewPostFormProps) => {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+      const file = e.target.files[0];
+      setImageFile(file);
+      setIsUploading(true);
+      setUploadError(null);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        const res = await fetch(CLOUDINARY_UPLOAD_URL, {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.secure_url) {
+          setImageUrl(data.secure_url);
+        } else {
+          setUploadError('Görsel yüklenemedi.');
+        }
+      } catch (err) {
+        setUploadError('Görsel yüklenemedi.');
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -126,11 +155,24 @@ const NewPostForm = ({ onSubmit }: NewPostFormProps) => {
           onChange={handleImageChange}
           className="form-file"
         />
+        {isUploading && (
+          <div style={{ color: '#2563eb', marginTop: 8 }}>
+            {currentLang === 'tr' ? 'Yükleniyor...' : 'Uploading...'}
+          </div>
+        )}
+        {uploadError && (
+          <div style={{ color: 'red', marginTop: 8 }}>{uploadError}</div>
+        )}
+        {imageUrl && (
+          <div style={{ marginTop: 8 }}>
+            <img src={imageUrl} alt="Preview" style={{ maxWidth: 200, borderRadius: 8 }} />
+          </div>
+        )}
       </div>
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || isUploading}
         className="submit-button"
       >
         {isSubmitting

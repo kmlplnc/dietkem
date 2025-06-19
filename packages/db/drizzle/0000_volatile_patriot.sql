@@ -5,10 +5,25 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "user_role" AS ENUM('dietitian', 'client');
+ CREATE TYPE "user_role" AS ENUM('subscriber_basic', 'subscriber_pro', 'clinic_admin', 'dietitian_team_member', 'admin', 'superadmin');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "accounts" (
+	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"user_id" varchar(255) NOT NULL,
+	"type" varchar(255) NOT NULL,
+	"provider" varchar(255) NOT NULL,
+	"provider_account_id" varchar(255) NOT NULL,
+	"refresh_token" text,
+	"access_token" text,
+	"expires_at" serial NOT NULL,
+	"token_type" varchar(255),
+	"scope" varchar(255),
+	"id_token" text,
+	"session_state" varchar(255)
+);
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "clients" (
 	"id" serial PRIMARY KEY NOT NULL,
@@ -72,14 +87,37 @@ CREATE TABLE IF NOT EXISTS "measurements" (
 	"body_fat_percent" numeric(4, 2)
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "sessions" (
+	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"session_token" varchar(255) NOT NULL,
+	"user_id" varchar(255) NOT NULL,
+	"expires" timestamp NOT NULL,
+	CONSTRAINT "sessions_session_token_unique" UNIQUE("session_token")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" serial PRIMARY KEY NOT NULL,
+	"clerk_id" varchar(255),
 	"email" varchar(255) NOT NULL,
-	"password_hash" varchar(255) NOT NULL,
-	"role" "user_role" NOT NULL,
+	"password" varchar(255),
+	"role" "user_role" DEFAULT 'subscriber_basic' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"first_name" varchar(255),
+	"last_name" varchar(255),
+	"username" varchar(255),
+	"avatar_url" varchar(512) DEFAULT 'https://res.cloudinary.com/dietkem/image/upload/v1/avatar.jpg',
+	"trial_started_at" timestamp,
+	"trial_used" text DEFAULT 'false',
+	"first_subscription_started_at" timestamp,
+	CONSTRAINT "users_clerk_id_unique" UNIQUE("clerk_id"),
 	CONSTRAINT "users_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "verification_tokens" (
+	"identifier" varchar(255) NOT NULL,
+	"token" varchar(255) NOT NULL,
+	"expires" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "water_logs" (

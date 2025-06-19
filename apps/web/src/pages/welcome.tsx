@@ -1,18 +1,31 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+// CLERK_DISABLED_TEMP: import { useUser } from '@clerk/clerk-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../lib/auth.tsx';
 
 export default function WelcomePage() {
-  const { user, isLoaded } = useUser();
+  // CLERK_DISABLED_TEMP: const { user, isLoaded } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [visibleChars, setVisibleChars] = useState(0);
   const [isFading, setIsFading] = useState(false);
-  const welcomeText = `${t('welcome.title')}, ${user?.firstName || ''} ${user?.lastName || ''}!`;
+  const [checking, setChecking] = useState(true);
+  const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
+  const welcomeText = `${t('welcome.title')}, ${userName || 'Kullanıcı'}!`;
 
   useEffect(() => {
-    if (isLoaded && user) {
+    // CLERK_DISABLED_TEMP: if (isLoaded && user) {
+    // CLERK_DISABLED_TEMP:   // Check if profile is complete
+    // CLERK_DISABLED_TEMP:   if (!user.firstName || !user.lastName || !user.username) {
+    // CLERK_DISABLED_TEMP:     navigate("/complete-profile");
+    // CLERK_DISABLED_TEMP:     return;
+    // CLERK_DISABLED_TEMP:   }
+
+      setChecking(false);
+
       // Start character animation immediately
       const interval = setInterval(() => {
         setVisibleChars(prev => {
@@ -26,7 +39,7 @@ export default function WelcomePage() {
 
       // Shorter animation duration
       const textDuration = welcomeText.length * 50;
-      const extraWaitTime = 800;
+      const extraWaitTime = 1500; // Increased wait time to 1.5 seconds
       const totalDuration = textDuration + extraWaitTime;
 
       // Start fade out before navigation
@@ -40,11 +53,12 @@ export default function WelcomePage() {
       }, totalDuration);
 
       return () => clearInterval(interval);
-    }
-  }, [isLoaded, user, welcomeText, navigate]);
+    // CLERK_DISABLED_TEMP: }
+  }, [welcomeText, navigate]);
 
-  if (!isLoaded || !user) {
-    return null;
+  // CLERK_DISABLED_TEMP: if (!isLoaded || !user || checking) {
+  if (checking) {
+    return <div>{t("welcome.loading") || "Yükleniyor..."}</div>;
   }
 
   return (

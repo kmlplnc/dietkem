@@ -14,7 +14,7 @@ export async function syncUserWithDatabase(clerkUser: any) {
       await db.insert(users).values({
         clerkId: clerkUser.id,
         email: clerkUser.emailAddresses[0].emailAddress,
-        role: 'client', // Default role
+        role: 'subscriber_basic', // Default role
       });
     }
 

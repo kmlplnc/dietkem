@@ -17,8 +17,9 @@ export default defineConfig(({ mode }) => {
       strictPort: false,
       proxy: {
         '/trpc': {
-          target: 'http://localhost:3004',
+          target: 'http://localhost:3001',
           changeOrigin: true,
+          secure: false,
         },
       },
     },

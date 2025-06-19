@@ -27,7 +27,7 @@ declare const users: drizzle_orm_pg_core.PgTableWithColumns<{
             columnType: "PgVarchar";
             data: string;
             driverParam: string;
-            notNull: true;
+            notNull: false;
             hasDefault: false;
             enumValues: [string, ...string[]];
             baseColumn: never;
@@ -40,6 +40,18 @@ declare const users: drizzle_orm_pg_core.PgTableWithColumns<{
             data: string;
             driverParam: string;
             notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        password: drizzle_orm_pg_core.PgColumn<{
+            name: "password";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
             hasDefault: false;
             enumValues: [string, ...string[]];
             baseColumn: never;
@@ -77,6 +89,303 @@ declare const users: drizzle_orm_pg_core.PgTableWithColumns<{
             driverParam: string;
             notNull: true;
             hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        first_name: drizzle_orm_pg_core.PgColumn<{
+            name: "first_name";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        last_name: drizzle_orm_pg_core.PgColumn<{
+            name: "last_name";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        username: drizzle_orm_pg_core.PgColumn<{
+            name: "username";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        avatar_url: drizzle_orm_pg_core.PgColumn<{
+            name: "avatar_url";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: true;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+    };
+    dialect: "pg";
+}>;
+declare const sessions: drizzle_orm_pg_core.PgTableWithColumns<{
+    name: "sessions";
+    schema: undefined;
+    columns: {
+        id: drizzle_orm_pg_core.PgColumn<{
+            name: "id";
+            tableName: "sessions";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        sessionToken: drizzle_orm_pg_core.PgColumn<{
+            name: "session_token";
+            tableName: "sessions";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        userId: drizzle_orm_pg_core.PgColumn<{
+            name: "user_id";
+            tableName: "sessions";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        expires: drizzle_orm_pg_core.PgColumn<{
+            name: "expires";
+            tableName: "sessions";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+    };
+    dialect: "pg";
+}>;
+declare const accounts: drizzle_orm_pg_core.PgTableWithColumns<{
+    name: "accounts";
+    schema: undefined;
+    columns: {
+        id: drizzle_orm_pg_core.PgColumn<{
+            name: "id";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        userId: drizzle_orm_pg_core.PgColumn<{
+            name: "user_id";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        type: drizzle_orm_pg_core.PgColumn<{
+            name: "type";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        provider: drizzle_orm_pg_core.PgColumn<{
+            name: "provider";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        providerAccountId: drizzle_orm_pg_core.PgColumn<{
+            name: "provider_account_id";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        refresh_token: drizzle_orm_pg_core.PgColumn<{
+            name: "refresh_token";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        access_token: drizzle_orm_pg_core.PgColumn<{
+            name: "access_token";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        expires_at: drizzle_orm_pg_core.PgColumn<{
+            name: "expires_at";
+            tableName: "accounts";
+            dataType: "number";
+            columnType: "PgSerial";
+            data: number;
+            driverParam: number;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        token_type: drizzle_orm_pg_core.PgColumn<{
+            name: "token_type";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        scope: drizzle_orm_pg_core.PgColumn<{
+            name: "scope";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        id_token: drizzle_orm_pg_core.PgColumn<{
+            name: "id_token";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        session_state: drizzle_orm_pg_core.PgColumn<{
+            name: "session_state";
+            tableName: "accounts";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+    };
+    dialect: "pg";
+}>;
+declare const verificationTokens: drizzle_orm_pg_core.PgTableWithColumns<{
+    name: "verification_tokens";
+    schema: undefined;
+    columns: {
+        identifier: drizzle_orm_pg_core.PgColumn<{
+            name: "identifier";
+            tableName: "verification_tokens";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        token: drizzle_orm_pg_core.PgColumn<{
+            name: "token";
+            tableName: "verification_tokens";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        expires: drizzle_orm_pg_core.PgColumn<{
+            name: "expires";
+            tableName: "verification_tokens";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
@@ -764,6 +1073,7 @@ declare const weight_logs: drizzle_orm_pg_core.PgTableWithColumns<{
     dialect: "pg";
 }>;
 
+declare const schema_accounts: typeof accounts;
 declare const schema_clients: typeof clients;
 declare const schema_foods: typeof foods;
 declare const schema_mealTypeEnum: typeof mealTypeEnum;
@@ -771,15 +1081,17 @@ declare const schema_meal_plan_days: typeof meal_plan_days;
 declare const schema_meal_plans: typeof meal_plans;
 declare const schema_meals: typeof meals;
 declare const schema_measurements: typeof measurements;
+declare const schema_sessions: typeof sessions;
 declare const schema_userRoleEnum: typeof userRoleEnum;
 declare const schema_users: typeof users;
+declare const schema_verificationTokens: typeof verificationTokens;
 declare const schema_water_logs: typeof water_logs;
 declare const schema_weight_logs: typeof weight_logs;
 declare namespace schema {
-  export { schema_clients as clients, schema_foods as foods, schema_mealTypeEnum as mealTypeEnum, schema_meal_plan_days as meal_plan_days, schema_meal_plans as meal_plans, schema_meals as meals, schema_measurements as measurements, schema_userRoleEnum as userRoleEnum, schema_users as users, schema_water_logs as water_logs, schema_weight_logs as weight_logs };
+  export { schema_accounts as accounts, schema_clients as clients, schema_foods as foods, schema_mealTypeEnum as mealTypeEnum, schema_meal_plan_days as meal_plan_days, schema_meal_plans as meal_plans, schema_meals as meals, schema_measurements as measurements, schema_sessions as sessions, schema_userRoleEnum as userRoleEnum, schema_users as users, schema_verificationTokens as verificationTokens, schema_water_logs as water_logs, schema_weight_logs as weight_logs };
 }
 
 declare const queryClient: postgres.Sql<{}>;
 declare const db: drizzle_orm_postgres_js.PostgresJsDatabase<typeof schema>;
 
-export { clients, db, foods, mealTypeEnum, meal_plan_days, meal_plans, meals, measurements, queryClient, userRoleEnum, users, water_logs, weight_logs };
+export { accounts, clients, db, foods, mealTypeEnum, meal_plan_days, meal_plans, meals, measurements, queryClient, sessions, userRoleEnum, users, verificationTokens, water_logs, weight_logs };

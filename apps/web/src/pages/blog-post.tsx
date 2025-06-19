@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import aiDietImage from '../assets/blog/ai-diet.png';
 import microbiomeImage from '../assets/blog/microbiome.png';
 import digitalDietImage from '../assets/blog/digital-diet.png';
+import { trpc } from '../utils/trpc';
 
 interface BlogPost {
   id: string;
@@ -19,29 +20,19 @@ interface BlogPost {
 const BlogPost = () => {
   const { id } = useParams();
   const { currentLang } = useLanguage();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [loading, setLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [relatedImageErrors, setRelatedImageErrors] = useState<{ [key: string]: boolean }>({});
 
-  const relatedPosts = [
-    {
-      id: '2',
-      title: currentLang === 'tr' ? 'Bağırsak Mikrobiyomu ve Sağlık' : 'Gut Microbiome and Health',
-      category: currentLang === 'tr' ? 'Mikrobiyom' : 'Microbiome',
-      image: microbiomeImage,
-      author: 'Mehmet Kemal Palancı',
-      date: '2024-03-10'
-    },
-    {
-      id: '3',
-      title: currentLang === 'tr' ? 'Dijital Çağda Beslenme' : 'Nutrition in the Digital Age',
-      category: currentLang === 'tr' ? 'Dijital Sağlık' : 'Digital Health',
-      image: digitalDietImage,
-      author: 'Mehmet Kemal Palancı',
-      date: '2024-03-05'
-    }
-  ];
+  // Fetch the post by ID using tRPC
+  const { data: post, isLoading, isError } = trpc.blogs.getById.useQuery(id || '');
+
+  // Fetch all published posts for related posts
+  const { data: allPosts = [] } = trpc.blogs.getAll.useQuery();
+
+  // Filter for related posts: published, not the current post
+  const relatedPosts = allPosts.filter(
+    p => p.status === 'published' && p.id !== id
+  ).slice(0, 3);
 
   const handleImageError = () => {
     setImageError(true);
@@ -54,35 +45,17 @@ const BlogPost = () => {
     }));
   };
 
-  useEffect(() => {
-    // Simüle edilmiş blog yazısı verisi
-    const mockPost: BlogPost = {
-      id: id || '1',
-      title: currentLang === 'tr' ? 'Yapay Zeka ile Kişiselleştirilmiş Beslenme' : 'AI-Powered Personalized Nutrition',
-      content: currentLang === 'tr' 
-        ? 'Yapay zeka teknolojisi, beslenme alanında devrim yaratıyor. Kişiselleştirilmiş diyet planları, besin takibi ve sağlık önerileri sunarak, her bireyin benzersiz ihtiyaçlarına göre özelleştirilmiş çözümler sunuyor.'
-        : 'Artificial intelligence technology is revolutionizing the field of nutrition. By offering personalized diet plans, nutrition tracking, and health recommendations, it provides customized solutions according to each individual\'s unique needs.',
-      category: currentLang === 'tr' ? 'Yapay Zeka' : 'Artificial Intelligence',
-      author: 'Mehmet Kemal Palancı',
-      date: '2024-03-15',
-      image: aiDietImage
-    };
-
-    setPost(mockPost);
-    setLoading(false);
-  }, [id, currentLang]);
-
-  if (loading) {
+  if (isLoading) {
     return <div className="loading">Loading...</div>;
   }
 
-  if (!post) {
+  if (isError || !post) {
     return <div className="error">Post not found</div>;
   }
 
   return (
     <div className="blog-post">
-      <div className="container">
+      <div className="page-container">
         <div className="navigation-buttons">
           <Link to="/blog" className="back-button">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -138,35 +111,41 @@ const BlogPost = () => {
             {currentLang === 'tr' ? 'İlgili Yazılar' : 'Related Posts'}
           </h2>
           <div className="related-posts-grid">
-            {relatedPosts.map((relatedPost) => (
-              <div key={relatedPost.id} className="related-post-card">
-                <div className="related-post-image">
-                  {relatedImageErrors[relatedPost.id] ? (
-                    <div className="default-image">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                      </svg>
-                    </div>
-                  ) : (
-                    <img 
-                      src={relatedPost.image} 
-                      alt={relatedPost.title}
-                      onError={() => handleRelatedImageError(relatedPost.id)}
-                    />
-                  )}
-                </div>
-                <div className="related-post-content">
-                  <span className="category">{relatedPost.category}</span>
-                  <h3 className="related-post-title">{relatedPost.title}</h3>
-                  <div className="related-post-meta">
-                    <span className="author">{relatedPost.author}</span>
-                    <span className="date">{relatedPost.date}</span>
-                  </div>
-                </div>
+            {relatedPosts.length === 0 ? (
+              <div className="no-related-posts">
+                {currentLang === 'tr' ? 'İlgili yazı bulunamadı.' : 'No related posts found.'}
               </div>
-            ))}
+            ) : (
+              relatedPosts.map((relatedPost) => (
+                <Link to={`/blog/${relatedPost.id}`} key={relatedPost.id} className="related-post-card" style={{ textDecoration: 'none' }}>
+                  <div className="related-post-image">
+                    {relatedImageErrors[relatedPost.id] ? (
+                      <div className="default-image">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                      </div>
+                    ) : (
+                      <img 
+                        src={relatedPost.image} 
+                        alt={relatedPost.title}
+                        onError={() => handleRelatedImageError(relatedPost.id)}
+                      />
+                    )}
+                  </div>
+                  <div className="related-post-content">
+                    <span className="category">{relatedPost.category}</span>
+                    <h3 className="related-post-title">{relatedPost.title}</h3>
+                    <div className="related-post-meta">
+                      <span className="author">{relatedPost.author}</span>
+                      <span className="date">{relatedPost.date}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </section>
       </div>
@@ -178,9 +157,10 @@ const BlogPost = () => {
           min-height: 100vh;
         }
 
-        .container {
+        .page-container {
           max-width: 1200px;
           margin: 0 auto;
+          padding-top: 64px;
         }
 
         .navigation-buttons {
@@ -400,6 +380,13 @@ const BlogPost = () => {
           text-align: center;
           padding: 2rem;
           color: #dc2626;
+          font-size: 1.125rem;
+        }
+
+        .no-related-posts {
+          text-align: center;
+          padding: 2rem;
+          color: #6b7280;
           font-size: 1.125rem;
         }
 

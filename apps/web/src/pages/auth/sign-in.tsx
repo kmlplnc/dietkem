@@ -1,8 +1,23 @@
-import { SignIn } from "@clerk/clerk-react";
+// CLERK_DISABLED_TEMP: import { SignIn, useSignIn, useAuth } from "@clerk/clerk-react";
 import { useLanguage } from '../../context/LanguageContext';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function SignInPage() {
   const { currentLang } = useLanguage();
+  // CLERK_DISABLED_TEMP: const { signIn, isLoaded } = useSignIn();
+  // CLERK_DISABLED_TEMP: const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
+
+  // CLERK_DISABLED_TEMP: useEffect(() => {
+  // CLERK_DISABLED_TEMP:   if (isSignedIn) {
+  // CLERK_DISABLED_TEMP:     navigate("/welcome", { replace: true });
+  // CLERK_DISABLED_TEMP:   }
+  // CLERK_DISABLED_TEMP: }, [isSignedIn, navigate]);
+
+  // CLERK_DISABLED_TEMP: if (isSignedIn) {
+  // CLERK_DISABLED_TEMP:   return null;
+  // CLERK_DISABLED_TEMP: }
 
   return (
     <div className="sign-in-container">
@@ -11,7 +26,7 @@ export default function SignInPage() {
           <div className="sign-in-header">
             <h1>{currentLang === 'tr' ? 'Giriş Yap' : 'Sign In'}</h1>
             <p className="subtitle">{currentLang === 'tr' ? 'Modern diyetisyenler için akıllı çözüm ortağı.' : 'Smart solution partner for modern dietitians.'}</p>
-            <SignIn 
+            {/* CLERK_DISABLED_TEMP: <SignIn 
               appearance={{
                 elements: {
                   headerTitle: "hidden",
@@ -36,7 +51,11 @@ export default function SignInPage() {
               redirectUrl="/welcome"
               routing="path"
               path="/sign-in"
-            />
+              initialValues={{
+                emailAddress: ""
+              }}
+              afterSignUpUrl="/welcome"
+            /> */}
             <div className="brand-footer">
               <img src="/logo/logo3.png" alt="Dietkem Logo" className="brand-logo" />
               <span className="brand-name">Dietkem</span>
@@ -135,33 +154,6 @@ export default function SignInPage() {
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E");
         }
 
-        /* Google button styles */
-        .cl-socialButtonsBlockButton {
-          display: flex !important;
-          align-items: center;
-          justify-content: center;
-          gap: 0.75rem;
-          padding: 0.75rem !important;
-          border: 1px solid #e5e7eb !important;
-          border-radius: 8px !important;
-          background: white !important;
-          color: #374151 !important;
-          font-weight: 500 !important;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .cl-socialButtonsBlockButton:hover {
-          background: #f9fafb !important;
-          border-color: #d1d5db !important;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .cl-socialButtonsBlockButton img {
-          width: 20px;
-          height: 20px;
-        }
-
         /* Clerk component customizations */
         .cl-rootBox {
           width: 100% !important;
@@ -206,41 +198,50 @@ export default function SignInPage() {
 
         .cl-formFieldError {
           text-align: center !important;
-          width: 100% !important;
-        }
-
-        .cl-alert {
-          text-align: center !important;
-          width: 100% !important;
-          margin: 0 auto !important;
         }
 
         .cl-formFieldLabel {
-          text-align: center !important;
-          width: 100% !important;
+          display: none !important;
         }
 
-        .cl-formField {
-          width: 100% !important;
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
+        .cl-formFieldAction {
+          display: none !important;
+        }
+
+        .cl-identityPreviewEditButton {
+          display: none !important;
+        }
+
+        .cl-identityPreviewText {
+          display: none !important;
+        }
+
+        .cl-formFieldInputShowPasswordButton {
+          display: none !important;
+        }
+
+        .cl-formFieldInputShowPasswordIcon {
+          display: none !important;
+        }
+
+        .cl-formFieldInputShowPasswordIconContainer {
+          display: none !important;
         }
 
         .brand-footer {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 0.5rem;
           margin-top: 2rem;
-          padding: 1.5rem 0;
+          padding-top: 1.5rem;
           border-top: 1px solid #e5e7eb;
           width: 100%;
-          justify-content: center;
         }
 
         .brand-logo {
+          width: 24px;
           height: 24px;
-          width: auto;
         }
 
         .brand-name {

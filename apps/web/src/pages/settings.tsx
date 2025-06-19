@@ -1,20 +1,20 @@
-import { useUser } from '@clerk/clerk-react';
+// CLERK_DISABLED_TEMP: import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 const SettingsPage = () => {
-  const { user, isLoaded } = useUser();
+  // CLERK_DISABLED_TEMP: const { user, isLoaded } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoaded && !user) {
-      navigate('/sign-in');
-    }
-  }, [isLoaded, user, navigate]);
+    // CLERK_DISABLED_TEMP: if (isLoaded && !user) {
+    // CLERK_DISABLED_TEMP:   navigate('/sign-in');
+    // CLERK_DISABLED_TEMP: }
+  }, [navigate]);
 
-  if (!isLoaded || !user) {
-    return <div className="loading">Yükleniyor...</div>;
-  }
+  // CLERK_DISABLED_TEMP: if (!isLoaded || !user) {
+  // CLERK_DISABLED_TEMP:   return <div className="loading">Yükleniyor...</div>;
+  // CLERK_DISABLED_TEMP: }
 
   return (
     <div className="settings-container">
@@ -73,6 +73,11 @@ const SettingsPage = () => {
           </div>
         </section>
       </div>
+      <style>{`
+        .settings-container {
+          padding-top: 64px;
+        }
+      `}</style>
     </div>
   );
 };

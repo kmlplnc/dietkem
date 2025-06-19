@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+// CLERK_DISABLED_TEMP: import { useUser } from '@clerk/clerk-react';
 import { useLanguage } from '../context/LanguageContext';
 import SearchBox from '../components/SearchBox';
 import NewPostForm from '../components/NewPostForm';
+import { trpc } from '../utils/trpc';
 
 // Import images
 import aiDietImage from '../assets/blog/ai-diet.png';
@@ -22,61 +23,49 @@ interface BlogPost {
 }
 
 const BlogPage = () => {
-  const { currentLang } = useLanguage();
-  const { user } = useUser();
+  const { currentLang, t } = useLanguage();
+  // CLERK_DISABLED_TEMP: const { user } = useUser();
   const [showNewPostForm, setShowNewPostForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
 
-  // Sample blog posts (replace with actual data from API)
-  const [posts] = useState<BlogPost[]>([
-    {
-      id: '1',
-      title: 'Yapay Zeka ile Diyet Planlaması',
-      summary: 'Yapay zeka teknolojilerinin diyet planlamasında kullanımı ve avantajları.',
-      category: 'AI',
-      author: 'Dr. Mehmet Yılmaz',
-      date: '2024-03-15',
-      image: aiDietImage,
-      status: 'published'
-    },
-    {
-      id: '2',
-      title: 'Bağırsak Mikrobiyomu ve Beslenme',
-      summary: 'Bağırsak sağlığı ve mikrobiyom üzerine güncel araştırmalar.',
-      category: 'Bilimsel',
-      author: 'Prof. Ayşe Demir',
-      date: '2024-03-10',
-      image: microbiomeImage,
-      status: 'published'
-    },
-    {
-      id: '3',
-      title: 'Dijital Diyetisyenlik',
-      summary: 'Modern diyetisyenlik pratiklerinde dijital araçların kullanımı.',
-      category: 'Uygulama',
-      author: 'Uzm. Dyt. Zeynep Kaya',
-      date: '2024-03-05',
-      image: digitalDietImage,
-      status: 'published'
-    }
-  ]);
+  // Remove the hardcoded posts state and use tRPC query instead
+  // const [posts] = useState<BlogPost[]>([ ... ]);
+  const { data: posts = [], isLoading } = trpc.blogs.getAll.useQuery();
 
+  // Move categories inside the component so it updates on language change
   const categories = [
-    { id: 'AI', label: 'AI' },
-    { id: 'Bilimsel', label: 'Bilimsel' },
-    { id: 'Uygulama', label: 'Uygulama' },
-    { id: 'Danışan', label: 'Danışan' }
+    { id: 'AI', label: t('blog.categories.ai') },
+    { id: 'Bilimsel', label: t('blog.categories.scientific') },
+    { id: 'Uygulama', label: t('blog.categories.application') },
+    { id: 'Danışan', label: t('blog.categories.client') }
   ];
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
 
-  const handleNewPost = async () => {
+  const createMutation = trpc.blogs.create.useMutation();
+
+  const handleNewPost = async (postData: {
+    title: string;
+    category: string;
+    summary: string;
+    content: string;
+    image?: string;
+  }) => {
     try {
-      // API call to create new post
-      // await createPost(postData);
+      // Şimdilik image upload yok, sadece metin verileri gönderiliyor
+      await createMutation.mutateAsync({
+        title: postData.title,
+        category: postData.category,
+        summary: postData.summary,
+        content: postData.content,
+        // CLERK_DISABLED_TEMP: author: user?.fullName || 'Anonim',
+        author: 'Anonim',
+        image: postData.image || '',
+        date: new Date().toISOString().split('T')[0],
+      });
       setShowNewPostForm(false);
     } catch (error) {
       console.error('Error creating post:', error);
@@ -90,19 +79,13 @@ const BlogPage = () => {
     return matchesSearch && matchesCategory && post.status === 'published';
   });
 
+  if (isLoading) {
+    return <div className="loading">Loading...</div>;
+  }
+
   return (
     <div className="blog-page">
-      <div className="container">
-        <div className="navigation-buttons">
-          <Link to="/" className="home-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            {currentLang === 'tr' ? 'Ana Sayfa' : 'Home'}
-          </Link>
-        </div>
-
+      <div className="page-container">
         <div className="hero">
           <div className="hero-content">
             <h1 className="hero-title">
@@ -124,7 +107,7 @@ const BlogPage = () => {
               className={`category-btn ${!selectedCategory ? 'active' : ''}`}
               onClick={() => setSelectedCategory('')}
             >
-              {currentLang === 'tr' ? 'Tümü' : 'All'}
+              {t('blog.categories.all')}
             </button>
             {categories.map(category => (
               <button
@@ -137,6 +120,7 @@ const BlogPage = () => {
             ))}
           </div>
 
+          {/* CLERK_DISABLED_TEMP:
           {user && (
             <button
               className="new-post-btn"
@@ -145,6 +129,7 @@ const BlogPage = () => {
               {currentLang === 'tr' ? 'Yeni Yazı Ekle' : 'Add New Post'}
             </button>
           )}
+          */}
         </div>
 
         {showNewPostForm && (
@@ -188,36 +173,6 @@ const BlogPage = () => {
           min-height: 100vh;
         }
 
-        .navigation-buttons {
-          margin-bottom: 1.5rem;
-        }
-
-        .home-button {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem 1.25rem;
-          background: white;
-          color: #1f2937;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          font-size: 0.875rem;
-          font-weight: 500;
-          text-decoration: none;
-          transition: all 0.2s ease;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-
-        .home-button:hover {
-          background: #f3f4f6;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .home-button svg {
-          color: #6b7280;
-        }
-
         .hero {
           background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
           padding: 4rem 2rem;
@@ -243,10 +198,11 @@ const BlogPage = () => {
           opacity: 0.9;
         }
 
-        .container {
+        .page-container {
           max-width: 1200px;
           margin: 0 auto;
           padding: 2rem;
+          padding-top: 64px;
         }
 
         .blog-header {
@@ -428,7 +384,7 @@ const BlogPage = () => {
             font-size: 1rem;
           }
 
-          .container {
+          .page-container {
             padding: 1rem;
           }
 

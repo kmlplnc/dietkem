@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+// CLERK_DISABLED_TEMP: import { useUser } from '@clerk/clerk-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,29 +15,31 @@ interface BlogPost {
 }
 
 const AdminBlogs = () => {
-  const { user } = useUser();
+  // CLERK_DISABLED_TEMP: const { user } = useUser();
   const { currentLang } = useLanguage();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Role kontrolü
-    if (!user || (user.publicMetadata.role !== 'admin' && user.publicMetadata.role !== 'superadmin')) {
-      navigate('/');
-      return;
-    }
+    // CLERK_DISABLED_TEMP: console.log('user:', user); // Debug için log
+    // CLERK_DISABLED_TEMP: if (!user || (user.publicMetadata.role !== 'admin' && user.publicMetadata.role !== 'superadmin')) {
+    // CLERK_DISABLED_TEMP:   navigate('/');
+    // CLERK_DISABLED_TEMP:   return;
+    // CLERK_DISABLED_TEMP: }
 
     // Blog yazılarını getir
     fetchPosts();
-  }, [user]);
+  }, []);
 
   const fetchPosts = async () => {
+    console.log('fetchPosts çağrıldı'); // Debug için log
     try {
-      // API'den blog yazılarını getir
-      const response = await fetch('/api/blogs/pending');
-      const data = await response.json();
-      setPosts(data);
+      // TRPC endpointinden blog yazılarını getir
+      const response = await fetch('/api/trpc/blogs.getAll');
+      const trpcResult = await response.json();
+      console.log('TRPC result:', trpcResult); // Debug için log
+      setPosts(trpcResult.result?.data || []);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
@@ -73,10 +75,18 @@ const AdminBlogs = () => {
 
   return (
     <div className="admin-blogs">
-      <div className="container">
-        <h1 className="page-title">
-          {currentLang === 'tr' ? 'Blog Yönetimi' : 'Blog Management'}
-        </h1>
+      <div className="page-container">
+        <div className="header">
+          <button
+            className="back-button"
+            onClick={() => navigate('/admin')}
+          >
+            <span style={{fontSize: '1.2em', marginRight: 4}}>←</span> {currentLang === 'tr' ? 'Admin Paneline Dön' : 'Back to Admin Panel'}
+          </button>
+          <h1 className="page-title">
+            {currentLang === 'tr' ? 'Blog Yönetimi' : 'Blog Management'}
+          </h1>
+        </div>
 
         <div className="posts-grid">
           {posts.length === 0 ? (
@@ -140,9 +150,41 @@ const AdminBlogs = () => {
           padding: 2rem;
         }
 
-        .container {
+        .page-container {
           max-width: 1200px;
           margin: 0 auto;
+          padding-top: 64px;
+        }
+
+        .header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 2rem;
+          position: relative;
+        }
+
+        .back-button {
+          position: absolute;
+          left: 0;
+          padding: 0.5rem 1rem;
+          background: #f3f4f6;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          color: #4b5563;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .back-button:hover {
+          background: #e5e7eb;
+          transform: translateX(-2px);
         }
 
         .page-title {
