@@ -20,7 +20,16 @@ const Hakkimizda = () => {
         <h2>{t('about.values.title')}</h2>
         <ul className="about-values">
           {(t('about.values.items', { returnObjects: true }) || []).map((item: string, index: number) => (
-            <li key={index}>{item}</li>
+            <li key={index}>
+              <span className="value-icon">
+                {index === 0 && '🔬'}
+                {index === 1 && '🤝'}
+                {index === 2 && '🔒'}
+                {index === 3 && '💡'}
+                {index === 4 && '🌱'}
+              </span>
+              {item}
+            </li>
           ))}
         </ul>
         <hr className="about-divider" />
@@ -77,6 +86,13 @@ const Hakkimizda = () => {
           display: flex;
           align-items: center;
           gap: 0.5rem;
+        }
+        .value-icon {
+          font-size: 1.2rem;
+          min-width: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .about-divider {
           border: none;

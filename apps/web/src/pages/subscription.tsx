@@ -1,16 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../lib/auth';
 import { trpc } from '../utils/trpc';
 
-const basePlans = [
+interface Plan {
+  duration: string;
+  type: string;
+  price: number;
+  labelKey?: string;
+  freeMonth?: boolean;
+}
+
+const basePlans: Plan[] = [
   { duration: '1m', type: 'monthly', price: 179 },
   { duration: '3m', type: 'quarterly', price: 479, labelKey: 'popular' },
   { duration: '6m', type: 'semiAnnual', price: 849 },
   { duration: '12m', type: 'annual', price: 1499, labelKey: 'bestValue' },
 ];
 
-function formatDate(dateStr: string, locale = 'tr-TR') {
+function formatDate(dateStr: string | null | undefined, locale = 'tr-TR') {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   return d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
@@ -37,7 +45,7 @@ const SubscriptionPage = () => {
     }
   });
 
-  const getLabel = (labelKey: string) => {
+  const getLabel = (labelKey: string | undefined) => {
     if (!labelKey) return null;
     const labels: Record<string, string> = {
       popular: '⭐ ' + (currentLang === 'en' ? 'Most Popular' : 'En Popüler'),
@@ -46,7 +54,7 @@ const SubscriptionPage = () => {
     return labels[labelKey];
   };
 
-  const handleSubscribe = async (plan: any) => {
+  const handleSubscribe = async (plan: Plan) => {
     // If first month is free and this is the monthly plan
     if (plan.duration === '1m' && subscriptionInfo?.canGetFreeMonth) {
       startFreeMonthMutation.mutate();
@@ -83,7 +91,7 @@ const SubscriptionPage = () => {
           <div className="subscription-active abonelik-kart slide-fade-in delay-300" style={{marginBottom: 32}}>
             <span>🎁 {currentLang === 'en' ? 'Active Subscription' : 'Aktif Aboneliğiniz'}</span>
             <br />
-            <span>{currentLang === 'en' ? 'End Date' : 'Bitiş Tarihi'}: {formatDate(subscriptionInfo.subscription_end_date, currentLang === 'en' ? 'en-US' : 'tr-TR')}</span>
+            <span>{currentLang === 'en' ? 'End Date' : 'Bitiş Tarihi'}: {formatDate(subscriptionInfo?.subscription_end_date, currentLang === 'en' ? 'en-US' : 'tr-TR')}</span>
           </div>
         )}
         
@@ -198,17 +206,11 @@ const SubscriptionPage = () => {
           font-size: 0.8rem;
           font-weight: 600;
           border-radius: 6px;
-          padding: 0.2rem 0.8rem;
-          box-shadow: 0 2px 8px rgba(37,99,235,0.13);
-          letter-spacing: 0.01em;
-          z-index: 10;
+          padding: 4px 12px;
           white-space: nowrap;
         }
-        .trial-card .plan-label {
-          background: #22c55e;
-        }
         .plan-title {
-          font-size: 1.2rem;
+          font-size: 1.25rem;
           font-weight: 600;
           color: #1f2937;
           margin-bottom: 1rem;
@@ -219,38 +221,37 @@ const SubscriptionPage = () => {
           font-weight: 700;
           color: #2563eb;
           margin-bottom: 1.5rem;
-          text-align: center;
         }
         .plan-features {
           list-style: none;
           padding: 0;
           margin: 0 0 2rem 0;
-          width: 100%;
+          text-align: center;
         }
         .plan-features li {
-          padding: 0.5rem 0;
-          color: #6b7280;
-          font-size: 0.9rem;
-          text-align: center;
-          border-bottom: 1px solid #e5e7eb;
+          margin-bottom: 0.75rem;
+          color: #4b5563;
+          font-size: 0.95rem;
         }
-        .plan-features li:last-child {
-          border-bottom: none;
+        .plan-features li:before {
+          content: "✓";
+          color: #22c55e;
+          margin-right: 0.5rem;
+          font-weight: bold;
         }
         .plan-btn {
           background: #2563eb;
           color: #fff;
           border: none;
-          border-radius: 8px;
+          border-radius: 6px;
           padding: 0.75rem 1.5rem;
-          font-size: 0.9rem;
+          font-size: 1rem;
           font-weight: 600;
           cursor: pointer;
-          transition: background 0.2s;
+          transition: background-color 0.2s;
           width: 100%;
-          margin-top: auto;
         }
-        .plan-btn:hover {
+        .plan-btn:hover:not(:disabled) {
           background: #1d4ed8;
         }
         .plan-btn:disabled {
@@ -258,36 +259,51 @@ const SubscriptionPage = () => {
           cursor: not-allowed;
         }
         .subscription-extras {
-          display: flex;
-          justify-content: center;
-          gap: 2rem;
-          margin-top: 2rem;
-          font-size: 0.9rem;
+          margin-top: 3rem;
+          text-align: center;
           color: #6b7280;
+        }
+        .secure-pay {
+          margin-bottom: 0.5rem;
         }
         .subscription-toast {
           position: fixed;
-          top: 20px;
-          right: 20px;
-          background: #10b981;
+          bottom: 2rem;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #2563eb;
           color: #fff;
-          padding: 1rem 1.5rem;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          z-index: 1000;
-          animation: slideIn 0.3s ease-out;
+          padding: 0.75rem 1.5rem;
+          border-radius: 6px;
+          font-weight: 500;
+          animation: fadeInUp 0.3s ease-out;
         }
-        @keyframes slideIn {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 1rem);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
         }
         .subscription-active {
-          background: #f0f9ff;
-          border: 1px solid #0ea5e9;
-          border-radius: 8px;
+          background: #f0fdf4;
+          border: 2px solid #22c55e;
           padding: 1rem;
+          border-radius: 8px;
           text-align: center;
-          color: #0c4a6e;
+          color: #166534;
+          font-weight: 500;
+        }
+        @media (max-width: 768px) {
+          .subscription-cards {
+            gap: 1rem;
+          }
+          .subscription-card {
+            min-width: 100%;
+          }
         }
       `}</style>
     </main>

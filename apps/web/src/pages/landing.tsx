@@ -1,9 +1,8 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import RealNavbar from '../components/RealNavbar';
-// CLERK_DISABLED_TEMP: import { useUser, useClerk } from '@clerk/clerk-react';
-import { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import Footer from '../components/Footer';
+import { useTranslation } from '../hooks/useTranslation';
+// CLERK_DISABLED_TEMP: import { useUser, useClerk } from '@clerk/clerk-react';
 
 interface FormData {
   gender: string;
@@ -15,8 +14,6 @@ interface FormData {
 }
 
 const LandingPage: React.FC = () => {
-  // CLERK_DISABLED_TEMP: const { user, isLoaded, isSignedIn } = useUser();
-  // CLERK_DISABLED_TEMP: const { signOut } = useClerk();
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -134,7 +131,6 @@ const LandingPage: React.FC = () => {
 
   return (
     <>
-      <RealNavbar />
       <section className="hero">
         <div className="hero-content">
           <h1 className="hero-title slide-fade-in">{t('hero.title')}</h1>
@@ -244,116 +240,6 @@ const LandingPage: React.FC = () => {
           max-width: 1200px;
           margin: 0 auto;
           padding: 0 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 2rem;
-          min-width: 0;
-          flex-wrap: nowrap !important;
-          flex-direction: row;
-        }
-
-        .navbar-left, .main-nav, .right-section {
-          display: flex;
-          align-items: center;
-          flex-direction: row;
-          flex-wrap: nowrap;
-        }
-
-        .main-nav {
-          margin: 0 auto;
-          flex-wrap: nowrap !important;
-          flex-direction: row;
-          gap: 2rem;
-        }
-
-        /* Brand Area */
-        .navbar-left {
-          gap: 0.75rem;
-        }
-
-        .logo-img {
-          height: 42px;
-          width: auto;
-          object-fit: contain;
-          display: block;
-        }
-
-        .brand-name {
-          font-size: 1.25rem;
-          font-weight: 600;
-          letter-spacing: -0.5px;
-          color: var(--text-color);
-        }
-
-        /* Main Navigation */
-        .main-nav {
-          gap: 3.5rem;
-        }
-
-        .nav-link {
-          color: var(--gray-600);
-          text-decoration: none;
-          font-size: 0.87rem;
-          font-weight: 500;
-          transition: color 0.2s ease;
-          position: relative;
-          padding: 0.75rem 1.25rem;
-          white-space: nowrap;
-        }
-
-        .nav-link:hover {
-          color: var(--text-color);
-        }
-
-        .nav-link::after {
-          content: '';
-          position: absolute;
-          width: 0;
-          height: 2px;
-          bottom: -4px;
-          left: 0;
-          background-color: var(--primary-color);
-          transition: width 0.2s ease;
-        }
-
-        .nav-link:hover::after {
-          width: 100%;
-        }
-
-        /* Right Section */
-        .right-section {
-          gap: 2rem;
-        }
-
-        /* Language Switcher */
-        .language-switcher {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .lang-btn {
-          background: none;
-          border: none;
-          padding: 0.25rem 0.5rem;
-          cursor: pointer;
-          font-size: 0.875rem;
-          color: #6b7280;
-          transition: all 0.2s ease;
-        }
-
-        .lang-btn:hover {
-          color: #111827;
-        }
-
-        .lang-btn.active {
-          color: #111827;
-          font-weight: 600;
-        }
-
-        .separator {
-          color: #e5e7eb;
         }
 
         /* Buttons */
@@ -389,56 +275,6 @@ const LandingPage: React.FC = () => {
 
         .btn-text:hover {
           color: #1d4ed8;
-        }
-
-        /* Top Bar */
-        .top-bar {
-          background-color: var(--white);
-          padding: 0.35rem 0;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          z-index: 1000;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-          .main-nav {
-            gap: 2rem;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .main-nav {
-            display: none;
-          }
-          
-          .language-switcher {
-            display: none;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .container {
-            padding: 0 1rem;
-          }
-
-          .brand-name {
-            font-size: 1rem;
-          }
-
-          .auth-buttons {
-            gap: 0.5rem;
-          }
-        }
-
-        /* Auth Buttons */
-        .auth-buttons {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
         }
 
         /* Hero Section */
@@ -585,38 +421,6 @@ const LandingPage: React.FC = () => {
           border-color: var(--primary-color);
           color: var(--primary-color);
           transform: translateY(-2px);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .hero {
-            padding: 5rem 1.5rem 3rem;
-            min-height: 70vh;
-          }
-
-          .hero-cta {
-            flex-direction: column;
-            gap: 1rem;
-          }
-
-          .hero .btn {
-            width: 100%;
-            max-width: 300px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .hero {
-            padding: 4rem 1rem 2rem;
-          }
-
-          .hero-title {
-            font-size: clamp(2rem, 4vw, 2.5rem);
-          }
-
-          .hero-subtitle {
-            font-size: 1rem;
-          }
         }
 
         /* Why Dietkem Section */

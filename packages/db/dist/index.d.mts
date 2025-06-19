@@ -140,6 +140,121 @@ declare const users: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: [string, ...string[]];
             baseColumn: never;
         }, {}, {}>;
+        trial_started_at: drizzle_orm_pg_core.PgColumn<{
+            name: "trial_started_at";
+            tableName: "users";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        trial_used: drizzle_orm_pg_core.PgColumn<{
+            name: "trial_used";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: true;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        first_subscription_started_at: drizzle_orm_pg_core.PgColumn<{
+            name: "first_subscription_started_at";
+            tableName: "users";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+    };
+    dialect: "pg";
+}>;
+declare const emailVerificationCodes: drizzle_orm_pg_core.PgTableWithColumns<{
+    name: "email_verification_codes";
+    schema: undefined;
+    columns: {
+        id: drizzle_orm_pg_core.PgColumn<{
+            name: "id";
+            tableName: "email_verification_codes";
+            dataType: "number";
+            columnType: "PgSerial";
+            data: number;
+            driverParam: number;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        email: drizzle_orm_pg_core.PgColumn<{
+            name: "email";
+            tableName: "email_verification_codes";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        code: drizzle_orm_pg_core.PgColumn<{
+            name: "code";
+            tableName: "email_verification_codes";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        expires_at: drizzle_orm_pg_core.PgColumn<{
+            name: "expires_at";
+            tableName: "email_verification_codes";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        used: drizzle_orm_pg_core.PgColumn<{
+            name: "used";
+            tableName: "email_verification_codes";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: true;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        created_at: drizzle_orm_pg_core.PgColumn<{
+            name: "created_at";
+            tableName: "email_verification_codes";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
     };
     dialect: "pg";
 }>;
@@ -1075,6 +1190,7 @@ declare const weight_logs: drizzle_orm_pg_core.PgTableWithColumns<{
 
 declare const schema_accounts: typeof accounts;
 declare const schema_clients: typeof clients;
+declare const schema_emailVerificationCodes: typeof emailVerificationCodes;
 declare const schema_foods: typeof foods;
 declare const schema_mealTypeEnum: typeof mealTypeEnum;
 declare const schema_meal_plan_days: typeof meal_plan_days;
@@ -1088,10 +1204,10 @@ declare const schema_verificationTokens: typeof verificationTokens;
 declare const schema_water_logs: typeof water_logs;
 declare const schema_weight_logs: typeof weight_logs;
 declare namespace schema {
-  export { schema_accounts as accounts, schema_clients as clients, schema_foods as foods, schema_mealTypeEnum as mealTypeEnum, schema_meal_plan_days as meal_plan_days, schema_meal_plans as meal_plans, schema_meals as meals, schema_measurements as measurements, schema_sessions as sessions, schema_userRoleEnum as userRoleEnum, schema_users as users, schema_verificationTokens as verificationTokens, schema_water_logs as water_logs, schema_weight_logs as weight_logs };
+  export { schema_accounts as accounts, schema_clients as clients, schema_emailVerificationCodes as emailVerificationCodes, schema_foods as foods, schema_mealTypeEnum as mealTypeEnum, schema_meal_plan_days as meal_plan_days, schema_meal_plans as meal_plans, schema_meals as meals, schema_measurements as measurements, schema_sessions as sessions, schema_userRoleEnum as userRoleEnum, schema_users as users, schema_verificationTokens as verificationTokens, schema_water_logs as water_logs, schema_weight_logs as weight_logs };
 }
 
 declare const queryClient: postgres.Sql<{}>;
 declare const db: drizzle_orm_postgres_js.PostgresJsDatabase<typeof schema>;
 
-export { accounts, clients, db, foods, mealTypeEnum, meal_plan_days, meal_plans, meals, measurements, queryClient, sessions, userRoleEnum, users, verificationTokens, water_logs, weight_logs };
+export { accounts, clients, db, emailVerificationCodes, foods, mealTypeEnum, meal_plan_days, meal_plans, meals, measurements, queryClient, sessions, userRoleEnum, users, verificationTokens, water_logs, weight_logs };

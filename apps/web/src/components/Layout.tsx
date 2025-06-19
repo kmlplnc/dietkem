@@ -1,5 +1,5 @@
 import React from "react";
-import RealNavbar from "./RealNavbar";
+import RealNavbar from "./RealNavbar.tsx";
 import Footer from "./Footer";
 import { useLocation } from "react-router-dom";
 import { CookieConsentProvider } from "../context/CookieConsentContext";
@@ -22,7 +22,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <CookieConsentProvider>
       <RealNavbar />
-      <TawkToWidget />
+      {(location.pathname === '/' || location.pathname === '/abonelikler' || location.pathname === '/subscription') && <TawkToWidget />}
       <CookieConsentBar />
       <CookieConsentModal />
       <FloatingSettingsButton />

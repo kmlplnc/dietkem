@@ -595,6 +595,28 @@ const tr = {
       client: 'Danışan'
     }
   },
+  about: {
+    title: 'Hakkımızda',
+    description: 'Dietkem, bireylerin sağlıklı yaşam yolculuklarında destek olmak ve diyetisyenlerin dijital araçlarla danışanlarına daha etkili hizmet verebilmelerini sağlamak amacıyla geliştirilmiş yenilikçi bir platformdur.',
+    mission: {
+      title: 'Misyonumuz',
+      description: 'Sağlık profesyonelleri ile bireyler arasında köprü kuran güvenilir ve kolay erişilebilir bir platform sağlamak.'
+    },
+    vision: {
+      title: 'Vizyonumuz',
+      description: 'Beslenme ve sağlık alanında teknolojinin sunduğu tüm fırsatları kullanarak daha bilinçli ve sürdürülebilir bir yaşam kültürünü desteklemek.'
+    },
+    values: {
+      title: 'Değerlerimiz',
+      items: [
+        'Bilimsel yaklaşım ve doğruluk',
+        'Kişiselleştirilmiş hizmet',
+        'Erişilebilirlik ve kullanıcı dostu tasarım',
+        'Veri güvenliği ve gizlilik'
+      ]
+    },
+    contact: 'Daha fazla bilgi için bizimle iletişime geçin'
+  },
   calculator: {
     title: 'Günlük Kalori İhtiyacınızı Hesaplayın',
     subtitle: 'BMR + Aktivite oranı kullanarak yaklaşık günlük enerji ihtiyacınızı hesaplayın.',

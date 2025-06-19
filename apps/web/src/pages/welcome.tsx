@@ -4,28 +4,53 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../lib/auth.tsx';
 
+// JWT decode function
+const decodeJWT = (token: string) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+};
+
 export default function WelcomePage() {
   // CLERK_DISABLED_TEMP: const { user, isLoaded } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
   const [visibleChars, setVisibleChars] = useState(0);
   const [isFading, setIsFading] = useState(false);
   const [checking, setChecking] = useState(true);
-  const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
+  
+  // Get user info from JWT token
+  const [userName, setUserName] = useState('');
+  
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded = decodeJWT(token);
+      if (decoded) {
+        // Try to get name from JWT payload or use email
+        const name = decoded.firstName || decoded.email || 'Kullanıcı';
+        setUserName(name);
+        console.log('Welcome page - User from JWT:', decoded);
+      }
+    }
+    
+    setChecking(false);
+  }, []);
+
   const welcomeText = `${t('welcome.title')}, ${userName || 'Kullanıcı'}!`;
 
   useEffect(() => {
-    // CLERK_DISABLED_TEMP: if (isLoaded && user) {
-    // CLERK_DISABLED_TEMP:   // Check if profile is complete
-    // CLERK_DISABLED_TEMP:   if (!user.firstName || !user.lastName || !user.username) {
-    // CLERK_DISABLED_TEMP:     navigate("/complete-profile");
-    // CLERK_DISABLED_TEMP:     return;
-    // CLERK_DISABLED_TEMP:   }
-
-      setChecking(false);
-
+    if (!checking) {
       // Start character animation immediately
       const interval = setInterval(() => {
         setVisibleChars(prev => {
@@ -53,8 +78,8 @@ export default function WelcomePage() {
       }, totalDuration);
 
       return () => clearInterval(interval);
-    // CLERK_DISABLED_TEMP: }
-  }, [welcomeText, navigate]);
+    }
+  }, [welcomeText, navigate, checking]);
 
   // CLERK_DISABLED_TEMP: if (!isLoaded || !user || checking) {
   if (checking) {

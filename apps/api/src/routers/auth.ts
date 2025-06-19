@@ -1,13 +1,19 @@
 import { router, publicProcedure } from '../trpc';
 import { db } from '@dietkem/db';
-import { users } from '@dietkem/db/src/schema';
+import { users, emailVerificationCodes } from '@dietkem/db/schema';
 import { TRPCError } from '@trpc/server';
-import { eq } from 'drizzle-orm';
+import { eq, and, gt, lte } from 'drizzle-orm';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { sendVerificationEmail } from '../lib/resend';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+// Helper function to generate a random 6-digit code
+const generateVerificationCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 export const authRouter = router({
   register: publicProcedure
@@ -276,6 +282,151 @@ export const authRouter = router({
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to start trial',
+        });
+      }
+    }),
+
+  sendVerificationCode: publicProcedure
+    .input(z.object({
+      email: z.string().email(),
+      password: z.string().min(6),
+      firstName: z.string().min(1),
+      lastName: z.string().min(1),
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        const { email } = input;
+
+        // Check if user already exists
+        const existingUser = await db.query.users.findFirst({
+          where: eq(users.email, email),
+        });
+
+        if (existingUser) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'User with this email already exists',
+          });
+        }
+
+        // Check rate limit (max 3 codes per hour) - DISABLED FOR DEVELOPMENT
+        /*
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const recentCodes = await db.query.emailVerificationCodes.findMany({
+          where: and(
+            eq(emailVerificationCodes.email, email),
+            gt(emailVerificationCodes.created_at, oneHourAgo)
+          ),
+        });
+
+        if (recentCodes.length >= 3) {
+          throw new TRPCError({
+            code: 'TOO_MANY_REQUESTS',
+            message: 'Too many verification attempts. Please try again later.',
+          });
+        }
+        */
+
+        // Generate and save new verification code
+        const code = generateVerificationCode();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+        await db.insert(emailVerificationCodes).values({
+          email,
+          code,
+          expires_at: expiresAt,
+        });
+
+        // Send verification email
+        await sendVerificationEmail(email, code);
+
+        return { success: true, message: 'Verification code sent' };
+      } catch (error) {
+        console.error('Send verification code error:', error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to send verification code',
+        });
+      }
+    }),
+
+  verifyCode: publicProcedure
+    .input(z.object({
+      email: z.string().email(),
+      code: z.string().length(6),
+      password: z.string().min(6),
+      firstName: z.string().min(1),
+      lastName: z.string().min(1),
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        const { email, code, password, firstName, lastName } = input;
+
+        // Find the latest valid verification code
+        const verificationCode = await db.query.emailVerificationCodes.findFirst({
+          where: and(
+            eq(emailVerificationCodes.email, email),
+            eq(emailVerificationCodes.code, code),
+            eq(emailVerificationCodes.used, 'false'),
+            gt(emailVerificationCodes.expires_at, new Date())
+          ),
+        });
+
+        if (!verificationCode) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Invalid or expired verification code',
+          });
+        }
+
+        // Mark code as used
+        await db.update(emailVerificationCodes)
+          .set({ used: 'true' })
+          .where(eq(emailVerificationCodes.id, verificationCode.id));
+
+        // Create user account
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const [newUser] = await db.insert(users).values({
+          email,
+          password: hashedPassword,
+          first_name: firstName,
+          last_name: lastName,
+          role: 'subscriber_basic',
+          avatar_url: 'https://res.cloudinary.com/dietkem/image/upload/v1/avatar.jpg',
+        }).returning();
+
+        // Generate JWT token
+        const token = jwt.sign(
+          { 
+            userId: newUser.id, 
+            email: newUser.email,
+            role: newUser.role 
+          },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        );
+
+        return {
+          user: {
+            id: newUser.id,
+            email: newUser.email,
+            firstName: newUser.first_name,
+            lastName: newUser.last_name,
+            role: newUser.role,
+          },
+          token,
+        };
+      } catch (error) {
+        console.error('Verify code error:', error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to verify code',
         });
       }
     }),

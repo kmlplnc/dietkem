@@ -30,6 +30,16 @@ export const users = pgTable('users', {
   first_subscription_started_at: timestamp('first_subscription_started_at'),
 });
 
+// Email verification codes table
+export const emailVerificationCodes = pgTable('email_verification_codes', {
+  id: serial('id').primaryKey(),
+  email: varchar('email', { length: 255 }).notNull(),
+  code: varchar('code', { length: 6 }).notNull(),
+  expires_at: timestamp('expires_at').notNull(),
+  used: text('used').default('false'),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+});
+
 // NextAuth session tables
 export const sessions = pgTable('sessions', {
   id: varchar('id', { length: 255 }).primaryKey(),

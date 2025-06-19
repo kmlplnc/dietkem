@@ -1,187 +1,372 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../lib/auth.tsx';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../../context/LanguageContext';
+import { trpc } from '../../utils/trpc';
 
-const RegisterPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { register, isLoggedIn } = useAuth();
+export default function Register() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const [step, setStep] = useState<'form' | 'verification'>('form');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+  });
+  const [verificationCode, setVerificationCode] = useState('');
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isLoggedIn) {
+  const sendVerificationCode = trpc.auth.sendVerificationCode.useMutation({
+    onSuccess: () => {
+      setStep('verification');
+      setError('');
+    },
+    onError: (error) => {
+      setError(error.message);
+    },
+  });
+
+  const verifyCode = trpc.auth.verifyCode.useMutation({
+    onSuccess: (data) => {
+      localStorage.setItem('token', data.token);
       navigate('/welcome');
-    }
-  }, [isLoggedIn, navigate]);
+    },
+    onError: (error) => {
+      setError(error.message);
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-
-    const result = await register(email, password, firstName, lastName);
-    
-    if (result.success) {
-      navigate('/welcome');
+    if (step === 'form') {
+      await sendVerificationCode.mutateAsync(formData);
     } else {
-      setError(result.error || 'Registration failed');
+      await verifyCode.mutateAsync({
+        ...formData,
+        code: verificationCode,
+      });
     }
-    
-    setLoading(false);
   };
 
-  if (isLoggedIn) {
-    return null;
-  }
-
   return (
-    <div className="register-container">
-      <form className="register-form" onSubmit={handleSubmit}>
-        <h2>{t('auth.register')}</h2>
-        <label>{t('auth.firstName')}</label>
-        <input
-          type="text"
-          value={firstName}
-          onChange={e => setFirstName(e.target.value)}
-          required
-          disabled={loading}
-        />
-        <label>{t('auth.lastName')}</label>
-        <input
-          type="text"
-          value={lastName}
-          onChange={e => setLastName(e.target.value)}
-          required
-          disabled={loading}
-        />
-        <label>{t('auth.email')}</label>
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          disabled={loading}
-        />
-        <label>{t('auth.password')}</label>
-        <input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-          minLength={6}
-          disabled={loading}
-        />
-        {error && <div className="error">{error}</div>}
-        <button type="submit" disabled={loading}>
-          {loading ? t('auth.registering') : t('auth.register')}
-        </button>
-        <div className="form-footer">
-          <p>
-            {t('auth.haveAccount')} <a href="/login">{t('auth.login')}</a>
-          </p>
+    <div className="register-bg">
+      <div className="register-container">
+        <h2 className="register-title">
+          {step === 'form' ? 'Hesap Oluştur' : 'E-posta Doğrulama'}
+        </h2>
+        <p className="register-desc">
+          {step === 'form'
+            ? 'Hemen ücretsiz hesabınızı oluşturun'
+            : 'E-posta adresinize gönderilen 6 haneli kodu girin'}
+        </p>
+        <form className="register-form" onSubmit={handleSubmit}>
+          {error && <div className="register-error">{error}</div>}
+          {step === 'form' ? (
+            <>
+              <div className="register-row">
+                <div className="register-col">
+                  <label htmlFor="firstName">Ad</label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    required
+                    autoComplete="given-name"
+                    placeholder="Ad"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="register-col">
+                  <label htmlFor="lastName">Soyad</label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    required
+                    autoComplete="family-name"
+                    placeholder="Soyad"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="register-field">
+                <label htmlFor="email">E-posta</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="E-posta"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                />
+              </div>
+              <div className="register-field">
+                <label htmlFor="password">Şifre</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Şifre"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                />
+              </div>
+            </>
+          ) : (
+            <div className="register-field">
+              <label htmlFor="code">Doğrulama Kodu</label>
+              <input
+                id="code"
+                name="code"
+                type="text"
+                required
+                placeholder="6 haneli kod"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                maxLength={6}
+                pattern="[0-9]{6}"
+              />
+              <p className="register-info">
+                Kod 5 dakika süreyle geçerlidir. Kod gelmedi mi?{' '}
+                <button
+                  type="button"
+                  className="register-link"
+                  onClick={() => sendVerificationCode.mutate(formData)}
+                  disabled={sendVerificationCode.isLoading}
+                >
+                  Tekrar Gönder
+                </button>
+              </p>
+            </div>
+          )}
+          <button
+            type="submit"
+            className="register-btn"
+            disabled={
+              step === 'form'
+                ? sendVerificationCode.isLoading
+                : verifyCode.isLoading
+            }
+          >
+            {step === 'form'
+              ? sendVerificationCode.isLoading
+                ? 'Gönderiliyor...'
+                : 'Devam Et'
+              : verifyCode.isLoading
+              ? 'Doğrulanıyor...'
+              : 'Hesabı Oluştur'}
+          </button>
+        </form>
+        <div className="register-footer">
+          Zaten hesabınız var mı?{' '}
+          <a href="/auth/login" className="register-link">Giriş Yap</a>
         </div>
-      </form>
+        <div className="register-brand">
+          <div className="brand-logo">
+            <img src="/logo/logo3.png" alt="DietKem Logo" className="logo-img" />
+          </div>
+          <div className="brand-text">
+            <span className="brand-name">DietKem</span>
+            <span className="brand-tagline">Sağlıklı Yaşam Rehberiniz</span>
+          </div>
+        </div>
+      </div>
       <style>{`
-        .register-container {
-          min-height: 100vh;
+        .register-bg {
+          min-height: calc(100vh - 64px);
+          margin-top: 64px;
+          background: #f9fafb;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #f9f9f9;
-          padding: 1rem;
         }
-        .register-form {
+        .register-container {
           background: #fff;
-          padding: 2rem 2.5rem;
+          padding: 32px 28px 24px 28px;
           border-radius: 12px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-          display: flex;
-          flex-direction: column;
-          min-width: 320px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.06);
           max-width: 400px;
           width: 100%;
         }
-        .register-form h2 {
-          margin-bottom: 1.5rem;
+        .register-title {
+          font-size: 2rem;
+          font-weight: 700;
           text-align: center;
-          color: #1f2937;
-          font-size: 1.5rem;
-          font-weight: 600;
+          margin-bottom: 8px;
+          color: #222;
         }
-        .register-form label {
-          margin-bottom: 0.5rem;
-          font-weight: 500;
-          color: #374151;
+        .register-desc {
+          text-align: center;
+          color: #666;
+          font-size: 1rem;
+          margin-bottom: 24px;
         }
-        .register-form input {
-          margin-bottom: 1rem;
-          padding: 0.75rem;
+        .register-form {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+        .register-row {
+          display: flex;
+          gap: 8px;
+        }
+        .register-col {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+        }
+        .register-col label {
+          margin-bottom: 4px;
+          font-size: 0.97rem;
+          color: #444;
+        }
+        .register-col input {
+          padding: 10px 12px;
           border: 1px solid #d1d5db;
           border-radius: 6px;
           font-size: 1rem;
+          outline: none;
+          transition: border-color 0.2s;
+          width: 100%;
+        }
+        .register-col input:focus {
+          border-color: #2563eb;
+        }
+        .register-field {
+          display: flex;
+          flex-direction: column;
+          margin-bottom: 8px;
+        }
+        .register-field label {
+          margin-bottom: 4px;
+          font-size: 0.97rem;
+          color: #444;
+        }
+        .register-field input {
+          padding: 10px 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: 1rem;
+          outline: none;
           transition: border-color 0.2s;
         }
-        .register-form input:focus {
-          outline: none;
+        .register-field input:focus {
           border-color: #2563eb;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
-        .register-form input:disabled {
-          background-color: #f9fafb;
-          cursor: not-allowed;
-        }
-        .register-form .error {
-          color: #dc2626;
-          margin-bottom: 1rem;
-          text-align: center;
-          padding: 0.5rem;
-          background-color: #fef2f2;
-          border-radius: 4px;
-          border: 1px solid #fecaca;
-        }
-        .register-form button {
-          padding: 0.75rem;
+        .register-btn {
+          width: 100%;
+          padding: 12px 0;
           background: #2563eb;
           color: #fff;
           border: none;
           border-radius: 6px;
-          font-size: 1rem;
+          font-size: 1.1rem;
           font-weight: 600;
           cursor: pointer;
-          transition: background-color 0.2s;
+          margin-top: 8px;
+          transition: background 0.2s;
         }
-        .register-form button:hover:not(:disabled) {
-          background: #1d4ed8;
-        }
-        .register-form button:disabled {
+        .register-btn:disabled {
           background: #9ca3af;
           cursor: not-allowed;
         }
-        .form-footer {
-          margin-top: 1.5rem;
+        .register-error {
+          background: #fee2e2;
+          color: #dc2626;
+          padding: 10px 14px;
+          border-radius: 6px;
+          margin-bottom: 8px;
+          font-size: 0.97rem;
           text-align: center;
         }
-        .form-footer p {
-          color: #6b7280;
-          margin: 0;
+        .register-info {
+          color: #666;
+          font-size: 0.95rem;
+          margin-top: 6px;
         }
-        .form-footer a {
+        .register-link {
           color: #2563eb;
-          text-decoration: none;
-          font-weight: 500;
-        }
-        .form-footer a:hover {
+          background: none;
+          border: none;
+          padding: 0;
+          font-size: 1em;
+          cursor: pointer;
           text-decoration: underline;
+        }
+        .register-link:disabled {
+          color: #9ca3af;
+          cursor: not-allowed;
+        }
+        .register-footer {
+          margin-top: 18px;
+          text-align: center;
+          color: #666;
+          font-size: 1rem;
+        }
+        .register-brand {
+          margin-top: 24px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+        }
+        .brand-logo {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .logo-img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+        .brand-text {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .brand-name {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: #2563eb;
+          line-height: 1;
+        }
+        .brand-tagline {
+          font-size: 0.8rem;
+          color: #6b7280;
+          margin-top: 2px;
+        }
+        @media (max-width: 600px) {
+          .register-row {
+            flex-direction: column;
+            gap: 0;
+          }
+          .register-col {
+            margin-bottom: 12px;
+            min-width: 0;
+          }
+          .register-col input {
+            font-size: 0.97rem;
+            padding: 8px 10px;
+          }
         }
       `}</style>
     </div>
   );
-};
-
-export default RegisterPage; 
+} 

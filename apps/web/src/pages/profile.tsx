@@ -8,6 +8,23 @@ import { useAuth } from '../lib/auth';
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dup6ahhjt/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = 'dietkem';
 
+interface User {
+  id: number;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  clerk_id: string | null;
+}
+
+interface AuthUser {
+  id: number;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatar_url: string | null;
+}
+
 const ProfilePage = () => {
   // CLERK_DISABLED_TEMP: const { user, isLoaded } = useUser();
   const navigate = useNavigate();
@@ -122,7 +139,7 @@ const ProfilePage = () => {
         });
       }
     }
-  }, [currentUser]); // Remove user and setUser from dependencies
+  }, [currentUser, user, setUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,12 +155,9 @@ const ProfilePage = () => {
 
       // Update database using mutation
       await updateProfile.mutateAsync({
-        // CLERK_DISABLED_TEMP: clerkId: user?.id || '',
         clerkId: currentUser?.clerk_id || '',
-        // CLERK_DISABLED_TEMP: email: user?.primaryEmailAddress?.emailAddress || '',
         email: currentUser?.email || '',
         firstName,
-        // CLERK_DISABLED_TEMP: lastName: user?.lastName || '',
         lastName: currentUser?.last_name || '',
       });
     } catch (err) {
@@ -201,29 +215,53 @@ const ProfilePage = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="firstName">
-                {currentLang === 'tr' ? 'Ad Soyad' : 'Full Name'}
+                {currentLang === 'tr' ? 'Ad' : 'First Name'}
               </label>
               <input
                 type="text"
                 id="firstName"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                disabled={isSubmitting}
                 required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="lastName">
+                {currentLang === 'tr' ? 'Soyad' : 'Last Name'}
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                value={currentUser.last_name || ''}
+                disabled
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">
+                {currentLang === 'tr' ? 'E-posta' : 'Email'}
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={currentUser.email}
+                disabled
               />
             </div>
 
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
 
-            <button 
-              type="submit" 
-              className="submit-button"
+            <button
+              type="submit"
+              className="save-button"
               disabled={isSubmitting}
             >
-              {isSubmitting 
+              {isSubmitting
                 ? (currentLang === 'tr' ? 'Kaydediliyor...' : 'Saving...')
-                : (currentLang === 'tr' ? 'Kaydet' : 'Save Changes')
-              }
+                : (currentLang === 'tr' ? 'Değişiklikleri Kaydet' : 'Save Changes')}
             </button>
           </form>
         </div>
@@ -231,90 +269,102 @@ const ProfilePage = () => {
 
       <style>{`
         .profile-page {
-          padding: 2rem;
           min-height: 100vh;
           background: #f9fafb;
+          padding: 2rem 1rem;
         }
-
         .page-container {
-          max-width: 1200px;
+          max-width: 600px;
           margin: 0 auto;
-          padding-top: 64px;
+          background: white;
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         }
-
         .header {
           margin-bottom: 2rem;
-          text-align: center;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
         }
-
         .back-button {
-          position: absolute;
-          left: 0;
-          color: var(--text-color);
+          display: inline-block;
+          color: #6b7280;
           text-decoration: none;
+          margin-bottom: 1rem;
           font-size: 0.9rem;
-          font-weight: 500;
-          padding: 0.5rem 1rem;
-          border-radius: 6px;
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
         }
-
         .back-button:hover {
-          color: var(--primary-color);
-          background-color: var(--hover-bg);
+          color: #4b5563;
         }
-
         .page-title {
-          font-size: 2rem;
+          font-size: 1.5rem;
           font-weight: 600;
           color: #1f2937;
           margin: 0;
         }
-
-        .profile-form {
-          background: white;
-          padding: 2rem;
-          border-radius: 12px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          border: 1px solid #e5e7eb;
+        .avatar-section {
+          display: flex;
+          align-items: center;
+          margin-bottom: 2rem;
         }
-
+        .avatar-upload-btn {
+          display: inline-block;
+          padding: 0.5rem 1rem;
+          background: #f3f4f6;
+          border-radius: 6px;
+          color: #4b5563;
+          font-size: 0.9rem;
+          transition: background-color 0.2s;
+        }
+        .avatar-upload-btn:hover {
+          background: #e5e7eb;
+        }
+        .avatar-success {
+          margin-left: 1rem;
+          color: #059669;
+          font-size: 0.9rem;
+        }
         .form-group {
           margin-bottom: 1.5rem;
         }
-
-        label {
+        .form-group label {
           display: block;
-          font-size: 0.875rem;
-          font-weight: 500;
-          color: #374151;
           margin-bottom: 0.5rem;
+          color: #4b5563;
+          font-weight: 500;
         }
-
-        input {
+        .form-group input {
           width: 100%;
           padding: 0.75rem;
-          border: 1px solid #e5e7eb;
+          border: 1px solid #d1d5db;
           border-radius: 6px;
           font-size: 1rem;
-          color: #1f2937;
-          transition: border-color 0.2s ease;
+          transition: border-color 0.2s;
         }
-
-        input:focus {
+        .form-group input:focus {
           outline: none;
           border-color: #2563eb;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+          box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
-
-        .submit-button {
+        .form-group input:disabled {
+          background: #f9fafb;
+          cursor: not-allowed;
+        }
+        .error-message {
+          color: #dc2626;
+          margin-bottom: 1rem;
+          padding: 0.75rem;
+          background: #fef2f2;
+          border-radius: 6px;
+          border: 1px solid #fecaca;
+        }
+        .success-message {
+          color: #059669;
+          margin-bottom: 1rem;
+          padding: 0.75rem;
+          background: #f0fdf4;
+          border-radius: 6px;
+          border: 1px solid #bbf7d0;
+        }
+        .save-button {
           width: 100%;
           padding: 0.75rem;
           background: #2563eb;
@@ -324,107 +374,22 @@ const ProfilePage = () => {
           font-size: 1rem;
           font-weight: 500;
           cursor: pointer;
-          transition: background-color 0.2s ease;
+          transition: background-color 0.2s;
         }
-
-        .submit-button:hover:not(:disabled) {
+        .save-button:hover:not(:disabled) {
           background: #1d4ed8;
         }
-
-        .submit-button:disabled {
-          background: #93c5fd;
+        .save-button:disabled {
+          background: #9ca3af;
           cursor: not-allowed;
         }
-
-        .error-message {
-          background: #fee2e2;
-          color: #dc2626;
-          padding: 0.75rem;
-          border-radius: 6px;
-          margin-bottom: 1rem;
-          font-size: 0.875rem;
-        }
-
-        .success-message {
-          background: #dcfce7;
-          color: #16a34a;
-          padding: 0.75rem;
-          border-radius: 6px;
-          margin-bottom: 1rem;
-          font-size: 0.875rem;
-        }
-
         .loading {
           display: flex;
-          align-items: center;
           justify-content: center;
-          min-height: 400px;
-          font-size: 1.125rem;
-          color: #6b7280;
-        }
-
-        .avatar-section {
-          display: flex;
           align-items: center;
-          margin-bottom: 2rem;
-        }
-
-        .avatar-img {
-          border-radius: 50%;
-          border: 2px solid #e5e7eb;
-          width: 96px;
-          height: 96px;
-          object-fit: cover;
-        }
-
-        .avatar-upload-label {
-          margin-left: 16px;
-          cursor: pointer;
-        }
-
-        .avatar-upload-btn {
-          background: #2563eb;
-          color: white;
-          padding: 0.5rem 1rem;
-          border-radius: 6px;
-          font-size: 0.95rem;
-          font-weight: 500;
-          transition: background 0.2s;
-          display: inline-block;
-        }
-
-        .avatar-upload-btn:hover {
-          background: #1d4ed8;
-        }
-
-        .avatar-success {
-          color: #16a34a;
-          margin-left: 1rem;
-          font-size: 0.95rem;
-        }
-
-        @media (max-width: 768px) {
-          .profile-page {
-            padding: 1rem;
-          }
-
-          .profile-form {
-            padding: 1.5rem;
-          }
-
-          .header {
-            flex-direction: column;
-            gap: 1rem;
-          }
-
-          .back-button {
-            position: static;
-            align-self: flex-start;
-          }
-
-          .page-title {
-            font-size: 1.5rem;
-          }
+          min-height: 100vh;
+          font-size: 1.2rem;
+          color: #6b7280;
         }
       `}</style>
     </div>

@@ -26,7 +26,7 @@ import BlogPage from './pages/blog';
 import BlogPost from './pages/blog-post';
 import Footer from './components/Footer';
 import Hakkimizda from './pages/hakkimizda';
-import RealNavbar from './components/RealNavbar.jsx';
+import RealNavbar from './components/RealNavbar.tsx';
 import Layout from "./components/Layout";
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfUse from './pages/TermsOfUse';

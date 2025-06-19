@@ -5074,6 +5074,7 @@ var schema_exports = {};
 __export(schema_exports, {
   accounts: () => accounts,
   clients: () => clients,
+  emailVerificationCodes: () => emailVerificationCodes,
   foods: () => foods,
   mealTypeEnum: () => mealTypeEnum,
   meal_plan_days: () => meal_plan_days,
@@ -5107,7 +5108,18 @@ var users = pgTable("users", {
   first_name: varchar("first_name", { length: 255 }),
   last_name: varchar("last_name", { length: 255 }),
   username: varchar("username", { length: 255 }),
-  avatar_url: varchar("avatar_url", { length: 512 }).default("https://res.cloudinary.com/dietkem/image/upload/v1/avatar.jpg")
+  avatar_url: varchar("avatar_url", { length: 512 }).default("https://res.cloudinary.com/dietkem/image/upload/v1/avatar.jpg"),
+  trial_started_at: timestamp("trial_started_at"),
+  trial_used: text("trial_used").default("false"),
+  first_subscription_started_at: timestamp("first_subscription_started_at")
+});
+var emailVerificationCodes = pgTable("email_verification_codes", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  code: varchar("code", { length: 6 }).notNull(),
+  expires_at: timestamp("expires_at").notNull(),
+  used: text("used").default("false"),
+  created_at: timestamp("created_at").defaultNow().notNull()
 });
 var sessions = pgTable("sessions", {
   id: varchar("id", { length: 255 }).primaryKey(),
@@ -5211,6 +5223,7 @@ export {
   accounts,
   clients,
   db,
+  emailVerificationCodes,
   foods,
   mealTypeEnum,
   meal_plan_days,

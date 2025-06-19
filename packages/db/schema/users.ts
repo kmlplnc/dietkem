@@ -52,4 +52,13 @@ export const verificationTokens = pgTable("verification_tokens", {
   identifier: varchar("identifier", { length: 255 }).notNull(),
   token: varchar("token", { length: 255 }).notNull(),
   expires: timestamp("expires").notNull(),
+});
+
+export const emailVerificationCodes = pgTable("email_verification_codes", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  code: varchar("code", { length: 6 }).notNull(),
+  expires_at: timestamp("expires_at").notNull(),
+  used: text("used").default('false'),
+  created_at: timestamp("created_at").defaultNow(),
 }); 

@@ -67,10 +67,20 @@ const LoginPage = () => {
             {t('auth.noAccount')} <a href="/register">{t('auth.register')}</a>
           </p>
         </div>
+        <div className="login-brand">
+          <div className="brand-logo">
+            <img src="/logo/logo3.png" alt="DietKem Logo" className="logo-img" />
+          </div>
+          <div className="brand-text">
+            <span className="brand-name">DietKem</span>
+            <span className="brand-tagline">Sağlıklı Yaşam Rehberiniz</span>
+          </div>
+        </div>
       </form>
       <style>{`
         .login-container {
-          min-height: 100vh;
+          min-height: calc(100vh - 64px);
+          margin-top: 64px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -159,6 +169,43 @@ const LoginPage = () => {
         }
         .form-footer a:hover {
           text-decoration: underline;
+        }
+        .login-brand {
+          margin-top: 1.5rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #e5e7eb;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+        }
+        .brand-logo {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .logo-img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+        .brand-text {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .brand-name {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: #2563eb;
+          line-height: 1;
+        }
+        .brand-tagline {
+          font-size: 0.8rem;
+          color: #6b7280;
+          margin-top: 2px;
         }
       `}</style>
     </div>

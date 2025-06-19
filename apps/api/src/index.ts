@@ -16,7 +16,8 @@ import { eq } from 'drizzle-orm';
 console.log('Environment variables:', {
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? 'Set' : 'Not set',
   CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY ? 'Set' : 'Not set',
-  CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET ? 'Set' : 'Not set'
+  CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET ? 'Set' : 'Not set',
+  RESEND_API_KEY: process.env.RESEND_API_KEY ? 'Set' : 'Not set'
 });
 
 const app = express();
