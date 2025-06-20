@@ -305,7 +305,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
                       return (
                         <text 
                           x={props.x} 
-                          y={props.y ? props.y - 15 : 0} 
+                          y={typeof props.y === 'number' ? props.y - 15 : 0} 
                           textAnchor="middle" 
                           fill={activeTab === 'weight' ? '#3b82f6' : activeTab === 'waist' ? '#10b981' : '#f59e0b'}
                           fontSize="11"

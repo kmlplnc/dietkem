@@ -41,7 +41,10 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
   );
 
   // Ölçümleri API'den çek
-  const { data: measurementsData = [], isLoading: measurementsLoading } = trpc.measurements.getByClientId.useQuery({ client_id: clientId });
+  const { data: measurementsData = [], isLoading: measurementsLoading } = trpc.measurements.getByClientId.useQuery(
+    { client_id: clientId! },
+    { enabled: !!clientId }
+  );
 
   // Update mutation
   const updateClientMutation = trpc.clients.update.useMutation();
