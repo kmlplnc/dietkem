@@ -153,6 +153,60 @@ app.post('/api/register', async (req, res) => {
 // Recipes routes
 app.use('/api/recipes', recipesRouter);
 
+// Blog endpoints for direct API access
+app.get('/api/blogs', (req, res) => {
+  // Şimdilik örnek veri
+  const samplePosts = [
+    // Eğer hiç blog kalmasın isteniyorsa, bu satırı boş bırak:
+    //
+    // Eğer orijinal 3 örnek blog kalacaksa, aşağıdaki gibi bırakabilirsiniz:
+    // {
+    //   id: '1',
+    //   title: 'Yapay Zeka ile Diyet Planlaması',
+    //   summary: 'Yapay zeka teknolojilerinin diyet planlamasında kullanımı ve avantajları.',
+    //   category: 'AI',
+    //   author: 'Dr. Mehmet Yılmaz',
+    //   date: '2024-03-15',
+    //   image: '/assets/blog/ai-diet.png',
+    //   status: 'approved',
+    //   content: 'Yapay zeka ile diyet planlaması hakkında detaylı içerik burada yer alacak.'
+    // },
+    // ...
+  ];
+  
+  res.json(samplePosts);
+});
+
+app.get('/api/blogs/:id', (req, res) => {
+  const { id } = req.params;
+  
+  // Şimdilik örnek veri
+  const samplePosts = [
+    // Eğer hiç blog kalmasın isteniyorsa, bu satırı boş bırak:
+    //
+    // Eğer orijinal 3 örnek blog kalacaksa, aşağıdaki gibi bırakabilirsiniz:
+    // {
+    //   id: '1',
+    //   title: 'Yapay Zeka ile Diyet Planlaması',
+    //   summary: 'Yapay zeka teknolojilerinin diyet planlamasında kullanımı ve avantajları.',
+    //   category: 'AI',
+    //   author: 'Dr. Mehmet Yılmaz',
+    //   date: '2024-03-15',
+    //   image: '/assets/blog/ai-diet.png',
+    //   status: 'approved',
+    //   content: 'Yapay zeka ile diyet planlaması hakkında detaylı içerik burada yer alacak.'
+    // },
+    // ...
+  ];
+  
+  const post = samplePosts.find(post => post.id === id);
+  if (!post) {
+    return res.status(404).json({ error: 'Blog post not found' });
+  }
+  
+  res.json(post);
+});
+
 // Create tRPC middleware with better error handling
 const trpcMiddleware = createExpressMiddleware({
   router: appRouter,

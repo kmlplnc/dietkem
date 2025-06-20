@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 // CLERK_DISABLED_TEMP: import { useUser } from '@clerk/clerk-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -28,10 +28,44 @@ const BlogPage = () => {
   const [showNewPostForm, setShowNewPostForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Remove the hardcoded posts state and use tRPC query instead
-  // const [posts] = useState<BlogPost[]>([ ... ]);
-  const { data: posts = [], isLoading } = trpc.blogs.getAll.useQuery();
+  // Fetch blog posts
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        if (import.meta.env.PROD) {
+          // Use direct API in production
+          const response = await fetch('https://dietkem.onrender.com/api/blogs');
+          if (response.ok) {
+            const data = await response.json();
+            setPosts(data);
+          } else {
+            console.error('Failed to fetch posts:', response.status);
+            setPosts([]);
+          }
+        } else {
+          // Use tRPC in development
+          const response = await fetch('/api/trpc/blogs.getAll?batch=1&input=%7B%7D');
+          if (response.ok) {
+            const data = await response.json();
+            setPosts(data[0]?.result?.data || []);
+          } else {
+            console.error('Failed to fetch posts:', response.status);
+            setPosts([]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setPosts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   // Move categories inside the component so it updates on language change
   const categories = [

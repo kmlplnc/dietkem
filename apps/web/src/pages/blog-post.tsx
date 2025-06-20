@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import aiDietImage from '../assets/blog/ai-diet.png';
 import microbiomeImage from '../assets/blog/microbiome.png';
 import digitalDietImage from '../assets/blog/digital-diet.png';
@@ -15,6 +15,7 @@ interface BlogPost {
   author: string;
   date: string;
   image?: string;
+  status?: 'pending' | 'published' | 'rejected';
 }
 
 const BlogPost = () => {
@@ -22,12 +23,64 @@ const BlogPost = () => {
   const { currentLang } = useLanguage();
   const [imageError, setImageError] = useState(false);
   const [relatedImageErrors, setRelatedImageErrors] = useState<{ [key: string]: boolean }>({});
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
-  // Fetch the post by ID using tRPC
-  const { data: post, isLoading, isError } = trpc.blogs.getById.useQuery(id || '');
+  // Fetch the post by ID and all posts
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (import.meta.env.PROD) {
+          // Use direct API in production
+          const [postResponse, postsResponse] = await Promise.all([
+            fetch(`https://dietkem.onrender.com/api/blogs/${id}`),
+            fetch('https://dietkem.onrender.com/api/blogs')
+          ]);
 
-  // Fetch all published posts for related posts
-  const { data: allPosts = [] } = trpc.blogs.getAll.useQuery();
+          if (postResponse.ok) {
+            const postData = await postResponse.json();
+            setPost(postData);
+          } else {
+            setIsError(true);
+          }
+
+          if (postsResponse.ok) {
+            const postsData = await postsResponse.json();
+            setAllPosts(postsData);
+          }
+        } else {
+          // Use tRPC in development
+          const [postResponse, postsResponse] = await Promise.all([
+            fetch(`/api/trpc/blogs.getById?batch=1&input=%22${id}%22`),
+            fetch('/api/trpc/blogs.getAll?batch=1&input=%7B%7D')
+          ]);
+
+          if (postResponse.ok) {
+            const postData = await postResponse.json();
+            setPost(postData[0]?.result?.data || null);
+          } else {
+            setIsError(true);
+          }
+
+          if (postsResponse.ok) {
+            const postsData = await postsResponse.json();
+            setAllPosts(postsData[0]?.result?.data || []);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
 
   // Filter for related posts: published, not the current post
   const relatedPosts = allPosts.filter(
