@@ -33,7 +33,7 @@ export const createTRPCClient = async () => {
       httpBatchLink({
         // Use the Vite proxy instead of direct connection
         url: '/trpc',
-        fetch: (url, options) => {
+        fetch: async (url, options) => {
           const currentToken = localStorage.getItem('token');
           
           // Ensure we have the default headers
@@ -47,10 +47,44 @@ export const createTRPCClient = async () => {
             ...(currentToken && { Authorization: `Bearer ${currentToken}` }),
           };
           
-          return fetch(url, {
-            ...options,
-            headers,
-          });
+          try {
+            const response = await fetch(url, {
+              ...options,
+              headers,
+            });
+            
+            // Check if response is ok
+            if (!response.ok) {
+              console.error('tRPC fetch error:', response.status, response.statusText);
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Check if response has content
+            const text = await response.text();
+            if (!text) {
+              console.error('tRPC empty response');
+              throw new Error('Empty response from server');
+            }
+            
+            // Try to parse JSON
+            try {
+              JSON.parse(text);
+            } catch (parseError) {
+              console.error('tRPC JSON parse error:', parseError);
+              console.error('Response text:', text);
+              throw new Error('Invalid JSON response from server');
+            }
+            
+            // Return a new Response with the text content
+            return new Response(text, {
+              status: response.status,
+              statusText: response.statusText,
+              headers: response.headers,
+            });
+          } catch (error) {
+            console.error('tRPC fetch error:', error);
+            throw error;
+          }
         },
       }),
     ],
