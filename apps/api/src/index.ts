@@ -179,6 +179,15 @@ const trpcMiddleware = createExpressMiddleware({
 // Use tRPC middleware
 app.use('/trpc', trpcMiddleware);
 
+// Add a simple test endpoint
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: 'API server is running!', 
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development'
+  });
+});
+
 const port = process.env.PORT ? Number(process.env.PORT) : 3001;
 app.listen(port, () => {
   console.log(`API server listening on port ${port}`);
