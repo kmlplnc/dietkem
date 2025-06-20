@@ -141,9 +141,12 @@ export const clientsRouter = router({
     .mutation(async ({ input }) => {
       try {
         const { id, ...updateData } = input;
-        
+        const updatePayload = {
+          ...updateData,
+          birth_date: updateData.birth_date ? new Date(updateData.birth_date) : undefined,
+        };
         const updatedClient = await db.update(clients)
-          .set(updateData)
+          .set(updatePayload)
           .where(eq(clients.id, id))
           .returning();
 
