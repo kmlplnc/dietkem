@@ -6,9 +6,9 @@ export const trpc = createTRPCReact<AppRouter>();
 
 // Function to get the API URL based on environment
 const getApiUrl = () => {
-  // In production (Render), use the environment variable
+  // In production (Render), use the specific Render URL
   if (import.meta.env.PROD) {
-    return import.meta.env.VITE_API_URL || 'https://your-render-api-url.onrender.com';
+    return 'https://dietkem.onrender.com';
   }
   
   // In development, use localhost
@@ -44,13 +44,16 @@ const findApiPort = async (): Promise<number> => {
 // Create a function that returns a new tRPC client with the latest token
 export const createTRPCClient = async () => {
   const apiUrl = getApiUrl();
+  const isProduction = import.meta.env.PROD;
+  
   console.log('tRPC client using API URL:', apiUrl);
+  console.log('Environment:', isProduction ? 'PRODUCTION' : 'DEVELOPMENT');
   
   const client = trpc.createClient({
     links: [
       httpBatchLink({
         // Use the appropriate URL based on environment
-        url: import.meta.env.PROD ? `${apiUrl}/trpc` : '/trpc',
+        url: isProduction ? `${apiUrl}/trpc` : '/trpc',
         fetch: async (url, options) => {
           const currentToken = localStorage.getItem('token');
           
@@ -65,7 +68,10 @@ export const createTRPCClient = async () => {
             ...(currentToken && { Authorization: `Bearer ${currentToken}` }),
           };
           
-          console.log('tRPC fetch request:', url, { headers });
+          console.log('tRPC fetch request:', url, { 
+            method: options?.method || 'GET',
+            headers: Object.keys(headers)
+          });
           
           try {
             const response = await fetch(url, {
@@ -74,6 +80,7 @@ export const createTRPCClient = async () => {
             });
             
             console.log('tRPC response status:', response.status, response.statusText);
+            console.log('tRPC response headers:', Object.fromEntries(response.headers.entries()));
             
             // Check if response is ok
             if (!response.ok) {
@@ -84,6 +91,7 @@ export const createTRPCClient = async () => {
             // Check if response has content
             const text = await response.text();
             console.log('tRPC response text length:', text.length);
+            console.log('tRPC response text preview:', text.substring(0, 200));
             
             if (!text) {
               console.error('tRPC empty response');
@@ -92,19 +100,18 @@ export const createTRPCClient = async () => {
             
             // Try to parse JSON
             try {
-              JSON.parse(text);
+              const parsed = JSON.parse(text);
+              console.log('tRPC parsed response:', parsed);
+              return new Response(text, {
+                status: response.status,
+                statusText: response.statusText,
+                headers: response.headers,
+              });
             } catch (parseError) {
               console.error('tRPC JSON parse error:', parseError);
               console.error('Response text:', text);
               throw new Error('Invalid JSON response from server');
             }
-            
-            // Return a new Response with the text content
-            return new Response(text, {
-              status: response.status,
-              statusText: response.statusText,
-              headers: response.headers,
-            });
           } catch (error) {
             console.error('tRPC fetch error:', error);
             throw error;
