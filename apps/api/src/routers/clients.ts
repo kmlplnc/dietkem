@@ -144,6 +144,7 @@ export const clientsRouter = router({
         const updatePayload = {
           ...updateData,
           birth_date: updateData.birth_date ? new Date(updateData.birth_date) : undefined,
+          height_cm: updateData.height_cm !== undefined ? String(updateData.height_cm) : undefined,
         };
         const updatedClient = await db.update(clients)
           .set(updatePayload)
