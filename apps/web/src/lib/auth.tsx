@@ -81,16 +81,61 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       console.log('AuthProvider - Login attempt for:', email);
-      const result = await loginMutation.mutateAsync({ email, password });
-      console.log('AuthProvider - Login successful');
+      
+      // Try tRPC first
       try {
-        localStorage.setItem('token', result.token);
-      } catch {
-        console.warn('AuthProvider - Could not save token to localStorage');
+        const result = await loginMutation.mutateAsync({ email, password });
+        console.log('AuthProvider - Login successful via tRPC');
+        try {
+          localStorage.setItem('token', result.token);
+        } catch {
+          console.warn('AuthProvider - Could not save token to localStorage');
+        }
+        setToken(result.token);
+        setUser(result.user);
+        return { success: true };
+      } catch (tRPCError: any) {
+        console.log('AuthProvider - tRPC login failed, trying direct API:', tRPCError.message);
+        
+        // Fallback to direct API call in production
+        if (import.meta.env.PROD) {
+          try {
+            const response = await fetch('https://dietkem.onrender.com/api/auth/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ email, password }),
+            });
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const text = await response.text();
+            if (!text) {
+              throw new Error('Empty response from API');
+            }
+            
+            const result = JSON.parse(text);
+            console.log('AuthProvider - Login successful via direct API');
+            
+            try {
+              localStorage.setItem('token', result.token);
+            } catch {
+              console.warn('AuthProvider - Could not save token to localStorage');
+            }
+            setToken(result.token);
+            setUser(result.user);
+            return { success: true };
+          } catch (directApiError: any) {
+            console.log('AuthProvider - Direct API login also failed:', directApiError.message);
+            throw tRPCError; // Throw the original tRPC error
+          }
+        } else {
+          throw tRPCError;
+        }
       }
-      setToken(result.token);
-      setUser(result.user);
-      return { success: true };
     } catch (error: any) {
       console.log('AuthProvider - Login error:', error.message);
       return { 

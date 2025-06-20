@@ -12,6 +12,7 @@ import { db } from '@dietkem/db';
 import { users } from '@dietkem/db/src/schema';
 import { eq } from 'drizzle-orm';
 import recipesRouter from './routers/recipes';
+import jwt from 'jsonwebtoken';
 
 // Debug environment variables
 console.log('Environment variables:', {
@@ -58,6 +59,63 @@ app.use('/api/auth', (req, res, next) => {
 // Register endpoint
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// Direct login endpoint for fallback
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Missing email or password' });
+  }
+  
+  try {
+    console.log('Direct login attempt for:', email);
+    
+    // Find user by email
+    const user = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (!user || !user.password) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Generate JWT token
+    const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+    const token = jwt.sign(
+      { 
+        userId: user.id, 
+        email: user.email,
+        role: user.role 
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    console.log('Direct login successful for:', email);
+
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role,
+        avatar_url: user.avatar_url,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error('Direct login error:', error);
+    return res.status(500).json({ error: 'Login failed' });
+  }
+});
+
 app.post('/api/register', async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password || !name) {
