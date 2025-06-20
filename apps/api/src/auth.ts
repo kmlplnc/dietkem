@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { UserRole } from './middleware/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -90,7 +90,7 @@ export const authOptions = {
   pages: {
     signIn: '/auth/login',
   },
-  secret: JWT_SECRET,
+  secret: NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

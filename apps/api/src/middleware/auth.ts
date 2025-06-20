@@ -4,7 +4,7 @@ import { users } from '@dietkem/db/src/schema';
 import { eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
 
 // Define user roles
 export type UserRole =
@@ -42,7 +42,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     }
 
     // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, NEXTAUTH_SECRET) as any;
     
     // Get user from database
     const user = await db.query.users.findFirst({

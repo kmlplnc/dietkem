@@ -15,7 +15,7 @@ import jwt from 'jsonwebtoken';
 // Debug environment variables
 console.log('Environment variables:', {
   RESEND_API_KEY: process.env.RESEND_API_KEY ? 'Set' : 'Not set',
-  JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set',
+  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? 'Set' : 'Not set',
   DATABASE_URL: process.env.DATABASE_URL ? 'Set' : 'Not set'
 });
 
@@ -89,14 +89,14 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     // Generate JWT token
-    const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+    const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
     const token = jwt.sign(
       { 
         userId: user.id, 
         email: user.email,
         role: user.role 
       },
-      JWT_SECRET,
+      NEXTAUTH_SECRET,
       { expiresIn: '7d' }
     );
 
