@@ -384,9 +384,10 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
   console.log('ClientDetail - latestMeasurement:', latestMeasurement);
   
   // BMI, BMR ve TDEE hesaplamaları
-  const bmi = currentWeight !== null && currentWeight !== undefined && client.height_cm !== null && client.height_cm !== undefined ? calculateBMI(currentWeight, Number(client.height_cm)) : null;
-  const bmr = currentWeight !== null && currentWeight !== undefined && client.height_cm !== null && client.height_cm !== undefined && client.birth_date && client.gender ? 
-    calculateBMR(currentWeight, Number(client.height_cm), calculateAge(client.birth_date), client.gender) : null;
+  const heightNumber = client.height_cm ? parseFloat(String(client.height_cm)) : null;
+  const bmi = currentWeight !== null && currentWeight !== undefined && heightNumber !== null && !isNaN(heightNumber) ? calculateBMI(currentWeight, heightNumber) : null;
+  const bmr = currentWeight !== null && currentWeight !== undefined && heightNumber !== null && !isNaN(heightNumber) && client.birth_date && client.gender ? 
+    calculateBMR(currentWeight, heightNumber, calculateAge(client.birth_date), client.gender) : null;
   const tdee = bmr ? calculateTDEE(bmr, client.activity_level || 'sedentary') : null;
 
   if (showProgress && client) {
