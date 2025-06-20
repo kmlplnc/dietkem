@@ -3,9 +3,7 @@ import { db } from '@dietkem/db';
 import { users } from '@dietkem/db/src/schema';
 import { TRPCError } from '@trpc/server';
 import { eq, or, desc } from 'drizzle-orm';
-import { clerkClient } from '@clerk/clerk-sdk-node';
 import { z } from 'zod';
-import { syncUserWithDatabase } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 
 // Create a middleware to check if user is authenticated
@@ -78,80 +76,14 @@ export const usersRouter = router({
         }
 
         // For JWT authentication, get user directly from database
-        if (ctx.authType === 'jwt') {
-          const user = await db.query.users.findFirst({
-            where: eq(users.id, parseInt(ctx.userId)),
-          });
-
-          if (!user) {
-            throw new TRPCError({
-              code: 'NOT_FOUND',
-              message: 'User not found in database',
-            });
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unnamed User',
-            role: user.role,
-            avatar_url: user.avatar_url,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            created_at: user.created_at,
-          };
-        }
-
-        // For Clerk authentication, try to get user from database first
-        let user = await db.query.users.findFirst({
-          where: eq(users.clerk_id, ctx.userId),
+        const user = await db.query.users.findFirst({
+          where: eq(users.id, parseInt(ctx.userId)),
         });
-
-        if (!user) {
-          // If not found by clerk_id, try to get from Clerk and sync
-          try {
-            const clerkUser = await ctx.clerk.users.getUser(ctx.userId);
-            
-            // Try to find by email as fallback
-            user = await db.query.users.findFirst({
-              where: eq(users.email, clerkUser.emailAddresses[0]?.emailAddress || ''),
-            });
-
-            if (!user) {
-              // Create new user if not found
-              const [newUser] = await db.insert(users).values({
-                clerk_id: ctx.userId,
-                email: clerkUser.emailAddresses[0]?.emailAddress || '',
-                role: 'subscriber_basic',
-                first_name: clerkUser.firstName || '',
-                last_name: clerkUser.lastName || '',
-                avatar_url: 'https://res.cloudinary.com/dietkem/image/upload/v1/avatar.jpg',
-              }).returning();
-
-              user = newUser;
-            } else if (!user.clerk_id) {
-              // Update existing user with clerk_id
-              await db.update(users)
-                .set({ 
-                  clerk_id: ctx.userId,
-                  first_name: clerkUser.firstName || user.first_name,
-                  last_name: clerkUser.lastName || user.last_name,
-                })
-                .where(eq(users.id, user.id));
-            }
-          } catch (clerkError) {
-            console.error('Error fetching from Clerk:', clerkError);
-            throw new TRPCError({
-              code: 'NOT_FOUND',
-              message: 'User not found in database',
-            });
-          }
-        }
 
         if (!user) {
           throw new TRPCError({
             code: 'NOT_FOUND',
-            message: 'User not found in database',
+            message: 'User not found',
           });
         }
 
@@ -201,46 +133,8 @@ export const usersRouter = router({
     .query(async ({ ctx }) => {
       try {
         // For JWT authentication, get user directly from database
-        if (ctx.authType === 'jwt') {
-          const user = await db.query.users.findFirst({
-            where: eq(users.id, parseInt(ctx.userId)),
-          });
-
-          if (!user) {
-            throw new TRPCError({
-              code: 'NOT_FOUND',
-              message: 'User not found',
-            });
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            createdAt: user.created_at,
-            firstName: user.first_name,
-            lastName: user.last_name,
-            avatar_url: user.avatar_url,
-          };
-        }
-
-        // For Clerk authentication
-        const clerkUser = await clerkClient.users.getUser(ctx.userId);
-        const userEmail = clerkUser.emailAddresses[0]?.emailAddress;
-
-        if (!userEmail) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'User email not found',
-          });
-        }
-
-        // Try to find user by clerk_id first, then by email
         const user = await db.query.users.findFirst({
-          where: or(
-            eq(users.clerk_id, ctx.userId),
-            eq(users.email, userEmail)
-          ),
+          where: eq(users.id, parseInt(ctx.userId)),
         });
 
         if (!user) {

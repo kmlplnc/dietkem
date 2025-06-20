@@ -119,7 +119,10 @@ app.post('/api/auth/login', async (req, res) => {
     return res.json(response);
   } catch (error) {
     console.error('Direct login error:', error);
-    return res.status(500).json({ error: 'Login failed', details: error.message });
+    return res.status(500).json({ 
+      error: 'Login failed', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    });
   }
 });
 
@@ -156,7 +159,7 @@ app.use('/api/recipes', recipesRouter);
 // Blog endpoints for direct API access
 app.get('/api/blogs', (req, res) => {
   // Şimdilik örnek veri
-  const samplePosts = [
+  const samplePosts: any[] = [
     // Eğer hiç blog kalmasın isteniyorsa, bu satırı boş bırak:
     //
     // Eğer orijinal 3 örnek blog kalacaksa, aşağıdaki gibi bırakabilirsiniz:
@@ -181,7 +184,7 @@ app.get('/api/blogs/:id', (req, res) => {
   const { id } = req.params;
   
   // Şimdilik örnek veri
-  const samplePosts = [
+  const samplePosts: any[] = [
     // Eğer hiç blog kalmasın isteniyorsa, bu satırı boş bırak:
     //
     // Eğer orijinal 3 örnek blog kalacaksa, aşağıdaki gibi bırakabilirsiniz:

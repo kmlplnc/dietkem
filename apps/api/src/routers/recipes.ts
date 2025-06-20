@@ -88,7 +88,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const recipeId = parseInt(req.params.id);
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
     // Tarif bilgilerini al
     const recipe = await db
@@ -200,7 +200,7 @@ router.post('/', authenticateToken, async (req, res) => {
       categories: recipeCategories,
     } = req.body;
 
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'Kullanıcı kimliği gerekli' });
@@ -286,7 +286,7 @@ router.post('/', authenticateToken, async (req, res) => {
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const recipeId = parseInt(req.params.id);
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'Kullanıcı kimliği gerekli' });
@@ -347,7 +347,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const recipeId = parseInt(req.params.id);
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'Kullanıcı kimliği gerekli' });
@@ -400,7 +400,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 router.post('/:id/favorite', authenticateToken, async (req, res) => {
   try {
     const recipeId = parseInt(req.params.id);
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: 'Kullanıcı kimliği gerekli' });
@@ -445,7 +445,7 @@ router.post('/:id/favorite', authenticateToken, async (req, res) => {
 router.post('/:id/rate', authenticateToken, async (req, res) => {
   try {
     const recipeId = parseInt(req.params.id);
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     const { rating, comment } = req.body;
 
     if (!userId) {
