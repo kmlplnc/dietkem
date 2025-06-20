@@ -61,6 +61,22 @@ export interface RecipesResponse {
   };
 }
 
+// Güvenli JSON parsing fonksiyonu
+const safeJsonParse = async (response: Response) => {
+  try {
+    const text = await response.text();
+    if (!text) {
+      throw new Error('Empty response');
+    }
+    return JSON.parse(text);
+  } catch (error) {
+    console.error('JSON parsing error:', error);
+    console.error('Response status:', response.status);
+    console.error('Response text:', await response.text());
+    throw new Error(`Invalid JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
 // Tüm tarifleri getir
 export const fetchRecipes = async (
   page: number = 1,
@@ -85,7 +101,7 @@ export const fetchRecipes = async (
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return await safeJsonParse(response);
   } catch (error) {
     console.error('Error fetching recipes:', error);
     throw error;
@@ -112,7 +128,7 @@ export const fetchRecipeById = async (id: number): Promise<Recipe> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return await safeJsonParse(response);
   } catch (error) {
     console.error('Error fetching recipe:', error);
     throw error;
@@ -139,7 +155,7 @@ export const toggleFavorite = async (recipeId: number): Promise<{ message: strin
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return await safeJsonParse(response);
   } catch (error) {
     console.error('Error toggling favorite:', error);
     throw error;
@@ -167,7 +183,7 @@ export const rateRecipe = async (recipeId: number, rating: number, comment?: str
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return await safeJsonParse(response);
   } catch (error) {
     console.error('Error rating recipe:', error);
     throw error;
@@ -183,7 +199,7 @@ export const fetchCategories = async (): Promise<Category[]> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return await safeJsonParse(response);
   } catch (error) {
     console.error('Error fetching categories:', error);
     throw error;
@@ -199,7 +215,7 @@ export const fetchIngredients = async (): Promise<RecipeIngredient[]> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return await safeJsonParse(response);
   } catch (error) {
     console.error('Error fetching ingredients:', error);
     throw error;
@@ -221,7 +237,7 @@ export const deleteRecipe = async (recipeId: number): Promise<{ message: string 
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return await safeJsonParse(response);
   } catch (error) {
     console.error('Error deleting recipe:', error);
     throw error;

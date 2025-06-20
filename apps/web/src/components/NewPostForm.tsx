@@ -67,13 +67,24 @@ const NewPostForm = ({ onSubmit }: NewPostFormProps) => {
           method: 'POST',
           body: formData,
         });
-        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(`Upload failed: ${res.status}`);
+        }
+        
+        const text = await res.text();
+        if (!text) {
+          throw new Error('Empty response from upload service');
+        }
+        
+        const data = JSON.parse(text);
         if (data.secure_url) {
           setImageUrl(data.secure_url);
         } else {
           setUploadError('Görsel yüklenemedi.');
         }
       } catch (err) {
+        console.error('Image upload error:', err);
         setUploadError('Görsel yüklenemedi.');
       } finally {
         setIsUploading(false);

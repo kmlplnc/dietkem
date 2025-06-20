@@ -37,7 +37,17 @@ const AdminBlogs = () => {
     try {
       // TRPC endpointinden blog yazılarını getir
       const response = await fetch('/api/trpc/blogs.getAll');
-      const trpcResult = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const text = await response.text();
+      if (!text) {
+        throw new Error('Empty response from API');
+      }
+      
+      const trpcResult = JSON.parse(text);
       console.log('TRPC result:', trpcResult); // Debug için log
       setPosts(trpcResult.result?.data || []);
     } catch (error) {

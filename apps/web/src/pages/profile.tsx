@@ -84,27 +84,39 @@ const ProfilePage = () => {
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setUploading(true);
-    setAvatarSuccess(null);
     setError(null);
+    setAvatarSuccess(null);
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('upload_preset', 'dietkem_avatars');
 
     try {
       const res = await fetch(CLOUDINARY_UPLOAD_URL, {
         method: 'POST',
         body: formData,
       });
-      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(`Upload failed: ${res.status}`);
+      }
+      
+      const text = await res.text();
+      if (!text) {
+        throw new Error('Empty response from upload service');
+      }
+      
+      const data = JSON.parse(text);
       if (data.secure_url) {
         setAvatarUrl(data.secure_url);
         updateAvatar.mutate({ avatarUrl: data.secure_url });
       } else {
         setError(currentLang === 'tr' ? 'Yükleme başarısız' : 'Upload failed');
       }
-    } catch {
+    } catch (error) {
+      console.error('Avatar upload error:', error);
       setError(currentLang === 'tr' ? 'Yükleme başarısız' : 'Upload failed');
     } finally {
       setUploading(false);
