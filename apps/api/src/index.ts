@@ -2,10 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
-// CLERK_DISABLED_TEMP: import { ClerkExpressWithAuth } from '@clerk/clerk-sdk-node';
 import { appRouter } from './router';
 import { createContext } from './context';
-import { handleClerkWebhook } from './webhooks/clerk';
 import nextAuthHandler from './auth';
 import bcrypt from 'bcryptjs';
 import { db } from '@dietkem/db';
@@ -16,10 +14,9 @@ import jwt from 'jsonwebtoken';
 
 // Debug environment variables
 console.log('Environment variables:', {
-  CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ? 'Set' : 'Not set',
-  CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY ? 'Set' : 'Not set',
-  CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET ? 'Set' : 'Not set',
-  RESEND_API_KEY: process.env.RESEND_API_KEY ? 'Set' : 'Not set'
+  RESEND_API_KEY: process.env.RESEND_API_KEY ? 'Set' : 'Not set',
+  JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set',
+  DATABASE_URL: process.env.DATABASE_URL ? 'Set' : 'Not set'
 });
 
 const app = express();
@@ -43,11 +40,6 @@ app.get('/trpc', (req, res) => {
     availableProcedures: Object.keys(appRouter._def.procedures)
   });
 });
-
-// CLERK_DISABLED_TEMP: app.use(ClerkExpressWithAuth());
-
-// Register webhook route
-// CLERK_DISABLED_TEMP: app.post('/webhooks/clerk', express.json({ limit: '10mb' }), handleClerkWebhook);
 
 // NextAuth.js route
 app.use('/api/auth', (req, res, next) => {
