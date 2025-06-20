@@ -4,8 +4,23 @@ import type { AppRouter } from '@dietkem/api-types';
 
 export const trpc = createTRPCReact<AppRouter>();
 
-// Function to find the API server port
+// Function to get the API URL based on environment
+const getApiUrl = () => {
+  // In production (Render), use the environment variable
+  if (import.meta.env.PROD) {
+    return import.meta.env.VITE_API_URL || 'https://your-render-api-url.onrender.com';
+  }
+  
+  // In development, use localhost
+  return 'http://localhost:3001';
+};
+
+// Function to find the API server port (development only)
 const findApiPort = async (): Promise<number> => {
+  if (import.meta.env.PROD) {
+    return 3001; // Not used in production
+  }
+  
   const ports = [3001, 3002, 3003, 3004, 3005];
   
   for (const port of ports) {
@@ -28,11 +43,14 @@ const findApiPort = async (): Promise<number> => {
 
 // Create a function that returns a new tRPC client with the latest token
 export const createTRPCClient = async () => {
+  const apiUrl = getApiUrl();
+  console.log('tRPC client using API URL:', apiUrl);
+  
   const client = trpc.createClient({
     links: [
       httpBatchLink({
-        // Use the Vite proxy instead of direct connection
-        url: '/trpc',
+        // Use the appropriate URL based on environment
+        url: import.meta.env.PROD ? `${apiUrl}/trpc` : '/trpc',
         fetch: async (url, options) => {
           const currentToken = localStorage.getItem('token');
           
@@ -47,11 +65,15 @@ export const createTRPCClient = async () => {
             ...(currentToken && { Authorization: `Bearer ${currentToken}` }),
           };
           
+          console.log('tRPC fetch request:', url, { headers });
+          
           try {
             const response = await fetch(url, {
               ...options,
               headers,
             });
+            
+            console.log('tRPC response status:', response.status, response.statusText);
             
             // Check if response is ok
             if (!response.ok) {
@@ -61,6 +83,8 @@ export const createTRPCClient = async () => {
             
             // Check if response has content
             const text = await response.text();
+            console.log('tRPC response text length:', text.length);
+            
             if (!text) {
               console.error('tRPC empty response');
               throw new Error('Empty response from server');
