@@ -42,7 +42,7 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
 
   // Ölçümleri API'den çek
   const { data: measurementsData = [], isLoading: measurementsLoading } = trpc.measurements.getByClientId.useQuery(
-    { client_id: clientId! },
+    { client_id: Number(clientId) },
     { enabled: !!clientId }
   );
 
@@ -384,8 +384,8 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
   console.log('ClientDetail - latestMeasurement:', latestMeasurement);
   
   // BMI, BMR ve TDEE hesaplamaları
-  const bmi = currentWeight !== null && currentWeight !== undefined && client.height_cm !== null ? calculateBMI(currentWeight, Number(client.height_cm)) : null;
-  const bmr = currentWeight !== null && currentWeight !== undefined && client.height_cm !== null && client.birth_date && client.gender ? 
+  const bmi = currentWeight !== null && currentWeight !== undefined && client.height_cm !== null && client.height_cm !== undefined ? calculateBMI(currentWeight, Number(client.height_cm)) : null;
+  const bmr = currentWeight !== null && currentWeight !== undefined && client.height_cm !== null && client.height_cm !== undefined && client.birth_date && client.gender ? 
     calculateBMR(currentWeight, Number(client.height_cm), calculateAge(client.birth_date), client.gender) : null;
   const tdee = bmr ? calculateTDEE(bmr, client.activity_level || 'sedentary') : null;
 
