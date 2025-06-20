@@ -1,3 +1,9 @@
+import NextAuth from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { db } from '@dietkem/db';
+import { users } from '@dietkem/db/src/schema';
+import { eq } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { UserRole } from './middleware/auth';
@@ -14,32 +20,79 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1];
+export const authOptions = {
+  providers: [
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
 
-  if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
-  }
+        try {
+          // Find user by email
+          const user = await db.query.users.findFirst({
+            where: eq(users.email, credentials.email),
+          });
 
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    req.user = {
-      id: decoded.userId,
-      email: decoded.email,
-      role: decoded.role as UserRole,
-      first_name: decoded.first_name || '',
-      last_name: decoded.last_name || '',
-    };
-    next();
-  } catch (error) {
-    return res.status(403).json({ error: 'Invalid token' });
-  }
+          if (!user || !user.password) {
+            return null;
+          }
+
+          // Verify password
+          const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+          if (!isValidPassword) {
+            return null;
+          }
+
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'User',
+            role: user.role,
+            first_name: user.first_name,
+            last_name: user.last_name,
+          };
+        } catch (error) {
+          console.error('Auth error:', error);
+          return null;
+        }
+      }
+    })
+  ],
+  session: {
+    strategy: 'jwt',
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.first_name = user.first_name;
+        token.last_name = user.last_name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.sub;
+        session.user.role = token.role;
+        session.user.first_name = token.first_name;
+        session.user.last_name = token.last_name;
+      }
+      return session;
+    }
+  },
+  pages: {
+    signIn: '/auth/login',
+  },
+  secret: JWT_SECRET,
 };
 
-// Simple handler for compatibility with existing code
-const handler = (req: Request, res: Response) => {
-  res.status(404).json({ error: 'Auth endpoint not implemented' });
-};
+const handler = NextAuth(authOptions);
 
 export default handler; 
