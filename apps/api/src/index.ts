@@ -24,11 +24,24 @@ console.log('Environment variables:', {
 const app = express();
 
 // Enable CORS
-debugger;
 app.use(cors({
   origin: '*', // Geliştirme için tüm originlere izin ver
   credentials: true
 }));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// tRPC health check endpoint
+app.get('/trpc', (req, res) => {
+  res.json({ 
+    status: 'tRPC endpoint is working',
+    timestamp: new Date().toISOString(),
+    availableProcedures: Object.keys(appRouter._def.procedures)
+  });
+});
 
 // CLERK_DISABLED_TEMP: app.use(ClerkExpressWithAuth());
 
@@ -75,21 +88,32 @@ app.post('/api/register', async (req, res) => {
 // Recipes routes
 app.use('/api/recipes', recipesRouter);
 
-// Create tRPC middleware
+// Create tRPC middleware with better error handling
 const trpcMiddleware = createExpressMiddleware({
   router: appRouter,
   createContext,
-  onError: ({ error, type, path, input }) => {
-    console.error('tRPC error:', { error, type, path, input });
+  onError: ({ error, type, path, input, ctx, req }) => {
+    console.error('tRPC error:', { 
+      error: error.message, 
+      code: error.code,
+      type, 
+      path, 
+      input,
+      url: req.url,
+      method: req.method,
+      headers: req.headers
+    });
+    
     if (error.code === 'UNAUTHORIZED') {
       return {
         status: 401,
         body: { error: 'Unauthorized' }
       };
     }
+    
     return {
       status: 500,
-      body: { error: 'Internal server error' }
+      body: { error: 'Internal server error', message: error.message }
     };
   }
 });
@@ -100,4 +124,6 @@ app.use('/trpc', trpcMiddleware);
 const port = process.env.PORT ? Number(process.env.PORT) : 3001;
 app.listen(port, () => {
   console.log(`API server listening on port ${port}`);
+  console.log(`Health check: http://localhost:${port}/health`);
+  console.log(`tRPC endpoint: http://localhost:${port}/trpc`);
 }); 
