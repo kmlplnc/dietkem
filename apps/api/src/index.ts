@@ -62,8 +62,13 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Direct login endpoint for fallback
 app.post('/api/auth/login', async (req, res) => {
+  console.log('=== Direct login endpoint called ===');
+  console.log('Request body:', req.body);
+  console.log('Request headers:', req.headers);
+  
   const { email, password } = req.body;
   if (!email || !password) {
+    console.log('Missing email or password');
     return res.status(400).json({ error: 'Missing email or password' });
   }
   
@@ -75,13 +80,19 @@ app.post('/api/auth/login', async (req, res) => {
       where: eq(users.email, email),
     });
 
+    console.log('User found:', user ? 'Yes' : 'No');
+
     if (!user || !user.password) {
+      console.log('Invalid user or password');
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
+    console.log('Password valid:', isValidPassword);
+    
     if (!isValidPassword) {
+      console.log('Invalid password');
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
@@ -98,8 +109,9 @@ app.post('/api/auth/login', async (req, res) => {
     );
 
     console.log('Direct login successful for:', email);
+    console.log('Generated token length:', token.length);
 
-    return res.json({
+    const response = {
       user: {
         id: user.id,
         email: user.email,
@@ -109,10 +121,13 @@ app.post('/api/auth/login', async (req, res) => {
         avatar_url: user.avatar_url,
       },
       token,
-    });
+    };
+
+    console.log('Sending response:', JSON.stringify(response, null, 2));
+    return res.json(response);
   } catch (error) {
     console.error('Direct login error:', error);
-    return res.status(500).json({ error: 'Login failed' });
+    return res.status(500).json({ error: 'Login failed', details: error.message });
   }
 });
 
