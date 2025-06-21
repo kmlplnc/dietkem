@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { trpc } from '../utils/trpc';
 import AddMeasurementModal from '../components/AddMeasurementModal';
 import toast, { Toaster } from 'react-hot-toast';
+import ConsultationsButton from '../components/ConsultationsButton';
 
 interface ClientsPageProps {
   onClientDetail?: (clientId: number) => void;
@@ -185,6 +186,11 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
                   </svg>
                   Detay
                 </button>
+                
+                <ConsultationsButton 
+                  clientId={client.id}
+                  clientName={client.name}
+                />
                 
                 <button 
                   onClick={() => handleNewMeasurement(client.id)}
