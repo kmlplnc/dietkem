@@ -81,11 +81,6 @@ const RealNavbar = () => {
                 <Link className="dropdown-item" to="/profile">
                   Profil
                 </Link>
-                {(isDietitian || isAdmin) && (
-                  <Link className="dropdown-item" to="/dietitian-panel">
-                    Diyetisyen Paneli
-                  </Link>
-                )}
                 {isAdmin && (
                   <Link className="dropdown-item" to="/admin">
                     Admin Paneli
