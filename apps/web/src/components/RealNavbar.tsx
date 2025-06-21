@@ -55,6 +55,7 @@ const RealNavbar = () => {
           {(isDietitian || isAdmin) && (
             <Link className="nav-link" to="/dietitian-panel">Diyetisyen Paneli</Link>
           )}
+          <Link className="nav-link" to="/client-access">Danışan Paneli</Link>
           <Link className="nav-link" to="/abonelikler">Abonelikler</Link>
         </nav>
         <div className="right-section">
@@ -135,6 +136,8 @@ const RealNavbar = () => {
           align-items: center;
           gap: 0.75rem;
           flex-shrink: 0;
+          flex: 1;
+          justify-content: flex-start;
         }
         .logo-img {
           height: 42px !important;
@@ -152,9 +155,9 @@ const RealNavbar = () => {
           display: flex;
           align-items: center;
           gap: 2rem;
-          flex: 1;
+          flex: 2;
           justify-content: center;
-          margin: 0 1rem;
+          margin: 0;
         }
         .nav-link {
           text-decoration: none;
@@ -188,6 +191,8 @@ const RealNavbar = () => {
           align-items: center;
           gap: 1rem;
           flex-shrink: 0;
+          flex: 1;
+          justify-content: flex-end;
         }
         .language-switcher {
           display: flex;

@@ -11,10 +11,14 @@ interface ClientDetailProps {
 
 const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => {
   const navigate = useNavigate();
-  const params = useParams();
   
-  // Props'tan gelen clientId'yi veya URL'den gelen id'yi kullan
-  const clientId = propClientId || params.id;
+  // Props'tan gelen clientId'yi kullan
+  const clientId = propClientId;
+  
+  console.log('ClientDetail - propClientId:', propClientId);
+  console.log('ClientDetail - Final clientId:', clientId);
+  console.log('ClientDetail - clientId type:', typeof clientId);
+  console.log('ClientDetail - clientId truthy:', !!clientId);
   
   const [isActive, setIsActive] = useState(true);
   const [dietitianNotes, setDietitianNotes] = useState('');
@@ -151,11 +155,45 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
     return Math.round(bmr * multiplier);
   };
 
+  // Danışan erişim kodu oluşturma fonksiyonu
+  const generateAccessCode = (clientId: number) => {
+    // Basit bir hash algoritması - gerçek uygulamada daha güvenli olmalı
+    const salt = 'DIETKEM2024'; // Salt değeri
+    const combined = `${clientId}${salt}`;
+    
+    // Basit hash oluştur
+    let hash = 0;
+    for (let i = 0; i < combined.length; i++) {
+      const char = combined.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // 32-bit integer'a çevir
+    }
+    
+    // Hash'i pozitif yap ve 6 haneli koda çevir
+    const positiveHash = Math.abs(hash);
+    const base36 = positiveHash.toString(36).toUpperCase();
+    
+    // 6 haneli kod oluştur (sayı ve harf karışımı)
+    let code = '';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    
+    // Hash'ten 6 karakter seç
+    for (let i = 0; i < 6; i++) {
+      const index = (positiveHash + i * 7) % chars.length;
+      code += chars[index];
+    }
+    
+    return code;
+  };
+
+  // Danışan erişim kodunu oluştur
+  const accessCode = client ? generateAccessCode(client.id) : '';
+
   const handleBack = () => {
     if (onBack) {
       onBack();
     } else {
-      // Fallback: Eğer onBack prop'u yoksa eski yöntemi kullan
+      // Fallback: Eğer onBack prop'u yoksa dietitian panel'e geri dön
       navigate('/dietitian-panel?tab=clients');
     }
   };
@@ -517,6 +555,22 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
               <div className="info-group">
                 <h4 className="group-title">📋 Temel Bilgiler</h4>
                 <div className="info-items">
+                  <div className="info-item">
+                    <span className="item-label">Danışan Kodu</span>
+                    <span className="item-value access-code">
+                      <span className="code-display">{accessCode}</span>
+                      <button 
+                        className="copy-btn"
+                        onClick={() => {
+                          navigator.clipboard.writeText(accessCode);
+                          toast.success('Kod kopyalandı!');
+                        }}
+                        title="Kodu kopyala"
+                      >
+                        📋
+                      </button>
+                    </span>
+                  </div>
                   <div className="info-item">
                     <span className="item-label">Cinsiyet</span>
                     <span className="item-value">
@@ -1298,6 +1352,35 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
 
         .editable-select {
           cursor: pointer;
+        }
+
+        .access-code {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .code-display {
+          font-weight: 600;
+          color: #1e293b;
+          font-size: 0.9rem;
+        }
+
+        .copy-btn {
+          background: none;
+          border: none;
+          padding: 0.25rem;
+          cursor: pointer;
+          font-size: 1rem;
+          color: #6b7280;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+          background: #f3f4f6;
+          color: #374151;
+          transform: scale(1.1);
         }
 
         @media (max-width: 768px) {

@@ -45,6 +45,8 @@ import CalorieCalculator from './pages/calorie-calculator';
 import DietitianPanel from './pages/dietitian-panel';
 import ClientsPage from './pages/ClientsPage';
 import ClientDetail from './pages/ClientDetail';
+import ClientAccess from './pages/client-access';
+import ClientDashboard from './pages/client-dashboard';
 
 function AppRoutes() {
   return (
@@ -138,6 +140,8 @@ function AppRoutes() {
         <Route path="/calorimatik" element={<CalorieCalculator />} />
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/client-detail/:id" element={<ClientDetail />} />
+        <Route path="/client-access" element={<ClientAccess />} />
+        <Route path="/client/:clientId" element={<ClientDashboard />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>

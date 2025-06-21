@@ -5,12 +5,15 @@
   --primary-color: #1e3a8a;
   --primary-hover: #1d4ed8;
   --sidebar-bg: #1f2937;
+  --sidebar-hover: #374151;
   --main-bg: #f3f4f6;
   --text-primary: #0f172a;
   --text-secondary: #64748b;
   --text-light: #e5e7eb;
   --border-color: #e5e7eb;
   --card-bg: #ffffff;
+  --accent: #3b82f6;
+  --danger: #ef4444;
   
   /* Shadows */
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -37,7 +40,7 @@ body {
 .dashboard {
   display: flex;
   min-height: 100vh;
-  background: var(--background);
+  background: var(--main-bg);
 }
 
 /* Sidebar Styles */
@@ -195,7 +198,8 @@ body {
   gap: 2rem;
 }
 
-section {
+/* Dashboard Section Styles */
+.dashboard-content section {
   background: var(--card-bg);
   border-radius: 10px;
   padding: 1.75rem;
@@ -203,7 +207,7 @@ section {
   border: 1px solid var(--border-color);
 }
 
-section h2 {
+.dashboard-content section h2 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -460,37 +464,24 @@ section h2 {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1.25rem;
+  margin-bottom: 16px;
 }
 
 .consultation-client-card .client-name {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1e293b;
   margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
   flex: 1;
-  line-height: 1.4;
 }
 
 .consultation-client-card .client-status {
-  padding: 0.375rem 0.875rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  display: none;
 }
 
-.consultation-client-card .client-status.active {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
+.consultation-client-card .client-status.active,
 .consultation-client-card .client-status.passive {
-  background: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fed7aa;
+  display: none;
 }
 
 .consultation-client-card .client-info {
@@ -1150,4 +1141,883 @@ section h2 {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Edit Button */
+.edit-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.edit-btn:hover {
+  opacity: 1;
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: scale(1.1);
+}
+
+/* Card Header and Content */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-icon {
+  font-size: 20px;
+}
+
+.date-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.date {
+  font-weight: 700;
+  font-size: 16px;
+  color: #3b82f6;
+}
+
+.day {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.time-info, .type-info, .notes-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.time-icon, .type-icon, .notes-icon {
+  font-size: 16px;
+}
+
+.time {
+  font-weight: 600;
+  color: #374151;
+}
+
+.type {
+  font-weight: 500;
+  color: #374151;
+}
+
+.notes {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.status-info {
+  margin-top: 4px;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-scheduled {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-completed {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-cancelled {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.modal-form {
+  padding: 0 24px 24px 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background-color: #e5e7eb;
+}
+
+/* Loading and Empty States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.countdown-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 12px;
+  border: 1px solid #f59e0b;
+}
+
+.countdown-icon {
+  font-size: 16px;
+}
+
+.countdown-text {
+  font-weight: 600;
+  color: #92400e;
+  font-size: 13px;
+}
+
+/* Next Consultation Countdown in Client Cards */
+.next-consultation-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.next-consultation-countdown {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #f59e0b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.no-upcoming-consultation {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #6b7280;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Update client header to accommodate countdown */
+.client-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.client-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  flex: 1;
+}
+
+/* Remove old status styles */
+.client-status {
+  display: none;
+}
+
+.client-status.active,
+.client-status.passive {
+  display: none;
+}
+
+/* Urgent Appointment Styles */
+.urgent-appointment {
+  border: 2px solid #ef4444 !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3) !important;
+  animation: urgentPulse 2s infinite;
+}
+
+@keyframes urgentPulse {
+  0% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  }
+}
+
+.countdown-text.urgent {
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+  animation: urgentTextPulse 1s infinite;
+}
+
+@keyframes urgentTextPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.urgent-appointment .countdown-info {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+  border: 1px solid #ef4444 !important;
+}
+
+.urgent-appointment .countdown-icon {
+  animation: urgentIconPulse 1s infinite;
+}
+
+@keyframes urgentIconPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Video Calls Page Styles */
+.video-calls-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 0;
+}
+
+.video-calls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.video-calls-info-banner {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.video-calls-info-banner .info-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.video-calls-info-banner .info-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.video-calls-info-banner .info-content p {
+  margin: 0;
+  font-size: 12px;
+  color: #1e3a8a;
+  line-height: 1.4;
+}
+
+.video-calls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 24px;
+}
+
+/* Video appointment cards will use the same style as consultation cards */
+.video-calls-grid .consultation-client-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #f1f5f9;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-calls-grid .consultation-client-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.video-appointment-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+  aspect-ratio: 1;
+}
+
+.video-appointment-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.video-appointment-card .appointment-header {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.video-appointment-card .client-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.video-appointment-card .appointment-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.video-appointment-card .appointment-time {
+  font-size: 16px;
+  font-weight: 500;
+  color: #3b82f6;
+}
+
+.video-appointment-card .appointment-type {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.video-appointment-card .appointment-actions {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.join-call-btn {
+  width: 100%;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.join-call-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.join-call-btn.active {
+  background: #ef4444;
+}
+
+.video-call-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.video-call-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.video-call-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.leave-call-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.leave-call-btn:hover {
+  background: #dc2626;
+}
+
+.video-call-container {
+  margin-bottom: 16px;
+}
+
+.video-call-info {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.video-call-info p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.video-call-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.video-call-empty .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.video-call-empty h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.video-call-empty p {
+  margin: 0 0 24px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.video-call-empty .empty-help {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: left;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.video-call-empty .empty-help p {
+  margin: 0 0 12px 0;
+  font-weight: 500;
+  color: #475569;
+}
+
+.video-call-empty .empty-help ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #64748b;
+}
+
+.video-call-empty .empty-help li {
+  margin-bottom: 8px;
+}
+
+.video-call-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.video-call-loading .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Form Help Styles */
+.form-help {
+  margin-top: 8px;
+  padding: 12px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+}
+
+.form-help p {
+  margin: 0;
+  font-size: 13px;
+  color: #0369a1;
+  line-height: 1.4;
+}
+
+/* Mobile Responsive for Video Calls */
+@media (max-width: 768px) {
+  .video-calls-info-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+  
+  .video-calls-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .video-call-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .video-call-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .video-call-empty .empty-help {
+    margin: 0 16px;
+  }
+  
+  .video-appointment-card {
+    padding: 20px;
+    min-height: 160px;
+  }
+  
+  .video-appointment-card .client-name {
+    font-size: 16px;
+  }
+  
+  .video-appointment-card .appointment-meta {
+    font-size: 13px;
+  }
+}
+
+/* Appointment Square Card Styles */
+.appointment-square-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  min-width: 220px;
+  max-width: 260px;
+  aspect-ratio: 1/1;
+  margin: 0 auto;
+  text-align: center;
+  gap: 12px;
+  padding: 1.25rem 1rem;
+}
+
+.appointment-date {
+  font-weight: 700;
+  font-size: 20px;
+  color: #3b82f6;
+  margin-bottom: 2px;
+}
+
+.appointment-day-time {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.appointment-type-text {
+  font-weight: 600;
+  font-size: 15px;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.appointment-notes {
+  font-size: 14px;
+  color: #6b7280;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 4px;
+  max-height: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Video Appointment Card Styles */
+.video-appointment-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  min-width: 220px;
+  max-width: 260px;
+  aspect-ratio: 1/1;
+  margin: 0 auto;
+  text-align: center;
+  gap: 12px;
+  padding: 1.25rem 1rem;
+}
+
+.video-appointment-card .appointment-time {
+  font-weight: 700;
+  font-size: 20px;
+  color: #3b82f6;
+  margin-bottom: 2px;
+}
+
+.video-appointment-card .appointment-type {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.video-appointment-card .client-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #374151;
+  margin-bottom: 2px;
 } 

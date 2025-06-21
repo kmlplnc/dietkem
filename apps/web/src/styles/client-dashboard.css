@@ -1,0 +1,406 @@
+/* Client Dashboard Styles */
+.client-dashboard {
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Loading States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e9ecef;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Header */
+.dashboard-header {
+  background: #2d3748;
+  color: white;
+  padding: 2rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #4a5568;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-content h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: white;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #e2e8f0;
+  margin: 0 0 1rem 0;
+}
+
+.greeting {
+  font-size: 1.2rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Main Content */
+.dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* Dashboard Sections */
+.dashboard-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-section h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+  flex-shrink: 0;
+}
+
+.dashboard-section > *:not(h2) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Measurements Grid */
+.measurements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.measurement-item {
+  text-align: center;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.measurement-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.measurement-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.measurement-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.measurement-date {
+  font-size: 0.875rem;
+  color: #6c757d;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Appointment Info */
+.appointment-info {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #3b82f6;
+}
+
+.appointment-date {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.appointment-type {
+  color: #3b82f6;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.appointment-notes {
+  font-size: 0.875rem;
+  color: #6c757d;
+  line-height: 1.5;
+}
+
+.appointment-note {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 0.5rem;
+  background: #e9ecef;
+  border-radius: 6px;
+}
+
+/* Diet Plan */
+.diet-plan {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.diet-plan-content p {
+  margin: 0 0 1rem 0;
+  color: #6c757d;
+}
+
+.diet-plan-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.diet-plan-link {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+  background: #3b82f6;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.diet-plan-link:hover {
+  background: #2563eb;
+}
+
+/* Notes */
+.notes-container {
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.note-item {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.note-item:last-child {
+  border-bottom: none;
+}
+
+.note-content {
+  color: #2d3748;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.note-date {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Consultations List */
+.consultations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.consultation-item {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.consultation-date {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.consultation-type {
+  color: #3b82f6;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.consultation-notes {
+  font-size: 0.875rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+/* Empty States */
+.empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #6c757d;
+}
+
+.empty-state p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* Footer */
+.dashboard-footer {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.btn-logout {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-logout:hover {
+  background: #c82333;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+  
+  .dashboard-section {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: 1.5rem 1rem;
+  }
+  
+  .header-content h1 {
+    font-size: 1.5rem;
+  }
+  
+  .greeting {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .dashboard-content {
+    padding: 0.75rem;
+  }
+  
+  .dashboard-section {
+    padding: 1rem;
+  }
+  
+  .measurements-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .measurement-item {
+    padding: 1rem;
+  }
+  
+  .measurement-value {
+    font-size: 1.5rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .dashboard-content {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  
+  .dashboard-section {
+    padding: 2rem;
+    min-height: 350px;
+  }
+  
+  .measurements-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  
+  .measurement-item {
+    padding: 2rem;
+  }
+} 
