@@ -108,6 +108,10 @@ const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = (
     }
   };
 
+  const truncate = (str: string, n: number) => {
+    return str.length > n ? str.slice(0, n) + '…' : str;
+  };
+
   if (isLoading) {
     return (
       <div className="appointments-content">
@@ -142,25 +146,35 @@ const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = (
     <div className="appointments-content">
       <div className="consultations-grid">
         {consultations.map((consultation) => (
-          <div key={consultation.id} className="consultation-client-card" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '1.5rem', padding: '1.25rem 1.5rem'}}>
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 70}}>
-              <div style={{fontWeight: 700, fontSize: 18, color: '#3b82f6'}}>{formatDate(consultation.consultation_date)}</div>
-              <div style={{fontSize: 13, color: '#64748b'}}>{getDayOfWeek(consultation.consultation_date)}</div>
-              <div style={{fontSize: 13, color: '#64748b'}}>{formatTime(consultation.consultation_time)}</div>
-            </div>
-            <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: 6}}>
-              <div style={{fontWeight: 600, fontSize: 15, color: '#374151'}}>{getConsultationTypeText(consultation.consultation_type)}</div>
-              {consultation.notes && (
-                <div style={{fontSize: 14, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginTop: 4, maxHeight: 48, overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                  {consultation.notes}
-                </div>
-              )}
-            </div>
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 120}}>
-              <span className={`appointment-status status-${consultation.status}`} style={{marginBottom: 8}}>
-                {getStatusText(consultation.status)}
-              </span>
-            </div>
+          <div
+            key={consultation.id}
+            className="consultation-client-card appointment-square-card"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 220,
+              minWidth: 220,
+              maxWidth: 260,
+              aspectRatio: '1/1',
+              margin: '0 auto',
+              textAlign: 'center',
+              gap: 12,
+              padding: '1.25rem 1rem',
+            }}
+          >
+            <div style={{fontWeight: 700, fontSize: 20, color: '#3b82f6', marginBottom: 2}}>{formatDate(consultation.consultation_date)}</div>
+            <div style={{fontSize: 13, color: '#64748b', marginBottom: 2}}>{getDayOfWeek(consultation.consultation_date)} - {formatTime(consultation.consultation_time)}</div>
+            <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>{getConsultationTypeText(consultation.consultation_type)}</div>
+            <span className={`appointment-status status-${consultation.status}`} style={{margin: '8px 0'}}>
+              {getStatusText(consultation.status)}
+            </span>
+            {consultation.notes && (
+              <div style={{fontSize: 14, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginTop: 4, maxHeight: 48, overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                {truncate(consultation.notes, 60)}
+              </div>
+            )}
           </div>
         ))}
       </div>
