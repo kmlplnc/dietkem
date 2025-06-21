@@ -140,34 +140,26 @@ const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = (
 
   return (
     <div className="appointments-content">
-      <div className="appointments-list">
+      <div className="consultations-grid">
         {consultations.map((consultation) => (
-          <div key={consultation.id} className="appointment-card">
-            <div className="appointment-header">
-              <div className="appointment-date-time">
-                <div className="appointment-date-icon">
-                  {getDayOfWeek(consultation.consultation_date)}
-                </div>
-                <div className="appointment-date-info">
-                  <span className="appointment-date">{formatDate(consultation.consultation_date)}</span>
-                  <span className="appointment-time">{formatTime(consultation.consultation_time)}</span>
-                </div>
-              </div>
-              <span className={`appointment-status status-${consultation.status}`}>
-                {getStatusText(consultation.status)}
-              </span>
+          <div key={consultation.id} className="consultation-client-card" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '1.5rem', padding: '1.25rem 1.5rem'}}>
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 70}}>
+              <div style={{fontWeight: 700, fontSize: 18, color: '#3b82f6'}}>{formatDate(consultation.consultation_date)}</div>
+              <div style={{fontSize: 13, color: '#64748b'}}>{getDayOfWeek(consultation.consultation_date)}</div>
+              <div style={{fontSize: 13, color: '#64748b'}}>{formatTime(consultation.consultation_time)}</div>
             </div>
-            
-            <div className="appointment-details">
-              <div className="appointment-type">
-                {getConsultationTypeText(consultation.consultation_type)}
-              </div>
-              
+            <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: 6}}>
+              <div style={{fontWeight: 600, fontSize: 15, color: '#374151'}}>{getConsultationTypeText(consultation.consultation_type)}</div>
               {consultation.notes && (
-                <div className="appointment-notes">
+                <div style={{fontSize: 14, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginTop: 4, maxHeight: 48, overflow: 'hidden', textOverflow: 'ellipsis'}}>
                   {consultation.notes}
                 </div>
               )}
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 120}}>
+              <span className={`appointment-status status-${consultation.status}`} style={{marginBottom: 8}}>
+                {getStatusText(consultation.status)}
+              </span>
             </div>
           </div>
         ))}
