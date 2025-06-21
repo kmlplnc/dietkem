@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
-// CLERK_DISABLED_TEMP: import { useAuth, useUser } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../lib/auth';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { trpc } from '../utils/trpc';
-import CreateClientForm from '../components/CreateClientForm';
-import ClientsPage from './ClientsPage';
-import ClientDetail from './ClientDetail';
-import "./dashboard.css";
+import { useTranslation } from '../hooks/useTranslation';
+import { useLanguage } from '../context/LanguageContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, 
   Users, 
@@ -18,11 +14,16 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import CreateClientForm from '../components/CreateClientForm';
+import ClientsPage from './ClientsPage';
+import ClientDetail from './ClientDetail';
+import "./dashboard.css";
 
 const DietitianPanel = () => {
-  // CLERK_DISABLED_TEMP: const { signOut } = useAuth();
-  // CLERK_DISABLED_TEMP: const { user, isLoaded } = useUser();
+  const { signOut } = useAuth();
+  const { user, isLoaded } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
@@ -31,7 +32,6 @@ const DietitianPanel = () => {
   const [isConsultationsOpen, setIsConsultationsOpen] = useState(false);
   const [selectedClientForConsultations, setSelectedClientForConsultations] = useState<{id: number, name: string} | null>(null);
   const { t } = useLanguage() || { t: (key: string) => key };
-  const { user } = useAuth();
 
   // Danışan sayısını çek
   const { data: clientCount, isLoading: isLoadingClientCount } = trpc.clients.getCount.useQuery();
@@ -39,19 +39,58 @@ const DietitianPanel = () => {
   // Tüm danışanları çek
   const { data: clients, isLoading: isLoadingClients } = trpc.clients.getAll.useQuery();
 
+  // URL'den tab bilgisini al
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+    const view = searchParams.get('view');
+    const clientId = searchParams.get('clientId');
+    const clientName = searchParams.get('clientName');
+    
+    if (tab) {
+      setActiveTab(tab);
+    }
+    
+    if (view && (view === 'list' || view === 'appointments' || view === 'new' || view === 'recent')) {
+      setConsultationView(view);
+    }
+    
+    if (clientId && clientName) {
+      setSelectedClientId(parseInt(clientId));
+      setSelectedClientName(clientName);
+    }
+  }, [location.search]);
+
+  // URL'yi güncelle
+  const updateURL = (tab: string, view?: string, clientId?: number, clientName?: string) => {
+    const searchParams = new URLSearchParams();
+    searchParams.set('tab', tab);
+    
+    if (view) {
+      searchParams.set('view', view);
+    }
+    
+    if (clientId && clientName) {
+      searchParams.set('clientId', clientId.toString());
+      searchParams.set('clientName', clientName);
+    }
+    
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
+  };
+
   const handleSignOut = async () => {
-    // CLERK_DISABLED_TEMP: await signOut();
+    await signOut();
     navigate('/');
   };
 
-  // CLERK_DISABLED_TEMP: if (!isLoaded) {
-  // CLERK_DISABLED_TEMP:   return <div className="loading">{t('dashboard.loading')}</div>;
-  // CLERK_DISABLED_TEMP: }
+  if (!isLoaded) {
+    return <div className="loading">{t('dashboard.loading')}</div>;
+  }
 
-  // CLERK_DISABLED_TEMP: if (!user) {
-  // CLERK_DISABLED_TEMP:   navigate("/sign-in");
-  // CLERK_DISABLED_TEMP:   return null;
-  // CLERK_DISABLED_TEMP: }
+  if (!user) {
+    navigate("/sign-in");
+    return null;
+  }
 
   // Get user display name
   const getUserDisplayName = () => {
@@ -68,12 +107,14 @@ const DietitianPanel = () => {
   const handleClientDetail = (clientId: number) => {
     setSelectedClientId(clientId);
     setActiveTab('client-detail');
+    updateURL('client-detail', undefined, clientId);
   };
 
   // Danışanlar listesine geri dön
   const handleBackToClients = () => {
     setSelectedClientId(null);
     setActiveTab('clients');
+    updateURL('clients');
   };
 
   // Görüşme paneli handler'ları
@@ -82,6 +123,7 @@ const DietitianPanel = () => {
     setSelectedClientName(clientName);
     setIsConsultationsOpen(true);
     setConsultationView('list');
+    updateURL('consultations', 'list', clientId, clientName);
   };
 
   const handleCloseConsultations = () => {
@@ -89,10 +131,12 @@ const DietitianPanel = () => {
     setSelectedClientId(null);
     setSelectedClientName('');
     setConsultationView('list');
+    updateURL('consultations');
   };
 
   const handleConsultationViewChange = (view: 'list' | 'appointments' | 'new' | 'recent') => {
     setConsultationView(view);
+    updateURL('consultations', view, selectedClientId || undefined, selectedClientName || undefined);
   };
 
   const renderContent = () => {
@@ -103,7 +147,10 @@ const DietitianPanel = () => {
             <section className="quick-actions">
               <h2>Hızlı İşlemler</h2>
               <div className="action-cards">
-                <div className="action-card" onClick={() => setActiveTab('new-client')}>
+                <div className="action-card" onClick={() => {
+                  setActiveTab('new-client');
+                  updateURL('new-client');
+                }}>
                   <i className="fas fa-user-plus"></i>
                   <h3>Yeni Danışan</h3>
                   <p>Yeni danışan kaydı oluşturun</p>
@@ -416,7 +463,11 @@ const DietitianPanel = () => {
             <a 
               href="#" 
               className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={(e) => { e.preventDefault(); setActiveTab('dashboard'); }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setActiveTab('dashboard'); 
+                updateURL('dashboard');
+              }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -427,7 +478,11 @@ const DietitianPanel = () => {
             <a 
               href="#" 
               className={`nav-link ${activeTab === 'clients' ? 'active' : ''}`}
-              onClick={(e) => { e.preventDefault(); setActiveTab('clients'); }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setActiveTab('clients'); 
+                updateURL('clients');
+              }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -450,7 +505,11 @@ const DietitianPanel = () => {
             <a 
               href="#" 
               className={`nav-link ${activeTab === 'consultations' ? 'active' : ''}`}
-              onClick={(e) => { e.preventDefault(); setActiveTab('consultations'); }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                setActiveTab('consultations'); 
+                updateURL('consultations');
+              }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
