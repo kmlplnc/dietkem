@@ -86,7 +86,8 @@ export const fetchRecipes = async (
   dishType?: string
 ): Promise<RecipesResponse> => {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://dietkem-api.onrender.com';
+    // Use the proxy instead of environment variable for local development
+    const apiUrl = '/api';
     
     const params = new URLSearchParams({
       page: page.toString(),
@@ -97,7 +98,7 @@ export const fetchRecipes = async (
     if (cuisine) params.append('cuisine', cuisine);
     if (dishType) params.append('dishType', dishType);
 
-    const response = await fetch(`${apiUrl}/api/recipes?${params}`);
+    const response = await fetch(`${apiUrl}/recipes?${params}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
