@@ -187,11 +187,6 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
                   Detay
                 </button>
                 
-                <ConsultationsButton 
-                  clientId={client.id}
-                  clientName={client.name}
-                />
-                
                 <button 
                   onClick={() => handleNewMeasurement(client.id)}
                   className="measurement-btn"

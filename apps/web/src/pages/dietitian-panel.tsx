@@ -7,6 +7,7 @@ import { trpc } from '../utils/trpc';
 import CreateClientForm from '../components/CreateClientForm';
 import ClientsPage from './ClientsPage';
 import ClientDetail from './ClientDetail';
+import ConsultationsPanel from '../components/ConsultationsPanel';
 import "./dashboard.css";
 
 const DietitianPanel = () => {
@@ -16,6 +17,8 @@ const DietitianPanel = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [isConsultationsOpen, setIsConsultationsOpen] = useState(false);
+  const [selectedClientForConsultations, setSelectedClientForConsultations] = useState<{id: number, name: string} | null>(null);
   const { t } = useLanguage() || { t: (key: string) => key };
   const { user } = useAuth();
 
@@ -57,6 +60,18 @@ const DietitianPanel = () => {
   const handleBackToClients = () => {
     setSelectedClientId(null);
     setActiveTab('clients');
+  };
+
+  // Görüşmeler panelini aç
+  const handleOpenConsultations = (clientId: number, clientName: string) => {
+    setSelectedClientForConsultations({ id: clientId, name: clientName });
+    setIsConsultationsOpen(true);
+  };
+
+  // Görüşmeler panelini kapat
+  const handleCloseConsultations = () => {
+    setIsConsultationsOpen(false);
+    setSelectedClientForConsultations(null);
   };
 
   const renderContent = () => {
@@ -123,6 +138,88 @@ const DietitianPanel = () => {
         return <ClientsPage onClientDetail={handleClientDetail} />;
       case 'client-detail':
         return <ClientDetail clientId={selectedClientId} onBack={handleBackToClients} />;
+      case 'consultations':
+        return (
+          <main className="dashboard-content">
+            <header className="topbar">
+              <div className="user-info">
+                <span className="greeting">Görüşmeler</span>
+              </div>
+            </header>
+            
+            <div className="consultations-page">
+              <div className="consultations-header">
+                <h2>Tüm Görüşmeler</h2>
+                <p>Danışanlarınızla yapılan tüm görüşmeleri buradan yönetebilirsiniz.</p>
+              </div>
+              
+              <div className="consultations-list">
+                <div className="consultation-item">
+                  <div className="consultation-client">
+                    <h3>Ayşe Yılmaz</h3>
+                    <span className="client-id">ID: 1</span>
+                  </div>
+                  <div className="consultation-details">
+                    <div className="consultation-date">21.06.2025</div>
+                    <div className="consultation-duration">45 dk</div>
+                    <div className="consultation-status visible">Görünür</div>
+                  </div>
+                  <div className="consultation-notes">
+                    İlk görüşme. Danışanın mevcut beslenme alışkanlıkları değerlendirildi. Hedefler belirlendi ve ilk beslenme planı oluşturuldu.
+                  </div>
+                  <button 
+                    className="view-consultation-btn"
+                    onClick={() => handleOpenConsultations(1, 'Ayşe Yılmaz')}
+                  >
+                    Görüşmeleri Görüntüle
+                  </button>
+                </div>
+                
+                <div className="consultation-item">
+                  <div className="consultation-client">
+                    <h3>Mehmet Demir</h3>
+                    <span className="client-id">ID: 2</span>
+                  </div>
+                  <div className="consultation-details">
+                    <div className="consultation-date">20.06.2025</div>
+                    <div className="consultation-duration">30 dk</div>
+                    <div className="consultation-status visible">Görünür</div>
+                  </div>
+                  <div className="consultation-notes">
+                    Kontrol görüşmesi. Plana uyum iyi, kilo kaybı 2kg. Motivasyon yüksek.
+                  </div>
+                  <button 
+                    className="view-consultation-btn"
+                    onClick={() => handleOpenConsultations(2, 'Mehmet Demir')}
+                  >
+                    Görüşmeleri Görüntüle
+                  </button>
+                </div>
+                
+                <div className="consultation-item">
+                  <div className="consultation-client">
+                    <h3>Fatma Kaya</h3>
+                    <span className="client-id">ID: 3</span>
+                  </div>
+                  <div className="consultation-details">
+                    <div className="consultation-date">19.06.2025</div>
+                    <div className="consultation-duration">60 dk</div>
+                    <div className="consultation-status hidden">Gizli</div>
+                  </div>
+                  <div className="consultation-notes">
+                    Detaylı beslenme analizi yapıldı. Yeni hedefler belirlendi.
+                  </div>
+                  <button 
+                    className="view-consultation-btn"
+                    onClick={() => handleOpenConsultations(3, 'Fatma Kaya')}
+                  >
+                    Görüşmeleri Görüntüle
+                  </button>
+                </div>
+              </div>
+            </div>
+          </main>
+        );
       default:
         return <div>Sayfa bulunamadı</div>;
     }
@@ -187,7 +284,11 @@ const DietitianPanel = () => {
               </svg>
               Beslenme Planları
             </a>
-            <a href="#" className="nav-link">
+            <a 
+              href="#" 
+              className={`nav-link ${activeTab === 'consultations' ? 'active' : ''}`}
+              onClick={(e) => { e.preventDefault(); setActiveTab('consultations'); }}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
               </svg>
@@ -226,6 +327,16 @@ const DietitianPanel = () => {
           {renderContent()}
         </div>
       </div>
+      
+      {/* Consultations Panel */}
+      {selectedClientForConsultations && (
+        <ConsultationsPanel
+          clientId={selectedClientForConsultations.id}
+          clientName={selectedClientForConsultations.name}
+          isOpen={isConsultationsOpen}
+          onClose={handleCloseConsultations}
+        />
+      )}
     </>
   );
 };
