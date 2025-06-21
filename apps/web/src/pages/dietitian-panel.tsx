@@ -32,6 +32,15 @@ const DietitianPanel = () => {
   const [selectedClientForConsultations, setSelectedClientForConsultations] = useState<{id: number, name: string} | null>(null);
   const { t } = useLanguage() || { t: (key: string) => key };
 
+  // Form state
+  const [formData, setFormData] = useState({
+    date: '',
+    time: '',
+    type: 'initial',
+    notes: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Danışan sayısını çek
   const { data: clientCount, isLoading: isLoadingClientCount } = trpc.clients.getCount.useQuery();
 
@@ -136,6 +145,61 @@ const DietitianPanel = () => {
   const handleConsultationViewChange = (view: 'list' | 'appointments' | 'new' | 'recent') => {
     setConsultationView(view);
     updateURL('consultations', view, selectedClientId || undefined, selectedClientName || undefined);
+  };
+
+  // Form handlers
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedClientId) {
+      alert('Danışan seçilmedi!');
+      return;
+    }
+
+    if (!formData.date || !formData.time) {
+      alert('Tarih ve saat alanları zorunludur!');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Burada API'ye görüşme kaydetme isteği gönderilecek
+      // Şimdilik sadece console'a yazdırıyoruz
+      console.log('Görüşme kaydediliyor:', {
+        clientId: selectedClientId,
+        clientName: selectedClientName,
+        ...formData
+      });
+
+      // Başarılı kayıt sonrası
+      alert('Görüşme başarıyla kaydedildi!');
+      
+      // Formu temizle
+      setFormData({
+        date: '',
+        time: '',
+        type: 'initial',
+        notes: ''
+      });
+      
+      // Görüşmeler listesine dön
+      handleConsultationViewChange('list');
+      
+    } catch (error) {
+      console.error('Görüşme kaydetme hatası:', error);
+      alert('Görüşme kaydedilirken bir hata oluştu!');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderContent = () => {
@@ -342,7 +406,7 @@ const DietitianPanel = () => {
                   </div>
                   
                   <div className="new-consultation-content">
-                    <form className="consultation-form">
+                    <form className="consultation-form" onSubmit={handleFormSubmit}>
                       <div className="form-group">
                         <label htmlFor="consultation-date">Görüşme Tarihi</label>
                         <input 
@@ -350,6 +414,9 @@ const DietitianPanel = () => {
                           id="consultation-date"
                           className="form-input"
                           required
+                          name="date"
+                          value={formData.date}
+                          onChange={handleInputChange}
                         />
                       </div>
                       
@@ -360,12 +427,15 @@ const DietitianPanel = () => {
                           id="consultation-time"
                           className="form-input"
                           required
+                          name="time"
+                          value={formData.time}
+                          onChange={handleInputChange}
                         />
                       </div>
                       
                       <div className="form-group">
                         <label htmlFor="consultation-type">Görüşme Türü</label>
-                        <select id="consultation-type" className="form-input">
+                        <select id="consultation-type" className="form-input" name="type" value={formData.type} onChange={handleInputChange}>
                           <option value="initial">İlk Görüşme</option>
                           <option value="follow-up">Takip Görüşmesi</option>
                           <option value="emergency">Acil Görüşme</option>
@@ -380,6 +450,9 @@ const DietitianPanel = () => {
                           className="form-textarea"
                           rows={4}
                           placeholder="Görüşme hakkında notlar..."
+                          name="notes"
+                          value={formData.notes}
+                          onChange={handleInputChange}
                         ></textarea>
                       </div>
                       
@@ -387,8 +460,8 @@ const DietitianPanel = () => {
                         <button type="button" className="cancel-btn" onClick={() => handleConsultationViewChange('list')}>
                           İptal
                         </button>
-                        <button type="submit" className="save-btn">
-                          Görüşmeyi Kaydet
+                        <button type="submit" className="save-btn" disabled={isSubmitting}>
+                          {isSubmitting ? 'Kaydediliyor...' : 'Görüşmeyi Kaydet'}
                         </button>
                       </div>
                     </form>
