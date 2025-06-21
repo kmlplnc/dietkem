@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { ClerkProvider } from "@clerk/clerk-react";
 import { LanguageProvider } from "./context/LanguageContext";
 // CLERK_DISABLED_TEMP: import { useAuth, useUser } from "@clerk/clerk-react";
 import './styles/animations.css';
@@ -146,9 +147,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <Router>
-      <AppRoutes />
-    </Router>
+    <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </ClerkProvider>
   );
 }
 
