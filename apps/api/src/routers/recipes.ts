@@ -6,8 +6,24 @@ import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
+// Add CORS headers to all routes
+router.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 // Tüm tarifleri getir (sayfalama ile)
 router.get('/', async (req, res) => {
+  console.log('Recipes endpoint called:', req.url);
+  console.log('Request headers:', req.headers);
+  
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 12;
@@ -15,6 +31,8 @@ router.get('/', async (req, res) => {
     const cuisine = req.query.cuisine as string;
     const dishType = req.query.dishType as string;
     const offset = (page - 1) * limit;
+
+    console.log('Query parameters:', { page, limit, search, cuisine, dishType });
 
     const filters = [eq(recipes.is_public, true)];
     if (search) filters.push(like(recipes.title, `%${search}%`));
