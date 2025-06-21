@@ -182,6 +182,177 @@ const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = (
   );
 };
 
+// Upcoming Appointments Component
+const UpcomingAppointments: React.FC<{ clientId: number; clientName: string }> = ({ clientId, clientName }) => {
+  const { data: consultations, isLoading } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
+
+  const now = new Date();
+
+  // Helper to combine date and time into a Date object
+  const getDateTime = (date: string, time: string) => {
+    return new Date(date.split('T')[0] + 'T' + time);
+  };
+
+  const upcoming = (consultations || []).filter(c => {
+    const dt = getDateTime(c.consultation_date, c.consultation_time);
+    return dt > now;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="appointments-content">
+        <div className="loading-appointments">
+          <div className="loading-spinner"></div>
+          <p>Randevular yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (upcoming.length === 0) {
+    return (
+      <div className="appointments-content">
+        <div className="empty-appointments">
+          <div className="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <h3>Yaklaşan randevu yok</h3>
+          <p>Bu danışan için ileri tarihli randevu bulunamadı.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Aynı kart yapısı
+  return (
+    <div className="appointments-content">
+      <div className="consultations-grid">
+        {upcoming.map((consultation) => (
+          <div
+            key={consultation.id}
+            className="consultation-client-card appointment-square-card"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 220,
+              minWidth: 220,
+              maxWidth: 260,
+              aspectRatio: '1/1',
+              margin: '0 auto',
+              textAlign: 'center',
+              gap: 12,
+              padding: '1.25rem 1rem',
+            }}
+          >
+            <div style={{fontWeight: 700, fontSize: 20, color: '#3b82f6', marginBottom: 2}}>{new Date(consultation.consultation_date).toLocaleDateString('tr-TR')}</div>
+            <div style={{fontSize: 13, color: '#64748b', marginBottom: 2}}>{new Date(consultation.consultation_date).toLocaleDateString('tr-TR', { weekday: 'short' })} - {consultation.consultation_time}</div>
+            <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>{consultation.consultation_type}</div>
+            <span className={`appointment-status status-${consultation.status}`} style={{margin: '8px 0'}}>
+              {consultation.status}
+            </span>
+            {consultation.notes && (
+              <div style={{fontSize: 14, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginTop: 4, maxHeight: 48, overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                {consultation.notes.length > 60 ? consultation.notes.slice(0, 60) + '…' : consultation.notes}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Past Appointments Component
+const PastAppointments: React.FC<{ clientId: number; clientName: string }> = ({ clientId, clientName }) => {
+  const { data: consultations, isLoading } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
+
+  const now = new Date();
+  const getDateTime = (date: string, time: string) => {
+    return new Date(date.split('T')[0] + 'T' + time);
+  };
+
+  const past = (consultations || []).filter(c => {
+    const dt = getDateTime(c.consultation_date, c.consultation_time);
+    return dt <= now;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="appointments-content">
+        <div className="loading-appointments">
+          <div className="loading-spinner"></div>
+          <p>Görüşmeler yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (past.length === 0) {
+    return (
+      <div className="appointments-content">
+        <div className="empty-appointments">
+          <div className="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <h3>Son görüşme yok</h3>
+          <p>Bu danışan için geçmiş görüşme bulunamadı.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="appointments-content">
+      <div className="consultations-grid">
+        {past.map((consultation) => (
+          <div
+            key={consultation.id}
+            className="consultation-client-card appointment-square-card"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 220,
+              minWidth: 220,
+              maxWidth: 260,
+              aspectRatio: '1/1',
+              margin: '0 auto',
+              textAlign: 'center',
+              gap: 12,
+              padding: '1.25rem 1rem',
+            }}
+          >
+            <div style={{fontWeight: 700, fontSize: 20, color: '#3b82f6', marginBottom: 2}}>{new Date(consultation.consultation_date).toLocaleDateString('tr-TR')}</div>
+            <div style={{fontSize: 13, color: '#64748b', marginBottom: 2}}>{new Date(consultation.consultation_date).toLocaleDateString('tr-TR', { weekday: 'short' })} - {consultation.consultation_time}</div>
+            <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>{consultation.consultation_type}</div>
+            <span className={`appointment-status status-${consultation.status}`} style={{margin: '8px 0'}}>
+              {consultation.status}
+            </span>
+            {consultation.notes && (
+              <div style={{fontSize: 14, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginTop: 4, maxHeight: 48, overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                {consultation.notes.length > 60 ? consultation.notes.slice(0, 60) + '…' : consultation.notes}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const DietitianPanel = () => {
   const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
@@ -568,7 +739,7 @@ const DietitianPanel = () => {
                   </div>
                   
                   <div className="appointments-content">
-                    <ClientAppointments clientId={selectedClientId} clientName={selectedClientName} />
+                    <UpcomingAppointments clientId={selectedClientId} clientName={selectedClientName} />
                   </div>
                 </div>
               )}
@@ -652,7 +823,7 @@ const DietitianPanel = () => {
                   </div>
                   
                   <div className="recent-consultations-content">
-                    <ClientAppointments clientId={selectedClientId} clientName={selectedClientName} />
+                    <PastAppointments clientId={selectedClientId} clientName={selectedClientName} />
                   </div>
                 </div>
               )}
