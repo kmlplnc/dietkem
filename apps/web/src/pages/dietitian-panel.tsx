@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useAuth } from '../lib/auth';
 import { trpc } from '../utils/trpc';
 import { useTranslation } from '../hooks/useTranslation';
 import { useLanguage } from '../context/LanguageContext';
@@ -20,8 +20,7 @@ import ClientDetail from './ClientDetail';
 import "./dashboard.css";
 
 const DietitianPanel = () => {
-  const { signOut } = useAuth();
-  const { user, isLoaded } = useUser();
+  const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -79,11 +78,11 @@ const DietitianPanel = () => {
   };
 
   const handleSignOut = async () => {
-    await signOut();
+    logout();
     navigate('/');
   };
 
-  if (!isLoaded) {
+  if (loading) {
     return <div className="loading">{t('dashboard.loading')}</div>;
   }
 
