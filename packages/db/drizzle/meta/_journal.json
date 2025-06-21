@@ -43,6 +43,13 @@
       "when": 1750338339345,
       "tag": "0007_add_missing_measurement_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1750503756487,
+      "tag": "0006_glossy_dark_beast",
+      "breakpoints": true
     }
   ]
 }

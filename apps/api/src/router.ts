@@ -5,9 +5,7 @@ import { blogsRouter } from './routers/blogs';
 import { authRouter } from './routers/auth';
 import { clientsRouter } from './routers/clients';
 import { measurementsRouter } from './routers/measurements';
-import { db } from '@dietkem/db';
-import { users as dbUsers } from '@dietkem/db/src/schema';
-import { eq } from 'drizzle-orm';
+import { consultationsRouter } from './routers/consultations';
 
 export const appRouter = router({
   // Public routes
@@ -17,6 +15,7 @@ export const appRouter = router({
   auth: authRouter,
   clients: clientsRouter,
   measurements: measurementsRouter,
+  consultations: consultationsRouter,
 
   // Dietitian-only routes
   addClient: dietitianProcedure
@@ -58,37 +57,6 @@ export const appRouter = router({
     .query(async () => {
       // Implementation for getting client's profile
       return {};
-    }),
-
-  // Profile update route
-  updateProfile: clientProcedure
-    .input(z.object({
-      email: z.string().email(),
-      firstName: z.string(),
-      lastName: z.string(),
-      username: z.string(),
-    }))
-    .mutation(async ({ ctx, input }) => {
-      if (!ctx.userId) {
-        throw new Error('User not authenticated');
-      }
-
-      try {
-        await db.update(dbUsers)
-          .set({
-            email: input.email,
-            first_name: input.firstName,
-            last_name: input.lastName,
-            username: input.username,
-            updated_at: new Date(),
-          })
-          .where(eq(dbUsers.clerk_id, ctx.userId));
-
-        return { message: 'Profile updated successfully' };
-      } catch (error) {
-        console.error('Error updating profile:', error);
-        throw new Error('Failed to update profile');
-      }
     }),
 });
 

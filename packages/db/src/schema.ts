@@ -116,6 +116,20 @@ export const meal_plans = pgTable('meal_plans', {
   created_by: integer('created_by').references(() => users.id).notNull(),
 });
 
+// Consultations table
+export const consultations = pgTable('consultations', {
+  id: serial('id').primaryKey(),
+  client_id: integer('client_id').references(() => clients.id).notNull(),
+  consultation_date: timestamp('consultation_date').notNull(),
+  consultation_time: varchar('consultation_time', { length: 10 }).notNull(), // HH:MM format
+  consultation_type: varchar('consultation_type', { length: 50 }).notNull(), // initial, follow-up, emergency, online
+  notes: text('notes'),
+  status: varchar('status', { length: 20 }).default('scheduled').notNull(), // scheduled, completed, cancelled
+  created_by: integer('created_by').references(() => users.id).notNull(),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Meal plan days table
 export const meal_plan_days = pgTable('meal_plan_days', {
   id: serial('id').primaryKey(),
@@ -163,4 +177,9 @@ export const weight_logs = pgTable('weight_logs', {
   client_id: integer('client_id').references(() => clients.id).notNull(),
   date: timestamp('date').notNull(),
   weight_kg: decimal('weight_kg', { precision: 5, scale: 2 }).notNull(),
-}); 
+});
+
+export * from '../schema/users';
+export * from '../schema/clients';
+export * from '../schema/measurements';
+export * from '../schema/consultations'; 

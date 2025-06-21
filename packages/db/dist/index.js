@@ -32,21 +32,22 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
-  accounts: () => accounts,
-  clients: () => clients,
+  accounts: () => accounts2,
+  clients: () => clients2,
+  consultations: () => consultations2,
   db: () => db,
-  emailVerificationCodes: () => emailVerificationCodes,
+  emailVerificationCodes: () => emailVerificationCodes2,
   foods: () => foods,
   mealTypeEnum: () => mealTypeEnum,
   meal_plan_days: () => meal_plan_days,
   meal_plans: () => meal_plans,
   meals: () => meals,
-  measurements: () => measurements,
+  measurements: () => measurements2,
   queryClient: () => queryClient,
-  sessions: () => sessions,
-  userRoleEnum: () => userRoleEnum,
-  users: () => users,
-  verificationTokens: () => verificationTokens,
+  sessions: () => sessions2,
+  userRoleEnum: () => userRoleEnum2,
+  users: () => users2,
+  verificationTokens: () => verificationTokens2,
   water_logs: () => water_logs,
   weight_logs: () => weight_logs
 });
@@ -605,8 +606,8 @@ function sql(strings, ...params) {
   sql2.param = param2;
 })(sql || (sql = {}));
 ((SQL2) => {
-  var _a93;
-  _a93 = entityKind;
+  var _a95;
+  _a95 = entityKind;
   const _Aliased = class _Aliased {
     constructor(sql2, fieldAlias) {
       /** @internal */
@@ -622,7 +623,7 @@ function sql(strings, ...params) {
       return new _Aliased(this.sql, this.fieldAlias);
     }
   };
-  __publicField(_Aliased, _a93, "SQL.Aliased");
+  __publicField(_Aliased, _a95, "SQL.Aliased");
   let Aliased = _Aliased;
   SQL2.Aliased = Aliased;
 })(SQL || (SQL = {}));
@@ -1798,9 +1799,42 @@ function numeric(name, config) {
 }
 var decimal = numeric;
 
-// ../../node_modules/drizzle-orm/pg-core/columns/serial.js
+// ../../node_modules/drizzle-orm/pg-core/columns/real.js
 var _a52, _b32;
-var PgSerialBuilder = class extends (_b32 = PgColumnBuilder, _a52 = entityKind, _b32) {
+var PgRealBuilder = class extends (_b32 = PgColumnBuilder, _a52 = entityKind, _b32) {
+  constructor(name, length) {
+    super(name, "number", "PgReal");
+    this.config.length = length;
+  }
+  /** @internal */
+  build(table) {
+    return new PgReal(table, this.config);
+  }
+};
+__publicField(PgRealBuilder, _a52, "PgRealBuilder");
+var _a53, _b33;
+var PgReal = class extends (_b33 = PgColumn, _a53 = entityKind, _b33) {
+  constructor(table, config) {
+    super(table, config);
+    __publicField(this, "mapFromDriverValue", (value) => {
+      if (typeof value === "string") {
+        return Number.parseFloat(value);
+      }
+      return value;
+    });
+  }
+  getSQLType() {
+    return "real";
+  }
+};
+__publicField(PgReal, _a53, "PgReal");
+function real(name) {
+  return new PgRealBuilder(name);
+}
+
+// ../../node_modules/drizzle-orm/pg-core/columns/serial.js
+var _a54, _b34;
+var PgSerialBuilder = class extends (_b34 = PgColumnBuilder, _a54 = entityKind, _b34) {
   constructor(name) {
     super(name, "number", "PgSerial");
     this.config.hasDefault = true;
@@ -1811,21 +1845,21 @@ var PgSerialBuilder = class extends (_b32 = PgColumnBuilder, _a52 = entityKind, 
     return new PgSerial(table, this.config);
   }
 };
-__publicField(PgSerialBuilder, _a52, "PgSerialBuilder");
-var _a53, _b33;
-var PgSerial = class extends (_b33 = PgColumn, _a53 = entityKind, _b33) {
+__publicField(PgSerialBuilder, _a54, "PgSerialBuilder");
+var _a55, _b35;
+var PgSerial = class extends (_b35 = PgColumn, _a55 = entityKind, _b35) {
   getSQLType() {
     return "serial";
   }
 };
-__publicField(PgSerial, _a53, "PgSerial");
+__publicField(PgSerial, _a55, "PgSerial");
 function serial(name) {
   return new PgSerialBuilder(name);
 }
 
 // ../../node_modules/drizzle-orm/pg-core/columns/text.js
-var _a54, _b34;
-var PgTextBuilder = class extends (_b34 = PgColumnBuilder, _a54 = entityKind, _b34) {
+var _a56, _b36;
+var PgTextBuilder = class extends (_b36 = PgColumnBuilder, _a56 = entityKind, _b36) {
   constructor(name, config) {
     super(name, "string", "PgText");
     this.config.enumValues = config.enum;
@@ -1835,9 +1869,9 @@ var PgTextBuilder = class extends (_b34 = PgColumnBuilder, _a54 = entityKind, _b
     return new PgText(table, this.config);
   }
 };
-__publicField(PgTextBuilder, _a54, "PgTextBuilder");
-var _a55, _b35;
-var PgText = class extends (_b35 = PgColumn, _a55 = entityKind, _b35) {
+__publicField(PgTextBuilder, _a56, "PgTextBuilder");
+var _a57, _b37;
+var PgText = class extends (_b37 = PgColumn, _a57 = entityKind, _b37) {
   constructor() {
     super(...arguments);
     __publicField(this, "enumValues", this.config.enumValues);
@@ -1846,14 +1880,14 @@ var PgText = class extends (_b35 = PgColumn, _a55 = entityKind, _b35) {
     return "text";
   }
 };
-__publicField(PgText, _a55, "PgText");
+__publicField(PgText, _a57, "PgText");
 function text(name, config = {}) {
   return new PgTextBuilder(name, config);
 }
 
 // ../../node_modules/drizzle-orm/pg-core/columns/time.js
-var _a56, _b36;
-var PgTimeBuilder = class extends (_b36 = PgDateColumnBaseBuilder, _a56 = entityKind, _b36) {
+var _a58, _b38;
+var PgTimeBuilder = class extends (_b38 = PgDateColumnBaseBuilder, _a58 = entityKind, _b38) {
   constructor(name, withTimezone, precision) {
     super(name, "string", "PgTime");
     this.withTimezone = withTimezone;
@@ -1866,9 +1900,9 @@ var PgTimeBuilder = class extends (_b36 = PgDateColumnBaseBuilder, _a56 = entity
     return new PgTime(table, this.config);
   }
 };
-__publicField(PgTimeBuilder, _a56, "PgTimeBuilder");
-var _a57, _b37;
-var PgTime = class extends (_b37 = PgColumn, _a57 = entityKind, _b37) {
+__publicField(PgTimeBuilder, _a58, "PgTimeBuilder");
+var _a59, _b39;
+var PgTime = class extends (_b39 = PgColumn, _a59 = entityKind, _b39) {
   constructor(table, config) {
     super(table, config);
     __publicField(this, "withTimezone");
@@ -1881,11 +1915,11 @@ var PgTime = class extends (_b37 = PgColumn, _a57 = entityKind, _b37) {
     return `time${precision}${this.withTimezone ? " with time zone" : ""}`;
   }
 };
-__publicField(PgTime, _a57, "PgTime");
+__publicField(PgTime, _a59, "PgTime");
 
 // ../../node_modules/drizzle-orm/pg-core/columns/timestamp.js
-var _a58, _b38;
-var PgTimestampBuilder = class extends (_b38 = PgDateColumnBaseBuilder, _a58 = entityKind, _b38) {
+var _a60, _b40;
+var PgTimestampBuilder = class extends (_b40 = PgDateColumnBaseBuilder, _a60 = entityKind, _b40) {
   constructor(name, withTimezone, precision) {
     super(name, "date", "PgTimestamp");
     this.config.withTimezone = withTimezone;
@@ -1896,9 +1930,9 @@ var PgTimestampBuilder = class extends (_b38 = PgDateColumnBaseBuilder, _a58 = e
     return new PgTimestamp(table, this.config);
   }
 };
-__publicField(PgTimestampBuilder, _a58, "PgTimestampBuilder");
-var _a59, _b39;
-var PgTimestamp = class extends (_b39 = PgColumn, _a59 = entityKind, _b39) {
+__publicField(PgTimestampBuilder, _a60, "PgTimestampBuilder");
+var _a61, _b41;
+var PgTimestamp = class extends (_b41 = PgColumn, _a61 = entityKind, _b41) {
   constructor(table, config) {
     super(table, config);
     __publicField(this, "withTimezone");
@@ -1917,9 +1951,9 @@ var PgTimestamp = class extends (_b39 = PgColumn, _a59 = entityKind, _b39) {
     return `timestamp${precision}${this.withTimezone ? " with time zone" : ""}`;
   }
 };
-__publicField(PgTimestamp, _a59, "PgTimestamp");
-var _a60, _b40;
-var PgTimestampStringBuilder = class extends (_b40 = PgDateColumnBaseBuilder, _a60 = entityKind, _b40) {
+__publicField(PgTimestamp, _a61, "PgTimestamp");
+var _a62, _b42;
+var PgTimestampStringBuilder = class extends (_b42 = PgDateColumnBaseBuilder, _a62 = entityKind, _b42) {
   constructor(name, withTimezone, precision) {
     super(name, "string", "PgTimestampString");
     this.config.withTimezone = withTimezone;
@@ -1933,9 +1967,9 @@ var PgTimestampStringBuilder = class extends (_b40 = PgDateColumnBaseBuilder, _a
     );
   }
 };
-__publicField(PgTimestampStringBuilder, _a60, "PgTimestampStringBuilder");
-var _a61, _b41;
-var PgTimestampString = class extends (_b41 = PgColumn, _a61 = entityKind, _b41) {
+__publicField(PgTimestampStringBuilder, _a62, "PgTimestampStringBuilder");
+var _a63, _b43;
+var PgTimestampString = class extends (_b43 = PgColumn, _a63 = entityKind, _b43) {
   constructor(table, config) {
     super(table, config);
     __publicField(this, "withTimezone");
@@ -1948,7 +1982,7 @@ var PgTimestampString = class extends (_b41 = PgColumn, _a61 = entityKind, _b41)
     return `timestamp${precision}${this.withTimezone ? " with time zone" : ""}`;
   }
 };
-__publicField(PgTimestampString, _a61, "PgTimestampString");
+__publicField(PgTimestampString, _a63, "PgTimestampString");
 function timestamp(name, config = {}) {
   if (config.mode === "string") {
     return new PgTimestampStringBuilder(name, config.withTimezone ?? false, config.precision);
@@ -1957,8 +1991,8 @@ function timestamp(name, config = {}) {
 }
 
 // ../../node_modules/drizzle-orm/pg-core/columns/uuid.js
-var _a62, _b42;
-var PgUUIDBuilder = class extends (_b42 = PgColumnBuilder, _a62 = entityKind, _b42) {
+var _a64, _b44;
+var PgUUIDBuilder = class extends (_b44 = PgColumnBuilder, _a64 = entityKind, _b44) {
   constructor(name) {
     super(name, "string", "PgUUID");
   }
@@ -1973,18 +2007,18 @@ var PgUUIDBuilder = class extends (_b42 = PgColumnBuilder, _a62 = entityKind, _b
     return new PgUUID(table, this.config);
   }
 };
-__publicField(PgUUIDBuilder, _a62, "PgUUIDBuilder");
-var _a63, _b43;
-var PgUUID = class extends (_b43 = PgColumn, _a63 = entityKind, _b43) {
+__publicField(PgUUIDBuilder, _a64, "PgUUIDBuilder");
+var _a65, _b45;
+var PgUUID = class extends (_b45 = PgColumn, _a65 = entityKind, _b45) {
   getSQLType() {
     return "uuid";
   }
 };
-__publicField(PgUUID, _a63, "PgUUID");
+__publicField(PgUUID, _a65, "PgUUID");
 
 // ../../node_modules/drizzle-orm/pg-core/columns/varchar.js
-var _a64, _b44;
-var PgVarcharBuilder = class extends (_b44 = PgColumnBuilder, _a64 = entityKind, _b44) {
+var _a66, _b46;
+var PgVarcharBuilder = class extends (_b46 = PgColumnBuilder, _a66 = entityKind, _b46) {
   constructor(name, config) {
     super(name, "string", "PgVarchar");
     this.config.length = config.length;
@@ -1995,9 +2029,9 @@ var PgVarcharBuilder = class extends (_b44 = PgColumnBuilder, _a64 = entityKind,
     return new PgVarchar(table, this.config);
   }
 };
-__publicField(PgVarcharBuilder, _a64, "PgVarcharBuilder");
-var _a65, _b45;
-var PgVarchar = class extends (_b45 = PgColumn, _a65 = entityKind, _b45) {
+__publicField(PgVarcharBuilder, _a66, "PgVarcharBuilder");
+var _a67, _b47;
+var PgVarchar = class extends (_b47 = PgColumn, _a67 = entityKind, _b47) {
   constructor() {
     super(...arguments);
     __publicField(this, "length", this.config.length);
@@ -2007,14 +2041,14 @@ var PgVarchar = class extends (_b45 = PgColumn, _a65 = entityKind, _b45) {
     return this.length === void 0 ? `varchar` : `varchar(${this.length})`;
   }
 };
-__publicField(PgVarchar, _a65, "PgVarchar");
+__publicField(PgVarchar, _a67, "PgVarchar");
 function varchar(name, config = {}) {
   return new PgVarcharBuilder(name, config);
 }
 
 // ../../node_modules/drizzle-orm/pg-core/primary-keys.js
-var _a66;
-_a66 = entityKind;
+var _a68;
+_a68 = entityKind;
 var PrimaryKeyBuilder = class {
   constructor(columns, name) {
     /** @internal */
@@ -2029,9 +2063,9 @@ var PrimaryKeyBuilder = class {
     return new PrimaryKey(table, this.columns, this.name);
   }
 };
-__publicField(PrimaryKeyBuilder, _a66, "PgPrimaryKeyBuilder");
-var _a67;
-_a67 = entityKind;
+__publicField(PrimaryKeyBuilder, _a68, "PgPrimaryKeyBuilder");
+var _a69;
+_a69 = entityKind;
 var PrimaryKey = class {
   constructor(table, columns, name) {
     __publicField(this, "columns");
@@ -2044,7 +2078,7 @@ var PrimaryKey = class {
     return this.name ?? `${this.table[PgTable.Symbol.Name]}_${this.columns.map((column) => column.name).join("_")}_pk`;
   }
 };
-__publicField(PrimaryKey, _a67, "PgPrimaryKey");
+__publicField(PrimaryKey, _a69, "PgPrimaryKey");
 
 // ../../node_modules/drizzle-orm/sql/expressions/conditions.js
 function bindIfParam(value, column) {
@@ -2170,8 +2204,8 @@ function desc(column) {
 }
 
 // ../../node_modules/drizzle-orm/relations.js
-var _a68;
-_a68 = entityKind;
+var _a70;
+_a70 = entityKind;
 var Relation = class {
   constructor(sourceTable, referencedTable, relationName) {
     __publicField(this, "referencedTableName");
@@ -2182,18 +2216,18 @@ var Relation = class {
     this.referencedTableName = referencedTable[Table.Symbol.Name];
   }
 };
-__publicField(Relation, _a68, "Relation");
-var _a69;
-_a69 = entityKind;
+__publicField(Relation, _a70, "Relation");
+var _a71;
+_a71 = entityKind;
 var Relations = class {
   constructor(table, config) {
     this.table = table;
     this.config = config;
   }
 };
-__publicField(Relations, _a69, "Relations");
-var _a70, _b46;
-var _One = class _One extends (_b46 = Relation, _a70 = entityKind, _b46) {
+__publicField(Relations, _a71, "Relations");
+var _a72, _b48;
+var _One = class _One extends (_b48 = Relation, _a72 = entityKind, _b48) {
   constructor(sourceTable, referencedTable, config, isNullable) {
     super(sourceTable, referencedTable, config?.relationName);
     this.config = config;
@@ -2210,10 +2244,10 @@ var _One = class _One extends (_b46 = Relation, _a70 = entityKind, _b46) {
     return relation;
   }
 };
-__publicField(_One, _a70, "One");
+__publicField(_One, _a72, "One");
 var One = _One;
-var _a71, _b47;
-var _Many = class _Many extends (_b47 = Relation, _a71 = entityKind, _b47) {
+var _a73, _b49;
+var _Many = class _Many extends (_b49 = Relation, _a73 = entityKind, _b49) {
   constructor(sourceTable, referencedTable, config) {
     super(sourceTable, referencedTable, config?.relationName);
     this.config = config;
@@ -2228,7 +2262,7 @@ var _Many = class _Many extends (_b47 = Relation, _a71 = entityKind, _b47) {
     return relation;
   }
 };
-__publicField(_Many, _a71, "Many");
+__publicField(_Many, _a73, "Many");
 var Many = _Many;
 function getOperators() {
   return {
@@ -2439,14 +2473,14 @@ function mapRelationalRow(tablesConfig, tableConfig, row, buildQueryResultSelect
 }
 
 // ../../node_modules/drizzle-orm/pg-core/view-base.js
-var _a72, _b48;
-var PgViewBase = class extends (_b48 = View, _a72 = entityKind, _b48) {
+var _a74, _b50;
+var PgViewBase = class extends (_b50 = View, _a74 = entityKind, _b50) {
 };
-__publicField(PgViewBase, _a72, "PgViewBase");
+__publicField(PgViewBase, _a74, "PgViewBase");
 
 // ../../node_modules/drizzle-orm/pg-core/dialect.js
-var _a73;
-_a73 = entityKind;
+var _a75;
+_a75 = entityKind;
 var PgDialect = class {
   async migrate(migrations, session, config) {
     const migrationsTable = typeof config === "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations";
@@ -3499,22 +3533,22 @@ var PgDialect = class {
     };
   }
 };
-__publicField(PgDialect, _a73, "PgDialect");
+__publicField(PgDialect, _a75, "PgDialect");
 
 // ../../node_modules/drizzle-orm/query-builders/query-builder.js
-var _a74;
-_a74 = entityKind;
+var _a76;
+_a76 = entityKind;
 var TypedQueryBuilder = class {
   /** @internal */
   getSelectedFields() {
     return this._.selectedFields;
   }
 };
-__publicField(TypedQueryBuilder, _a74, "TypedQueryBuilder");
+__publicField(TypedQueryBuilder, _a76, "TypedQueryBuilder");
 
 // ../../node_modules/drizzle-orm/selection-proxy.js
-var _a75;
-_a75 = entityKind;
+var _a77;
+_a77 = entityKind;
 var _SelectionProxyHandler = class _SelectionProxyHandler {
   constructor(config) {
     __publicField(this, "config");
@@ -3580,12 +3614,12 @@ var _SelectionProxyHandler = class _SelectionProxyHandler {
     return new Proxy(value, new _SelectionProxyHandler(this.config));
   }
 };
-__publicField(_SelectionProxyHandler, _a75, "SelectionProxyHandler");
+__publicField(_SelectionProxyHandler, _a77, "SelectionProxyHandler");
 var SelectionProxyHandler = _SelectionProxyHandler;
 
 // ../../node_modules/drizzle-orm/pg-core/query-builders/select.js
-var _a76;
-_a76 = entityKind;
+var _a78;
+_a78 = entityKind;
 var PgSelectBuilder = class {
   constructor(config) {
     __publicField(this, "fields");
@@ -3634,9 +3668,9 @@ var PgSelectBuilder = class {
     });
   }
 };
-__publicField(PgSelectBuilder, _a76, "PgSelectBuilder");
-var _a77, _b49;
-var PgSelectQueryBuilderBase = class extends (_b49 = TypedQueryBuilder, _a77 = entityKind, _b49) {
+__publicField(PgSelectBuilder, _a78, "PgSelectBuilder");
+var _a79, _b51;
+var PgSelectQueryBuilderBase = class extends (_b51 = TypedQueryBuilder, _a79 = entityKind, _b51) {
   constructor({ table, fields, isPartialSelect, session, dialect, withList, distinct }) {
     super();
     __publicField(this, "_");
@@ -4236,9 +4270,9 @@ var PgSelectQueryBuilderBase = class extends (_b49 = TypedQueryBuilder, _a77 = e
     return this;
   }
 };
-__publicField(PgSelectQueryBuilderBase, _a77, "PgSelectQueryBuilder");
-var _a78, _b50;
-var PgSelectBase = class extends (_b50 = PgSelectQueryBuilderBase, _a78 = entityKind, _b50) {
+__publicField(PgSelectQueryBuilderBase, _a79, "PgSelectQueryBuilder");
+var _a80, _b52;
+var PgSelectBase = class extends (_b52 = PgSelectQueryBuilderBase, _a80 = entityKind, _b52) {
   constructor() {
     super(...arguments);
     __publicField(this, "execute", (placeholderValues) => {
@@ -4271,7 +4305,7 @@ var PgSelectBase = class extends (_b50 = PgSelectQueryBuilderBase, _a78 = entity
     return this._prepare(name);
   }
 };
-__publicField(PgSelectBase, _a78, "PgSelect");
+__publicField(PgSelectBase, _a80, "PgSelect");
 applyMixins(PgSelectBase, [QueryPromise]);
 function createSetOperator(type, isAll) {
   return (leftSelect, rightSelect, ...restSelects) => {
@@ -4306,8 +4340,8 @@ var except = createSetOperator("except", false);
 var exceptAll = createSetOperator("except", true);
 
 // ../../node_modules/drizzle-orm/pg-core/query-builders/query-builder.js
-var _a79;
-_a79 = entityKind;
+var _a81;
+_a81 = entityKind;
 var QueryBuilder = class {
   constructor() {
     __publicField(this, "dialect");
@@ -4385,11 +4419,11 @@ var QueryBuilder = class {
     return this.dialect;
   }
 };
-__publicField(QueryBuilder, _a79, "PgQueryBuilder");
+__publicField(QueryBuilder, _a81, "PgQueryBuilder");
 
 // ../../node_modules/drizzle-orm/pg-core/query-builders/refresh-materialized-view.js
-var _a80, _b51;
-var PgRefreshMaterializedView = class extends (_b51 = QueryPromise, _a80 = entityKind, _b51) {
+var _a82, _b53;
+var PgRefreshMaterializedView = class extends (_b53 = QueryPromise, _a82 = entityKind, _b53) {
   constructor(view, session, dialect) {
     super();
     __publicField(this, "config");
@@ -4434,11 +4468,11 @@ var PgRefreshMaterializedView = class extends (_b51 = QueryPromise, _a80 = entit
     return this._prepare(name);
   }
 };
-__publicField(PgRefreshMaterializedView, _a80, "PgRefreshMaterializedView");
+__publicField(PgRefreshMaterializedView, _a82, "PgRefreshMaterializedView");
 
 // ../../node_modules/drizzle-orm/pg-core/query-builders/update.js
-var _a81;
-_a81 = entityKind;
+var _a83;
+_a83 = entityKind;
 var PgUpdateBuilder = class {
   constructor(table, session, dialect, withList) {
     this.table = table;
@@ -4456,9 +4490,9 @@ var PgUpdateBuilder = class {
     );
   }
 };
-__publicField(PgUpdateBuilder, _a81, "PgUpdateBuilder");
-var _a82, _b52;
-var PgUpdateBase = class extends (_b52 = QueryPromise, _a82 = entityKind, _b52) {
+__publicField(PgUpdateBuilder, _a83, "PgUpdateBuilder");
+var _a84, _b54;
+var PgUpdateBase = class extends (_b54 = QueryPromise, _a84 = entityKind, _b54) {
   constructor(table, set, session, dialect, withList) {
     super();
     __publicField(this, "config");
@@ -4529,11 +4563,11 @@ var PgUpdateBase = class extends (_b52 = QueryPromise, _a82 = entityKind, _b52) 
     return this;
   }
 };
-__publicField(PgUpdateBase, _a82, "PgUpdate");
+__publicField(PgUpdateBase, _a84, "PgUpdate");
 
 // ../../node_modules/drizzle-orm/pg-core/query-builders/query.js
-var _a83;
-_a83 = entityKind;
+var _a85;
+_a85 = entityKind;
 var RelationalQueryBuilder = class {
   constructor(fullSchema, schema, tableNamesMap, table, tableConfig, dialect, session) {
     this.fullSchema = fullSchema;
@@ -4571,9 +4605,9 @@ var RelationalQueryBuilder = class {
     );
   }
 };
-__publicField(RelationalQueryBuilder, _a83, "PgRelationalQueryBuilder");
-var _a84, _b53;
-var PgRelationalQuery = class extends (_b53 = QueryPromise, _a84 = entityKind, _b53) {
+__publicField(RelationalQueryBuilder, _a85, "PgRelationalQueryBuilder");
+var _a86, _b55;
+var PgRelationalQuery = class extends (_b55 = QueryPromise, _a86 = entityKind, _b55) {
   constructor(fullSchema, schema, tableNamesMap, table, tableConfig, dialect, session, config, mode) {
     super();
     this.fullSchema = fullSchema;
@@ -4638,11 +4672,11 @@ var PgRelationalQuery = class extends (_b53 = QueryPromise, _a84 = entityKind, _
     });
   }
 };
-__publicField(PgRelationalQuery, _a84, "PgRelationalQuery");
+__publicField(PgRelationalQuery, _a86, "PgRelationalQuery");
 
 // ../../node_modules/drizzle-orm/pg-core/query-builders/raw.js
-var _a85, _b54;
-var PgRaw = class extends (_b54 = QueryPromise, _a85 = entityKind, _b54) {
+var _a87, _b56;
+var PgRaw = class extends (_b56 = QueryPromise, _a87 = entityKind, _b56) {
   constructor(execute, sql2, query, mapBatchResult) {
     super();
     this.execute = execute;
@@ -4664,11 +4698,11 @@ var PgRaw = class extends (_b54 = QueryPromise, _a85 = entityKind, _b54) {
     return this;
   }
 };
-__publicField(PgRaw, _a85, "PgRaw");
+__publicField(PgRaw, _a87, "PgRaw");
 
 // ../../node_modules/drizzle-orm/pg-core/db.js
-var _a86;
-_a86 = entityKind;
+var _a88;
+_a88 = entityKind;
 var PgDatabase = class {
   constructor(dialect, session, schema) {
     __publicField(this, "query");
@@ -4922,11 +4956,11 @@ var PgDatabase = class {
     return this.session.transaction(transaction, config);
   }
 };
-__publicField(PgDatabase, _a86, "PgDatabase");
+__publicField(PgDatabase, _a88, "PgDatabase");
 
 // ../../node_modules/drizzle-orm/pg-core/session.js
-var _a87;
-_a87 = entityKind;
+var _a89;
+_a89 = entityKind;
 var PgPreparedQuery = class {
   constructor(query) {
     /** @internal */
@@ -4940,9 +4974,9 @@ var PgPreparedQuery = class {
     return response;
   }
 };
-__publicField(PgPreparedQuery, _a87, "PgPreparedQuery");
-var _a88;
-_a88 = entityKind;
+__publicField(PgPreparedQuery, _a89, "PgPreparedQuery");
+var _a90;
+_a90 = entityKind;
 var PgSession = class {
   constructor(dialect) {
     this.dialect = dialect;
@@ -4967,9 +5001,9 @@ var PgSession = class {
     ).all();
   }
 };
-__publicField(PgSession, _a88, "PgSession");
-var _a89, _b55;
-var PgTransaction = class extends (_b55 = PgDatabase, _a89 = entityKind, _b55) {
+__publicField(PgSession, _a90, "PgSession");
+var _a91, _b57;
+var PgTransaction = class extends (_b57 = PgDatabase, _a91 = entityKind, _b57) {
   constructor(dialect, session, schema, nestedIndex = 0) {
     super(dialect, session, schema);
     this.schema = schema;
@@ -4996,11 +5030,11 @@ var PgTransaction = class extends (_b55 = PgDatabase, _a89 = entityKind, _b55) {
     return this.session.execute(sql`set transaction ${this.getTransactionConfigSQL(config)}`);
   }
 };
-__publicField(PgTransaction, _a89, "PgTransaction");
+__publicField(PgTransaction, _a91, "PgTransaction");
 
 // ../../node_modules/drizzle-orm/postgres-js/session.js
-var _a90, _b56;
-var PostgresJsPreparedQuery = class extends (_b56 = PgPreparedQuery, _a90 = entityKind, _b56) {
+var _a92, _b58;
+var PostgresJsPreparedQuery = class extends (_b58 = PgPreparedQuery, _a92 = entityKind, _b58) {
   constructor(client, queryString, params, logger, fields, customResultMapper) {
     super({ sql: queryString, params });
     this.client = client;
@@ -5054,9 +5088,9 @@ var PostgresJsPreparedQuery = class extends (_b56 = PgPreparedQuery, _a90 = enti
     });
   }
 };
-__publicField(PostgresJsPreparedQuery, _a90, "PostgresJsPreparedQuery");
-var _a91, _b57;
-var _PostgresJsSession = class _PostgresJsSession extends (_b57 = PgSession, _a91 = entityKind, _b57) {
+__publicField(PostgresJsPreparedQuery, _a92, "PostgresJsPreparedQuery");
+var _a93, _b59;
+var _PostgresJsSession = class _PostgresJsSession extends (_b59 = PgSession, _a93 = entityKind, _b59) {
   constructor(client, dialect, schema, options = {}) {
     super(dialect);
     __publicField(this, "logger");
@@ -5091,10 +5125,10 @@ var _PostgresJsSession = class _PostgresJsSession extends (_b57 = PgSession, _a9
     });
   }
 };
-__publicField(_PostgresJsSession, _a91, "PostgresJsSession");
+__publicField(_PostgresJsSession, _a93, "PostgresJsSession");
 var PostgresJsSession = _PostgresJsSession;
-var _a92, _b58;
-var _PostgresJsTransaction = class _PostgresJsTransaction extends (_b58 = PgTransaction, _a92 = entityKind, _b58) {
+var _a94, _b60;
+var _PostgresJsTransaction = class _PostgresJsTransaction extends (_b60 = PgTransaction, _a94 = entityKind, _b60) {
   constructor(dialect, session, schema, nestedIndex = 0) {
     super(dialect, session, schema, nestedIndex);
     this.session = session;
@@ -5107,7 +5141,7 @@ var _PostgresJsTransaction = class _PostgresJsTransaction extends (_b58 = PgTran
     });
   }
 };
-__publicField(_PostgresJsTransaction, _a92, "PostgresJsTransaction");
+__publicField(_PostgresJsTransaction, _a94, "PostgresJsTransaction");
 var PostgresJsTransaction = _PostgresJsTransaction;
 
 // ../../node_modules/drizzle-orm/postgres-js/driver.js
@@ -5141,22 +5175,25 @@ var import_postgres = __toESM(require("postgres"));
 // src/schema.ts
 var schema_exports = {};
 __export(schema_exports, {
-  accounts: () => accounts,
-  clients: () => clients,
-  emailVerificationCodes: () => emailVerificationCodes,
+  accounts: () => accounts2,
+  clients: () => clients2,
+  consultations: () => consultations2,
+  emailVerificationCodes: () => emailVerificationCodes2,
   foods: () => foods,
   mealTypeEnum: () => mealTypeEnum,
   meal_plan_days: () => meal_plan_days,
   meal_plans: () => meal_plans,
   meals: () => meals,
-  measurements: () => measurements,
-  sessions: () => sessions,
-  userRoleEnum: () => userRoleEnum,
-  users: () => users,
-  verificationTokens: () => verificationTokens,
+  measurements: () => measurements2,
+  sessions: () => sessions2,
+  userRoleEnum: () => userRoleEnum2,
+  users: () => users2,
+  verificationTokens: () => verificationTokens2,
   water_logs: () => water_logs,
   weight_logs: () => weight_logs
 });
+
+// schema/users.ts
 var userRoleEnum = pgEnum("user_role", [
   "subscriber_basic",
   "subscriber_pro",
@@ -5165,30 +5202,21 @@ var userRoleEnum = pgEnum("user_role", [
   "admin",
   "superadmin"
 ]);
-var mealTypeEnum = pgEnum("meal_type", ["breakfast", "lunch", "dinner", "snack"]);
 var users = pgTable("users", {
   id: serial("id").primaryKey(),
   clerk_id: varchar("clerk_id", { length: 255 }).unique(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   password: varchar("password", { length: 255 }),
-  role: userRoleEnum("role").notNull().default("subscriber_basic"),
-  created_at: timestamp("created_at").defaultNow().notNull(),
-  updated_at: timestamp("updated_at").defaultNow().notNull(),
   first_name: varchar("first_name", { length: 255 }),
   last_name: varchar("last_name", { length: 255 }),
   username: varchar("username", { length: 255 }),
-  avatar_url: varchar("avatar_url", { length: 512 }).default("https://res.cloudinary.com/dietkem/image/upload/v1/avatar.jpg"),
+  role: userRoleEnum("role").notNull().default("subscriber_basic"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
   trial_started_at: timestamp("trial_started_at"),
   trial_used: text("trial_used").default("false"),
-  first_subscription_started_at: timestamp("first_subscription_started_at")
-});
-var emailVerificationCodes = pgTable("email_verification_codes", {
-  id: serial("id").primaryKey(),
-  email: varchar("email", { length: 255 }).notNull(),
-  code: varchar("code", { length: 6 }).notNull(),
-  expires_at: timestamp("expires_at").notNull(),
-  used: text("used").default("false"),
-  created_at: timestamp("created_at").defaultNow().notNull()
+  first_subscription_started_at: timestamp("first_subscription_started_at"),
+  avatar_url: varchar("avatar_url", { length: 500 })
 });
 var sessions = pgTable("sessions", {
   id: varchar("id", { length: 255 }).primaryKey(),
@@ -5215,7 +5243,131 @@ var verificationTokens = pgTable("verification_tokens", {
   token: varchar("token", { length: 255 }).notNull(),
   expires: timestamp("expires").notNull()
 });
+var emailVerificationCodes = pgTable("email_verification_codes", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  code: varchar("code", { length: 6 }).notNull(),
+  expires_at: timestamp("expires_at").notNull(),
+  used: text("used").default("false"),
+  created_at: timestamp("created_at").defaultNow()
+});
+
+// schema/clients.ts
 var clients = pgTable("clients", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  gender: varchar("gender", { length: 50 }),
+  birth_date: timestamp("birth_date"),
+  height_cm: decimal("height_cm", { precision: 5, scale: 2 }),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 20 }),
+  notes: text("notes"),
+  diseases: text("diseases"),
+  // JSON stringified array (string[])
+  allergies: text("allergies"),
+  // JSON stringified array (string[])
+  medications: text("medications"),
+  // JSON stringified array (string[])
+  has_active_plan: boolean("has_active_plan").default(false),
+  status: varchar("status", { length: 10 }).notNull().default("active"),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  activity_level: varchar("activity_level", { length: 32 })
+});
+
+// schema/measurements.ts
+var measurements = pgTable("measurements", {
+  id: serial("id").primaryKey(),
+  client_id: integer("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  weight_kg: real("weight_kg").notNull(),
+  waist_cm: real("waist_cm"),
+  hip_cm: real("hip_cm"),
+  neck_cm: real("neck_cm"),
+  chest_cm: real("chest_cm"),
+  arm_cm: real("arm_cm"),
+  thigh_cm: real("thigh_cm"),
+  body_fat_percent: real("body_fat_percent"),
+  measured_at: text("measured_at"),
+  note: text("note"),
+  created_at: timestamp("created_at").defaultNow()
+});
+
+// schema/consultations.ts
+var consultations = pgTable("consultations", {
+  id: serial("id").primaryKey(),
+  client_id: integer("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  consultation_date: timestamp("consultation_date").notNull(),
+  consultation_time: varchar("consultation_time", { length: 10 }).notNull(),
+  // HH:MM format
+  consultation_type: varchar("consultation_type", { length: 50 }).notNull(),
+  // initial, follow-up, emergency, online
+  notes: text("notes"),
+  status: varchar("status", { length: 20 }).default("scheduled").notNull(),
+  // scheduled, completed, cancelled
+  created_by: integer("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull()
+});
+
+// src/schema.ts
+var userRoleEnum2 = pgEnum("user_role", [
+  "subscriber_basic",
+  "subscriber_pro",
+  "clinic_admin",
+  "dietitian_team_member",
+  "admin",
+  "superadmin"
+]);
+var mealTypeEnum = pgEnum("meal_type", ["breakfast", "lunch", "dinner", "snack"]);
+var users2 = pgTable("users", {
+  id: serial("id").primaryKey(),
+  clerk_id: varchar("clerk_id", { length: 255 }).unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }),
+  role: userRoleEnum2("role").notNull().default("subscriber_basic"),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+  first_name: varchar("first_name", { length: 255 }),
+  last_name: varchar("last_name", { length: 255 }),
+  username: varchar("username", { length: 255 }),
+  avatar_url: varchar("avatar_url", { length: 512 }).default("https://res.cloudinary.com/dietkem/image/upload/v1/avatar.jpg"),
+  trial_started_at: timestamp("trial_started_at"),
+  trial_used: text("trial_used").default("false"),
+  first_subscription_started_at: timestamp("first_subscription_started_at")
+});
+var emailVerificationCodes2 = pgTable("email_verification_codes", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  code: varchar("code", { length: 6 }).notNull(),
+  expires_at: timestamp("expires_at").notNull(),
+  used: text("used").default("false"),
+  created_at: timestamp("created_at").defaultNow().notNull()
+});
+var sessions2 = pgTable("sessions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  sessionToken: varchar("session_token", { length: 255 }).notNull().unique(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  expires: timestamp("expires").notNull()
+});
+var accounts2 = pgTable("accounts", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }).notNull(),
+  provider: varchar("provider", { length: 255 }).notNull(),
+  providerAccountId: varchar("provider_account_id", { length: 255 }).notNull(),
+  refresh_token: text("refresh_token"),
+  access_token: text("access_token"),
+  expires_at: serial("expires_at"),
+  token_type: varchar("token_type", { length: 255 }),
+  scope: varchar("scope", { length: 255 }),
+  id_token: text("id_token"),
+  session_state: varchar("session_state", { length: 255 })
+});
+var verificationTokens2 = pgTable("verification_tokens", {
+  identifier: varchar("identifier", { length: 255 }).notNull(),
+  token: varchar("token", { length: 255 }).notNull(),
+  expires: timestamp("expires").notNull()
+});
+var clients2 = pgTable("clients", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   gender: varchar("gender", { length: 50 }),
@@ -5232,9 +5384,9 @@ var clients = pgTable("clients", {
   created_at: timestamp("created_at").defaultNow().notNull(),
   activity_level: varchar("activity_level", { length: 32 })
 });
-var measurements = pgTable("measurements", {
+var measurements2 = pgTable("measurements", {
   id: serial("id").primaryKey(),
-  client_id: integer("client_id").references(() => clients.id).notNull(),
+  client_id: integer("client_id").references(() => clients2.id).notNull(),
   measured_at: text("measured_at"),
   weight_kg: decimal("weight_kg", { precision: 5, scale: 2 }).notNull(),
   waist_cm: decimal("waist_cm", { precision: 5, scale: 2 }),
@@ -5249,12 +5401,27 @@ var measurements = pgTable("measurements", {
 });
 var meal_plans = pgTable("meal_plans", {
   id: serial("id").primaryKey(),
-  client_id: integer("client_id").references(() => clients.id).notNull(),
+  client_id: integer("client_id").references(() => clients2.id).notNull(),
   start_date: timestamp("start_date").notNull(),
   end_date: timestamp("end_date").notNull(),
   total_calories: integer("total_calories").notNull(),
   notes: text("notes"),
-  created_by: integer("created_by").references(() => users.id).notNull()
+  created_by: integer("created_by").references(() => users2.id).notNull()
+});
+var consultations2 = pgTable("consultations", {
+  id: serial("id").primaryKey(),
+  client_id: integer("client_id").references(() => clients2.id).notNull(),
+  consultation_date: timestamp("consultation_date").notNull(),
+  consultation_time: varchar("consultation_time", { length: 10 }).notNull(),
+  // HH:MM format
+  consultation_type: varchar("consultation_type", { length: 50 }).notNull(),
+  // initial, follow-up, emergency, online
+  notes: text("notes"),
+  status: varchar("status", { length: 20 }).default("scheduled").notNull(),
+  // scheduled, completed, cancelled
+  created_by: integer("created_by").references(() => users2.id).notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull()
 });
 var meal_plan_days = pgTable("meal_plan_days", {
   id: serial("id").primaryKey(),
@@ -5285,13 +5452,13 @@ var foods = pgTable("foods", {
 });
 var water_logs = pgTable("water_logs", {
   id: serial("id").primaryKey(),
-  client_id: integer("client_id").references(() => clients.id).notNull(),
+  client_id: integer("client_id").references(() => clients2.id).notNull(),
   date: timestamp("date").notNull(),
   value_liters: decimal("value_liters", { precision: 4, scale: 2 }).notNull()
 });
 var weight_logs = pgTable("weight_logs", {
   id: serial("id").primaryKey(),
-  client_id: integer("client_id").references(() => clients.id).notNull(),
+  client_id: integer("client_id").references(() => clients2.id).notNull(),
   date: timestamp("date").notNull(),
   weight_kg: decimal("weight_kg", { precision: 5, scale: 2 }).notNull()
 });
@@ -5304,6 +5471,7 @@ var db = drizzle(queryClient, { schema: schema_exports });
 0 && (module.exports = {
   accounts,
   clients,
+  consultations,
   db,
   emailVerificationCodes,
   foods,

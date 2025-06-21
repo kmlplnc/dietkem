@@ -17,7 +17,164 @@ import {
 import CreateClientForm from '../components/CreateClientForm';
 import ClientsPage from './ClientsPage';
 import ClientDetail from './ClientDetail';
+import Toast from '../components/Toast';
 import "./dashboard.css";
+
+// Client Consultation Stats Component
+const ClientConsultationStats: React.FC<{ clientId: number }> = ({ clientId }) => {
+  const { data: stats, isLoading } = trpc.consultations.getClientStats.useQuery({ client_id: clientId });
+
+  if (isLoading) {
+    return (
+      <div className="client-info">
+        <div className="info-row">
+          <span className="info-label">Son Görüşme:</span>
+          <span className="info-value">Yükleniyor...</span>
+        </div>
+        <div className="info-row">
+          <span className="info-label">Toplam Görüşme:</span>
+          <span className="info-value">Yükleniyor...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  return (
+    <div className="client-info">
+      <div className="info-row">
+        <span className="info-label">Son Görüşme:</span>
+        <span className="info-value">
+          {stats?.lastConsultation 
+            ? formatDate(stats.lastConsultation.consultation_date) 
+            : 'Henüz görüşme yok'
+          }
+        </span>
+      </div>
+      <div className="info-row">
+        <span className="info-label">Toplam Görüşme:</span>
+        <span className="info-value">{stats?.totalConsultations || 0}</span>
+      </div>
+    </div>
+  );
+};
+
+// Client Appointments Component
+const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = ({ clientId, clientName }) => {
+  const { data: consultations, isLoading, refetch } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (timeString: string) => {
+    return timeString;
+  };
+
+  const getDayOfWeek = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR', { weekday: 'short' });
+  };
+
+  const getConsultationTypeText = (type: string) => {
+    switch (type) {
+      case 'initial': return 'İlk Görüşme';
+      case 'follow-up': return 'Takip Görüşmesi';
+      case 'emergency': return 'Acil Görüşme';
+      case 'online': return 'Online Görüşme';
+      default: return type;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'scheduled': return 'Planlandı';
+      case 'completed': return 'Tamamlandı';
+      case 'cancelled': return 'İptal Edildi';
+      default: return status;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="appointments-content">
+        <div className="loading-appointments">
+          <div className="loading-spinner"></div>
+          <p>Randevular yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!consultations || consultations.length === 0) {
+    return (
+      <div className="appointments-content">
+        <div className="empty-appointments">
+          <div className="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <h3>Henüz randevu yok</h3>
+          <p>Bu danışan için henüz randevu oluşturulmamış.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="appointments-content">
+      <div className="appointments-list">
+        {consultations.map((consultation) => (
+          <div key={consultation.id} className="appointment-card">
+            <div className="appointment-header">
+              <div className="appointment-date-time">
+                <div className="appointment-date-icon">
+                  {getDayOfWeek(consultation.consultation_date)}
+                </div>
+                <div className="appointment-date-info">
+                  <span className="appointment-date">{formatDate(consultation.consultation_date)}</span>
+                  <span className="appointment-time">{formatTime(consultation.consultation_time)}</span>
+                </div>
+              </div>
+              <span className={`appointment-status status-${consultation.status}`}>
+                {getStatusText(consultation.status)}
+              </span>
+            </div>
+            
+            <div className="appointment-details">
+              <div className="appointment-type">
+                {getConsultationTypeText(consultation.consultation_type)}
+              </div>
+              
+              {consultation.notes && (
+                <div className="appointment-notes">
+                  {consultation.notes}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const DietitianPanel = () => {
   const { user, logout, loading } = useAuth();
@@ -32,6 +189,17 @@ const DietitianPanel = () => {
   const [selectedClientForConsultations, setSelectedClientForConsultations] = useState<{id: number, name: string} | null>(null);
   const { t } = useLanguage() || { t: (key: string) => key };
 
+  // Toast state
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+    isVisible: boolean;
+  }>({
+    message: '',
+    type: 'info',
+    isVisible: false
+  });
+
   // Form state
   const [formData, setFormData] = useState({
     date: '',
@@ -45,7 +213,23 @@ const DietitianPanel = () => {
   const { data: clientCount, isLoading: isLoadingClientCount } = trpc.clients.getCount.useQuery();
 
   // Tüm danışanları çek
-  const { data: clients, isLoading: isLoadingClients } = trpc.clients.getAll.useQuery();
+  const { data: clients, isLoading: isLoadingClients, refetch: refetchClients } = trpc.clients.getAll.useQuery();
+
+  // Görüşme mutation'ı
+  const createConsultationMutation = trpc.consultations.create.useMutation();
+
+  // Toast helper functions
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({
+      message,
+      type,
+      isVisible: true
+    });
+  };
+
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
 
   // URL'den tab bilgisini al
   useEffect(() => {
@@ -160,28 +344,38 @@ const DietitianPanel = () => {
     e.preventDefault();
     
     if (!selectedClientId) {
-      alert('Danışan seçilmedi!');
+      showToast('Danışan seçilmedi!', 'error');
       return;
     }
 
     if (!formData.date || !formData.time) {
-      alert('Tarih ve saat alanları zorunludur!');
+      showToast('Tarih ve saat alanları zorunludur!', 'error');
+      return;
+    }
+
+    if (!user?.id) {
+      showToast('Kullanıcı bilgisi bulunamadı!', 'error');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Burada API'ye görüşme kaydetme isteği gönderilecek
-      // Şimdilik sadece console'a yazdırıyoruz
-      console.log('Görüşme kaydediliyor:', {
-        clientId: selectedClientId,
-        clientName: selectedClientName,
-        ...formData
+      // API'ye görüşme kaydetme isteği gönder
+      const result = await createConsultationMutation.mutateAsync({
+        client_id: selectedClientId,
+        consultation_date: formData.date,
+        consultation_time: formData.time,
+        consultation_type: formData.type as 'initial' | 'follow-up' | 'emergency' | 'online',
+        notes: formData.notes || undefined,
+        created_by: user.id,
       });
 
       // Başarılı kayıt sonrası
-      alert('Görüşme başarıyla kaydedildi!');
+      showToast('Görüşme başarıyla kaydedildi!', 'success');
+      
+      // Client listesini yenile
+      refetchClients();
       
       // Formu temizle
       setFormData({
@@ -194,9 +388,9 @@ const DietitianPanel = () => {
       // Görüşmeler listesine dön
       handleConsultationViewChange('list');
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Görüşme kaydetme hatası:', error);
-      alert('Görüşme kaydedilirken bir hata oluştu!');
+      showToast(`Görüşme kaydedilirken bir hata oluştu: ${error.message || 'Bilinmeyen hata'}`, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -316,15 +510,7 @@ const DietitianPanel = () => {
                           </div>
                           
                           <div className="client-info">
-                            <div className="info-row">
-                              <span className="info-label">Son Görüşme:</span>
-                              <span className="info-value">Henüz görüşme yok</span>
-                            </div>
-                            
-                            <div className="info-row">
-                              <span className="info-label">Toplam Görüşme:</span>
-                              <span className="info-value">0</span>
-                            </div>
+                            <ClientConsultationStats clientId={client.id} />
                           </div>
                           
                           <div className="client-actions">
@@ -376,24 +562,7 @@ const DietitianPanel = () => {
                   </div>
                   
                   <div className="appointments-content">
-                    <div className="empty-appointments">
-                      <div className="empty-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                          <line x1="16" y1="2" x2="16" y2="6"></line>
-                          <line x1="8" y1="2" x2="8" y2="6"></line>
-                          <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                      </div>
-                      <h3>Henüz randevu yok</h3>
-                      <p>Bu danışan için henüz randevu oluşturulmamış.</p>
-                      <button 
-                        className="create-appointment-btn"
-                        onClick={() => handleConsultationViewChange('new')}
-                      >
-                        İlk Randevuyu Oluştur
-                      </button>
-                    </div>
+                    <ClientAppointments clientId={selectedClientId} clientName={selectedClientName} />
                   </div>
                 </div>
               )}
@@ -477,25 +646,7 @@ const DietitianPanel = () => {
                   </div>
                   
                   <div className="recent-consultations-content">
-                    <div className="empty-consultations">
-                      <div className="empty-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                          <polyline points="14,2 14,8 20,8"></polyline>
-                          <line x1="16" y1="13" x2="8" y2="13"></line>
-                          <line x1="16" y1="17" x2="8" y2="17"></line>
-                          <polyline points="10,9 9,9 8,9"></polyline>
-                        </svg>
-                      </div>
-                      <h3>Henüz görüşme yok</h3>
-                      <p>Bu danışan için henüz görüşme kaydı bulunmuyor.</p>
-                      <button 
-                        className="create-consultation-btn"
-                        onClick={() => handleConsultationViewChange('new')}
-                      >
-                        İlk Görüşmeyi Oluştur
-                      </button>
-                    </div>
+                    <ClientAppointments clientId={selectedClientId} clientName={selectedClientName} />
                   </div>
                 </div>
               )}
@@ -621,6 +772,14 @@ const DietitianPanel = () => {
           {renderContent()}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </>
   );
 };
