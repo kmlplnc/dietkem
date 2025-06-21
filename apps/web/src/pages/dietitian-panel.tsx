@@ -25,6 +25,9 @@ const DietitianPanel = () => {
   // Danışan sayısını çek
   const { data: clientCount, isLoading: isLoadingClientCount } = trpc.clients.getCount.useQuery();
 
+  // Tüm danışanları çek
+  const { data: clients, isLoading: isLoadingClients } = trpc.clients.getAll.useQuery();
+
   const handleSignOut = async () => {
     // CLERK_DISABLED_TEMP: await signOut();
     navigate('/');
@@ -148,133 +151,65 @@ const DietitianPanel = () => {
             </header>
             
             <div className="consultations-page">
-              <div className="consultations-grid">
-                <div className="consultation-client-card">
-                  <div className="client-header">
-                    <h3 className="client-name">Ayşe Yılmaz</h3>
-                    <span className="client-status active">Aktif</span>
+              {!clients || clients.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
                   </div>
-                  
-                  <div className="client-info">
-                    <div className="info-row">
-                      <span className="info-label">Son Görüşme:</span>
-                      <span className="info-value">21.06.2025</span>
-                    </div>
-                    
-                    <div className="info-row">
-                      <span className="info-label">Toplam Görüşme:</span>
-                      <span className="info-value">3</span>
-                    </div>
-                  </div>
-                  
-                  <div className="client-actions">
-                    <button 
-                      className="appointments-btn"
-                      onClick={() => handleOpenConsultations(1, 'Ayşe Yılmaz')}
-                    >
-                      🗓️ Randevularını Gör
-                    </button>
-                    
-                    <button 
-                      className="new-consultation-btn"
-                      onClick={() => handleOpenConsultations(1, 'Ayşe Yılmaz')}
-                    >
-                      ➕ Yeni Görüşme Ekle
-                    </button>
-                    
-                    <button 
-                      className="recent-consultations-btn"
-                      onClick={() => handleOpenConsultations(1, 'Ayşe Yılmaz')}
-                    >
-                      🧾 Son Görüşmeler
-                    </button>
-                  </div>
+                  <h3>Henüz danışan yok</h3>
+                  <p>Görüşme yönetimi için önce danışan eklemeniz gerekiyor.</p>
                 </div>
-                
-                <div className="consultation-client-card">
-                  <div className="client-header">
-                    <h3 className="client-name">Mehmet Demir</h3>
-                    <span className="client-status active">Aktif</span>
-                  </div>
-                  
-                  <div className="client-info">
-                    <div className="info-row">
-                      <span className="info-label">Son Görüşme:</span>
-                      <span className="info-value">20.06.2025</span>
+              ) : (
+                <div className="consultations-grid">
+                  {clients.map((client) => (
+                    <div key={client.id} className="consultation-client-card">
+                      <div className="client-header">
+                        <h3 className="client-name">{client.name}</h3>
+                        <span className={`client-status ${client.status === 'active' ? 'active' : 'passive'}`}>
+                          {client.status === 'active' ? 'Aktif' : 'Pasif'}
+                        </span>
+                      </div>
+                      
+                      <div className="client-info">
+                        <div className="info-row">
+                          <span className="info-label">Son Görüşme:</span>
+                          <span className="info-value">Henüz görüşme yok</span>
+                        </div>
+                        
+                        <div className="info-row">
+                          <span className="info-label">Toplam Görüşme:</span>
+                          <span className="info-value">0</span>
+                        </div>
+                      </div>
+                      
+                      <div className="client-actions">
+                        <button 
+                          className="appointments-btn"
+                          onClick={() => handleOpenConsultations(client.id, client.name)}
+                        >
+                          🗓️ Randevularını Gör
+                        </button>
+                        
+                        <button 
+                          className="new-consultation-btn"
+                          onClick={() => handleOpenConsultations(client.id, client.name)}
+                        >
+                          ➕ Yeni Görüşme Ekle
+                        </button>
+                        
+                        <button 
+                          className="recent-consultations-btn"
+                          onClick={() => handleOpenConsultations(client.id, client.name)}
+                        >
+                          🧾 Son Görüşmeler
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="info-row">
-                      <span className="info-label">Toplam Görüşme:</span>
-                      <span className="info-value">2</span>
-                    </div>
-                  </div>
-                  
-                  <div className="client-actions">
-                    <button 
-                      className="appointments-btn"
-                      onClick={() => handleOpenConsultations(2, 'Mehmet Demir')}
-                    >
-                      🗓️ Randevularını Gör
-                    </button>
-                    
-                    <button 
-                      className="new-consultation-btn"
-                      onClick={() => handleOpenConsultations(2, 'Mehmet Demir')}
-                    >
-                      ➕ Yeni Görüşme Ekle
-                    </button>
-                    
-                    <button 
-                      className="recent-consultations-btn"
-                      onClick={() => handleOpenConsultations(2, 'Mehmet Demir')}
-                    >
-                      🧾 Son Görüşmeler
-                    </button>
-                  </div>
+                  ))}
                 </div>
-                
-                <div className="consultation-client-card">
-                  <div className="client-header">
-                    <h3 className="client-name">Fatma Kaya</h3>
-                    <span className="client-status passive">Pasif</span>
-                  </div>
-                  
-                  <div className="client-info">
-                    <div className="info-row">
-                      <span className="info-label">Son Görüşme:</span>
-                      <span className="info-value">19.06.2025</span>
-                    </div>
-                    
-                    <div className="info-row">
-                      <span className="info-label">Toplam Görüşme:</span>
-                      <span className="info-value">1</span>
-                    </div>
-                  </div>
-                  
-                  <div className="client-actions">
-                    <button 
-                      className="appointments-btn"
-                      onClick={() => handleOpenConsultations(3, 'Fatma Kaya')}
-                    >
-                      🗓️ Randevularını Gör
-                    </button>
-                    
-                    <button 
-                      className="new-consultation-btn"
-                      onClick={() => handleOpenConsultations(3, 'Fatma Kaya')}
-                    >
-                      ➕ Yeni Görüşme Ekle
-                    </button>
-                    
-                    <button 
-                      className="recent-consultations-btn"
-                      onClick={() => handleOpenConsultations(3, 'Fatma Kaya')}
-                    >
-                      🧾 Son Görüşmeler
-                    </button>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </main>
         );
