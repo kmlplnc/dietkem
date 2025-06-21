@@ -67,6 +67,26 @@ const ClientConsultationStats: React.FC<{ clientId: number }> = ({ clientId }) =
   );
 };
 
+// Helper functions (move to top for reuse)
+const getConsultationTypeText = (type: string) => {
+  switch (type) {
+    case 'initial': return 'İlk Görüşme';
+    case 'follow-up': return 'Takip Görüşmesi';
+    case 'emergency': return 'Acil Görüşme';
+    case 'online': return 'Online Görüşme';
+    default: return type;
+  }
+};
+
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'scheduled': return 'Planlandı';
+    case 'completed': return 'Tamamlandı';
+    case 'cancelled': return 'İptal Edildi';
+    default: return status;
+  }
+};
+
 // Client Appointments Component
 const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = ({ clientId, clientName }) => {
   const { data: consultations, isLoading, refetch } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
@@ -87,25 +107,6 @@ const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = (
   const getDayOfWeek = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('tr-TR', { weekday: 'short' });
-  };
-
-  const getConsultationTypeText = (type: string) => {
-    switch (type) {
-      case 'initial': return 'İlk Görüşme';
-      case 'follow-up': return 'Takip Görüşmesi';
-      case 'emergency': return 'Acil Görüşme';
-      case 'online': return 'Online Görüşme';
-      default: return type;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'scheduled': return 'Planlandı';
-      case 'completed': return 'Tamamlandı';
-      case 'cancelled': return 'İptal Edildi';
-      default: return status;
-    }
   };
 
   const truncate = (str: string, n: number) => {
@@ -187,16 +188,8 @@ const UpcomingAppointments: React.FC<{ clientId: number; clientName: string }> =
   const { data: consultations, isLoading } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
 
   const now = new Date();
-
-  // Helper to combine date and time into a Date object
-  const getDateTime = (date: string, time: string) => {
-    return new Date(date.split('T')[0] + 'T' + time);
-  };
-
-  const upcoming = (consultations || []).filter(c => {
-    const dt = getDateTime(c.consultation_date, c.consultation_time);
-    return dt > now;
-  });
+  const getDateTime = (date: string, time: string) => new Date(date.split('T')[0] + 'T' + time);
+  const upcoming = (consultations || []).filter(c => getDateTime(c.consultation_date, c.consultation_time) > now);
 
   if (isLoading) {
     return (
@@ -228,7 +221,6 @@ const UpcomingAppointments: React.FC<{ clientId: number; clientName: string }> =
     );
   }
 
-  // Aynı kart yapısı
   return (
     <div className="appointments-content">
       <div className="consultations-grid">
@@ -253,9 +245,9 @@ const UpcomingAppointments: React.FC<{ clientId: number; clientName: string }> =
           >
             <div style={{fontWeight: 700, fontSize: 20, color: '#3b82f6', marginBottom: 2}}>{new Date(consultation.consultation_date).toLocaleDateString('tr-TR')}</div>
             <div style={{fontSize: 13, color: '#64748b', marginBottom: 2}}>{new Date(consultation.consultation_date).toLocaleDateString('tr-TR', { weekday: 'short' })} - {consultation.consultation_time}</div>
-            <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>{consultation.consultation_type}</div>
+            <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>{getConsultationTypeText(consultation.consultation_type)}</div>
             <span className={`appointment-status status-${consultation.status}`} style={{margin: '8px 0'}}>
-              {consultation.status}
+              {getStatusText(consultation.status)}
             </span>
             {consultation.notes && (
               <div style={{fontSize: 14, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginTop: 4, maxHeight: 48, overflow: 'hidden', textOverflow: 'ellipsis'}}>
@@ -274,14 +266,8 @@ const PastAppointments: React.FC<{ clientId: number; clientName: string }> = ({ 
   const { data: consultations, isLoading } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
 
   const now = new Date();
-  const getDateTime = (date: string, time: string) => {
-    return new Date(date.split('T')[0] + 'T' + time);
-  };
-
-  const past = (consultations || []).filter(c => {
-    const dt = getDateTime(c.consultation_date, c.consultation_time);
-    return dt <= now;
-  });
+  const getDateTime = (date: string, time: string) => new Date(date.split('T')[0] + 'T' + time);
+  const past = (consultations || []).filter(c => getDateTime(c.consultation_date, c.consultation_time) <= now);
 
   if (isLoading) {
     return (
@@ -337,9 +323,9 @@ const PastAppointments: React.FC<{ clientId: number; clientName: string }> = ({ 
           >
             <div style={{fontWeight: 700, fontSize: 20, color: '#3b82f6', marginBottom: 2}}>{new Date(consultation.consultation_date).toLocaleDateString('tr-TR')}</div>
             <div style={{fontSize: 13, color: '#64748b', marginBottom: 2}}>{new Date(consultation.consultation_date).toLocaleDateString('tr-TR', { weekday: 'short' })} - {consultation.consultation_time}</div>
-            <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>{consultation.consultation_type}</div>
+            <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>{getConsultationTypeText(consultation.consultation_type)}</div>
             <span className={`appointment-status status-${consultation.status}`} style={{margin: '8px 0'}}>
-              {consultation.status}
+              {getStatusText(consultation.status)}
             </span>
             {consultation.notes && (
               <div style={{fontSize: 14, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginTop: 4, maxHeight: 48, overflow: 'hidden', textOverflow: 'ellipsis'}}>
