@@ -86,7 +86,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (import.meta.env.PROD) {
         console.log('AuthProvider - Using direct API for production');
         
-        const response = await fetch('https://dietkem.onrender.com/api/auth/login', {
+        // Use environment variable for API URL, fallback to correct API server URL
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://dietkem-api.onrender.com';
+        
+        const response = await fetch(`${apiUrl}/api/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

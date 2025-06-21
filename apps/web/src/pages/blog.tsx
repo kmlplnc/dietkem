@@ -35,30 +35,16 @@ const BlogPage = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        if (import.meta.env.PROD) {
-          // Use direct API in production
-          const response = await fetch('https://dietkem.onrender.com/api/blogs');
-          if (response.ok) {
-            const data = await response.json();
-            setPosts(data);
-          } else {
-            console.error('Failed to fetch posts:', response.status);
-            setPosts([]);
-          }
-        } else {
-          // Use tRPC in development
-          const response = await fetch('/api/trpc/blogs.getAll?batch=1&input=%7B%7D');
-          if (response.ok) {
-            const data = await response.json();
-            setPosts(data[0]?.result?.data || []);
-          } else {
-            console.error('Failed to fetch posts:', response.status);
-            setPosts([]);
-          }
+        setIsLoading(true);
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://dietkem-api.onrender.com';
+        const response = await fetch(`${apiUrl}/api/blogs`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const data = await response.json();
+        setPosts(data);
       } catch (error) {
-        console.error('Error fetching posts:', error);
-        setPosts([]);
+        console.error('Failed to fetch posts:', error);
       } finally {
         setIsLoading(false);
       }

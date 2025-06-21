@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchRecipes, Recipe, deleteRecipe, fetchRecipeById } from '../recipes/api';
+import { fetchRecipes, Recipe, RecipesResponse, deleteRecipe, fetchRecipeById } from '../recipes/api';
 import { useNavigate } from 'react-router-dom';
 
 const AdminRecipesPage: React.FC = () => {

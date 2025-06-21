@@ -13,8 +13,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./packages/db/drizzle:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
     networks:
       - dietkem_network
     healthcheck:
@@ -34,11 +32,9 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-dietkem_user}:${POSTGRES_PASSWORD:-dietkem_password}@postgres:5432/${POSTGRES_DB:-dietkem}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3001}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
       RESEND_API_KEY: ${RESEND_API_KEY}
       PORT: 3001
-    ports:
-      - "3001:3001"
     depends_on:
       postgres:
         condition: service_healthy
@@ -65,15 +61,13 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
-    ports:
-      - "3000:3000"
+      VITE_API_URL: ${VITE_API_URL}
     depends_on:
       - api
     networks:
       - dietkem_network
 
-  # Nginx Reverse Proxy
+  # Nginx Reverse Proxy with SSL
   nginx:
     image: nginx:alpine
     container_name: dietkem_nginx
@@ -84,6 +78,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
     depends_on:
       - web
       - api
@@ -92,6 +87,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  nginx_logs:
     driver: local
 
 networks:

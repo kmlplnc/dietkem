@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': JSON.stringify(env.VITE_CLERK_PUBLISHABLE_KEY),
+      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL),
     },
     build: {
       sourcemap: true,
@@ -38,7 +38,6 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
-            clerk: ['@clerk/clerk-react'],
           },
         },
       },

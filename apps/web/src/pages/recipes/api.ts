@@ -86,6 +86,8 @@ export const fetchRecipes = async (
   dishType?: string
 ): Promise<RecipesResponse> => {
   try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://dietkem-api.onrender.com';
+    
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
@@ -95,13 +97,28 @@ export const fetchRecipes = async (
     if (cuisine) params.append('cuisine', cuisine);
     if (dishType) params.append('dishType', dishType);
 
-    const response = await fetch(`${API_BASE_URL}/recipes?${params}`);
+    const response = await fetch(`${apiUrl}/api/recipes?${params}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    return await safeJsonParse(response);
+    
+    const data = await response.json();
+    
+    // If the API returns a simple array, wrap it in the expected format
+    if (Array.isArray(data)) {
+      return {
+        recipes: data,
+        pagination: {
+          page,
+          limit,
+          total: data.length,
+          totalPages: Math.ceil(data.length / limit)
+        }
+      };
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error fetching recipes:', error);
     throw error;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchRecipes, Recipe } from './api';
+import { fetchRecipes, Recipe, RecipesResponse } from './api';
 import RecipeCard from './RecipeCard';
 
 const RecipesPage: React.FC = () => {
