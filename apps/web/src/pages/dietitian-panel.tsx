@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // CLERK_DISABLED_TEMP: import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
@@ -7,8 +7,17 @@ import { trpc } from '../utils/trpc';
 import CreateClientForm from '../components/CreateClientForm';
 import ClientsPage from './ClientsPage';
 import ClientDetail from './ClientDetail';
-import ConsultationsPanel from '../components/ConsultationsPanel';
 import "./dashboard.css";
+import { 
+  User, 
+  Users, 
+  Calendar, 
+  FileText, 
+  Settings, 
+  LogOut,
+  Menu,
+  X
+} from 'lucide-react';
 
 const DietitianPanel = () => {
   // CLERK_DISABLED_TEMP: const { signOut } = useAuth();
@@ -17,6 +26,8 @@ const DietitianPanel = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [selectedClientName, setSelectedClientName] = useState<string>('');
+  const [consultationView, setConsultationView] = useState<'list' | 'appointments' | 'new' | 'recent'>('list');
   const [isConsultationsOpen, setIsConsultationsOpen] = useState(false);
   const [selectedClientForConsultations, setSelectedClientForConsultations] = useState<{id: number, name: string} | null>(null);
   const { t } = useLanguage() || { t: (key: string) => key };
@@ -65,16 +76,23 @@ const DietitianPanel = () => {
     setActiveTab('clients');
   };
 
-  // Görüşmeler panelini aç
+  // Görüşme paneli handler'ları
   const handleOpenConsultations = (clientId: number, clientName: string) => {
-    setSelectedClientForConsultations({ id: clientId, name: clientName });
+    setSelectedClientId(clientId);
+    setSelectedClientName(clientName);
     setIsConsultationsOpen(true);
+    setConsultationView('list');
   };
 
-  // Görüşmeler panelini kapat
   const handleCloseConsultations = () => {
     setIsConsultationsOpen(false);
-    setSelectedClientForConsultations(null);
+    setSelectedClientId(null);
+    setSelectedClientName('');
+    setConsultationView('list');
+  };
+
+  const handleConsultationViewChange = (view: 'list' | 'appointments' | 'new' | 'recent') => {
+    setConsultationView(view);
   };
 
   const renderContent = () => {
@@ -146,68 +164,220 @@ const DietitianPanel = () => {
           <main className="dashboard-content">
             <header className="topbar">
               <div className="user-info">
-                <span className="greeting">Görüşmeler</span>
+                <span className="greeting">
+                  {consultationView === 'list' && 'Görüşmeler'}
+                  {consultationView === 'appointments' && `Randevular - ${selectedClientName}`}
+                  {consultationView === 'new' && `Yeni Görüşme - ${selectedClientName}`}
+                  {consultationView === 'recent' && `Son Görüşmeler - ${selectedClientName}`}
+                </span>
+                {consultationView !== 'list' && (
+                  <button 
+                    className="back-btn"
+                    onClick={() => handleConsultationViewChange('list')}
+                  >
+                    ← Geri
+                  </button>
+                )}
               </div>
             </header>
             
             <div className="consultations-page">
-              {!clients || clients.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                    </svg>
-                  </div>
-                  <h3>Henüz danışan yok</h3>
-                  <p>Görüşme yönetimi için önce danışan eklemeniz gerekiyor.</p>
-                </div>
-              ) : (
-                <div className="consultations-grid">
-                  {clients.map((client) => (
-                    <div key={client.id} className="consultation-client-card">
-                      <div className="client-header">
-                        <h3 className="client-name">{client.name}</h3>
-                        <span className={`client-status ${client.status === 'active' ? 'active' : 'passive'}`}>
-                          {client.status === 'active' ? 'Aktif' : 'Pasif'}
-                        </span>
+              {consultationView === 'list' && (
+                <>
+                  {!clients || clients.length === 0 ? (
+                    <div className="empty-state">
+                      <div className="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
                       </div>
-                      
-                      <div className="client-info">
-                        <div className="info-row">
-                          <span className="info-label">Son Görüşme:</span>
-                          <span className="info-value">Henüz görüşme yok</span>
-                        </div>
-                        
-                        <div className="info-row">
-                          <span className="info-label">Toplam Görüşme:</span>
-                          <span className="info-value">0</span>
-                        </div>
-                      </div>
-                      
-                      <div className="client-actions">
-                        <button 
-                          className="appointments-btn"
-                          onClick={() => handleOpenConsultations(client.id, client.name)}
-                        >
-                          🗓️ Randevularını Gör
-                        </button>
-                        
-                        <button 
-                          className="new-consultation-btn"
-                          onClick={() => handleOpenConsultations(client.id, client.name)}
-                        >
-                          ➕ Yeni Görüşme Ekle
-                        </button>
-                        
-                        <button 
-                          className="recent-consultations-btn"
-                          onClick={() => handleOpenConsultations(client.id, client.name)}
-                        >
-                          🧾 Son Görüşmeler
-                        </button>
-                      </div>
+                      <h3>Henüz danışan yok</h3>
+                      <p>Görüşme yönetimi için önce danışan eklemeniz gerekiyor.</p>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="consultations-grid">
+                      {clients.map((client) => (
+                        <div key={client.id} className="consultation-client-card">
+                          <div className="client-header">
+                            <h3 className="client-name">{client.name}</h3>
+                            <span className={`client-status ${client.status === 'active' ? 'active' : 'passive'}`}>
+                              {client.status === 'active' ? 'Aktif' : 'Pasif'}
+                            </span>
+                          </div>
+                          
+                          <div className="client-info">
+                            <div className="info-row">
+                              <span className="info-label">Son Görüşme:</span>
+                              <span className="info-value">Henüz görüşme yok</span>
+                            </div>
+                            
+                            <div className="info-row">
+                              <span className="info-label">Toplam Görüşme:</span>
+                              <span className="info-value">0</span>
+                            </div>
+                          </div>
+                          
+                          <div className="client-actions">
+                            <button 
+                              className="appointments-btn"
+                              onClick={() => {
+                                setSelectedClientId(client.id);
+                                setSelectedClientName(client.name);
+                                handleConsultationViewChange('appointments');
+                              }}
+                            >
+                              🗓️ Randevularını Gör
+                            </button>
+                            
+                            <button 
+                              className="new-consultation-btn"
+                              onClick={() => {
+                                setSelectedClientId(client.id);
+                                setSelectedClientName(client.name);
+                                handleConsultationViewChange('new');
+                              }}
+                            >
+                              ➕ Yeni Görüşme Ekle
+                            </button>
+                            
+                            <button 
+                              className="recent-consultations-btn"
+                              onClick={() => {
+                                setSelectedClientId(client.id);
+                                setSelectedClientName(client.name);
+                                handleConsultationViewChange('recent');
+                              }}
+                            >
+                              🧾 Son Görüşmeler
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {consultationView === 'appointments' && (
+                <div className="consultation-detail-view">
+                  <div className="detail-header">
+                    <h2>Randevular</h2>
+                    <p>Danışan: {selectedClientName}</p>
+                  </div>
+                  
+                  <div className="appointments-content">
+                    <div className="empty-appointments">
+                      <div className="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                      </div>
+                      <h3>Henüz randevu yok</h3>
+                      <p>Bu danışan için henüz randevu oluşturulmamış.</p>
+                      <button 
+                        className="create-appointment-btn"
+                        onClick={() => handleConsultationViewChange('new')}
+                      >
+                        İlk Randevuyu Oluştur
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {consultationView === 'new' && (
+                <div className="consultation-detail-view">
+                  <div className="detail-header">
+                    <h2>Yeni Görüşme Ekle</h2>
+                    <p>Danışan: {selectedClientName}</p>
+                  </div>
+                  
+                  <div className="new-consultation-content">
+                    <form className="consultation-form">
+                      <div className="form-group">
+                        <label htmlFor="consultation-date">Görüşme Tarihi</label>
+                        <input 
+                          type="date" 
+                          id="consultation-date"
+                          className="form-input"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="consultation-time">Görüşme Saati</label>
+                        <input 
+                          type="time" 
+                          id="consultation-time"
+                          className="form-input"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="consultation-type">Görüşme Türü</label>
+                        <select id="consultation-type" className="form-input">
+                          <option value="initial">İlk Görüşme</option>
+                          <option value="follow-up">Takip Görüşmesi</option>
+                          <option value="emergency">Acil Görüşme</option>
+                          <option value="online">Online Görüşme</option>
+                        </select>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="consultation-notes">Notlar</label>
+                        <textarea 
+                          id="consultation-notes"
+                          className="form-textarea"
+                          rows={4}
+                          placeholder="Görüşme hakkında notlar..."
+                        ></textarea>
+                      </div>
+                      
+                      <div className="form-actions">
+                        <button type="button" className="cancel-btn" onClick={() => handleConsultationViewChange('list')}>
+                          İptal
+                        </button>
+                        <button type="submit" className="save-btn">
+                          Görüşmeyi Kaydet
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {consultationView === 'recent' && (
+                <div className="consultation-detail-view">
+                  <div className="detail-header">
+                    <h2>Son Görüşmeler</h2>
+                    <p>Danışan: {selectedClientName}</p>
+                  </div>
+                  
+                  <div className="recent-consultations-content">
+                    <div className="empty-consultations">
+                      <div className="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14,2 14,8 20,8"></polyline>
+                          <line x1="16" y1="13" x2="8" y2="13"></line>
+                          <line x1="16" y1="17" x2="8" y2="17"></line>
+                          <polyline points="10,9 9,9 8,9"></polyline>
+                        </svg>
+                      </div>
+                      <h3>Henüz görüşme yok</h3>
+                      <p>Bu danışan için henüz görüşme kaydı bulunmuyor.</p>
+                      <button 
+                        className="create-consultation-btn"
+                        onClick={() => handleConsultationViewChange('new')}
+                      >
+                        İlk Görüşmeyi Oluştur
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -320,16 +490,6 @@ const DietitianPanel = () => {
           {renderContent()}
         </div>
       </div>
-      
-      {/* Consultations Panel */}
-      {selectedClientForConsultations && (
-        <ConsultationsPanel
-          clientId={selectedClientForConsultations.id}
-          clientName={selectedClientForConsultations.name}
-          isOpen={isConsultationsOpen}
-          onClose={handleCloseConsultations}
-        />
-      )}
     </>
   );
 };
