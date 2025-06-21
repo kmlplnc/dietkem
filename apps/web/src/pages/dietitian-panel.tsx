@@ -148,73 +148,131 @@ const DietitianPanel = () => {
             </header>
             
             <div className="consultations-page">
-              <div className="consultations-header">
-                <h2>Tüm Görüşmeler</h2>
-                <p>Danışanlarınızla yapılan tüm görüşmeleri buradan yönetebilirsiniz.</p>
-              </div>
-              
-              <div className="consultations-list">
-                <div className="consultation-item">
-                  <div className="consultation-client">
-                    <h3>Ayşe Yılmaz</h3>
-                    <span className="client-id">ID: 1</span>
+              <div className="consultations-grid">
+                <div className="consultation-client-card">
+                  <div className="client-header">
+                    <h3 className="client-name">Ayşe Yılmaz</h3>
+                    <span className="client-status active">Aktif</span>
                   </div>
-                  <div className="consultation-details">
-                    <div className="consultation-date">21.06.2025</div>
-                    <div className="consultation-duration">45 dk</div>
-                    <div className="consultation-status visible">Görünür</div>
+                  
+                  <div className="client-info">
+                    <div className="info-row">
+                      <span className="info-label">Son Görüşme:</span>
+                      <span className="info-value">21.06.2025</span>
+                    </div>
+                    
+                    <div className="info-row">
+                      <span className="info-label">Toplam Görüşme:</span>
+                      <span className="info-value">3</span>
+                    </div>
                   </div>
-                  <div className="consultation-notes">
-                    İlk görüşme. Danışanın mevcut beslenme alışkanlıkları değerlendirildi. Hedefler belirlendi ve ilk beslenme planı oluşturuldu.
+                  
+                  <div className="client-actions">
+                    <button 
+                      className="appointments-btn"
+                      onClick={() => handleOpenConsultations(1, 'Ayşe Yılmaz')}
+                    >
+                      🗓️ Randevularını Gör
+                    </button>
+                    
+                    <button 
+                      className="new-consultation-btn"
+                      onClick={() => handleOpenConsultations(1, 'Ayşe Yılmaz')}
+                    >
+                      ➕ Yeni Görüşme Ekle
+                    </button>
+                    
+                    <button 
+                      className="recent-consultations-btn"
+                      onClick={() => handleOpenConsultations(1, 'Ayşe Yılmaz')}
+                    >
+                      🧾 Son Görüşmeler
+                    </button>
                   </div>
-                  <button 
-                    className="view-consultation-btn"
-                    onClick={() => handleOpenConsultations(1, 'Ayşe Yılmaz')}
-                  >
-                    Görüşmeleri Görüntüle
-                  </button>
                 </div>
                 
-                <div className="consultation-item">
-                  <div className="consultation-client">
-                    <h3>Mehmet Demir</h3>
-                    <span className="client-id">ID: 2</span>
+                <div className="consultation-client-card">
+                  <div className="client-header">
+                    <h3 className="client-name">Mehmet Demir</h3>
+                    <span className="client-status active">Aktif</span>
                   </div>
-                  <div className="consultation-details">
-                    <div className="consultation-date">20.06.2025</div>
-                    <div className="consultation-duration">30 dk</div>
-                    <div className="consultation-status visible">Görünür</div>
+                  
+                  <div className="client-info">
+                    <div className="info-row">
+                      <span className="info-label">Son Görüşme:</span>
+                      <span className="info-value">20.06.2025</span>
+                    </div>
+                    
+                    <div className="info-row">
+                      <span className="info-label">Toplam Görüşme:</span>
+                      <span className="info-value">2</span>
+                    </div>
                   </div>
-                  <div className="consultation-notes">
-                    Kontrol görüşmesi. Plana uyum iyi, kilo kaybı 2kg. Motivasyon yüksek.
+                  
+                  <div className="client-actions">
+                    <button 
+                      className="appointments-btn"
+                      onClick={() => handleOpenConsultations(2, 'Mehmet Demir')}
+                    >
+                      🗓️ Randevularını Gör
+                    </button>
+                    
+                    <button 
+                      className="new-consultation-btn"
+                      onClick={() => handleOpenConsultations(2, 'Mehmet Demir')}
+                    >
+                      ➕ Yeni Görüşme Ekle
+                    </button>
+                    
+                    <button 
+                      className="recent-consultations-btn"
+                      onClick={() => handleOpenConsultations(2, 'Mehmet Demir')}
+                    >
+                      🧾 Son Görüşmeler
+                    </button>
                   </div>
-                  <button 
-                    className="view-consultation-btn"
-                    onClick={() => handleOpenConsultations(2, 'Mehmet Demir')}
-                  >
-                    Görüşmeleri Görüntüle
-                  </button>
                 </div>
                 
-                <div className="consultation-item">
-                  <div className="consultation-client">
-                    <h3>Fatma Kaya</h3>
-                    <span className="client-id">ID: 3</span>
+                <div className="consultation-client-card">
+                  <div className="client-header">
+                    <h3 className="client-name">Fatma Kaya</h3>
+                    <span className="client-status passive">Pasif</span>
                   </div>
-                  <div className="consultation-details">
-                    <div className="consultation-date">19.06.2025</div>
-                    <div className="consultation-duration">60 dk</div>
-                    <div className="consultation-status hidden">Gizli</div>
+                  
+                  <div className="client-info">
+                    <div className="info-row">
+                      <span className="info-label">Son Görüşme:</span>
+                      <span className="info-value">19.06.2025</span>
+                    </div>
+                    
+                    <div className="info-row">
+                      <span className="info-label">Toplam Görüşme:</span>
+                      <span className="info-value">1</span>
+                    </div>
                   </div>
-                  <div className="consultation-notes">
-                    Detaylı beslenme analizi yapıldı. Yeni hedefler belirlendi.
+                  
+                  <div className="client-actions">
+                    <button 
+                      className="appointments-btn"
+                      onClick={() => handleOpenConsultations(3, 'Fatma Kaya')}
+                    >
+                      🗓️ Randevularını Gör
+                    </button>
+                    
+                    <button 
+                      className="new-consultation-btn"
+                      onClick={() => handleOpenConsultations(3, 'Fatma Kaya')}
+                    >
+                      ➕ Yeni Görüşme Ekle
+                    </button>
+                    
+                    <button 
+                      className="recent-consultations-btn"
+                      onClick={() => handleOpenConsultations(3, 'Fatma Kaya')}
+                    >
+                      🧾 Son Görüşmeler
+                    </button>
                   </div>
-                  <button 
-                    className="view-consultation-btn"
-                    onClick={() => handleOpenConsultations(3, 'Fatma Kaya')}
-                  >
-                    Görüşmeleri Görüntüle
-                  </button>
                 </div>
               </div>
             </div>
