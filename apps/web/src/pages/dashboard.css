@@ -743,8 +743,16 @@ section h2 {
 }
 
 /* Consultation Form */
+.new-consultation-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 400px;
+}
+
 .consultation-form {
   max-width: 600px;
+  width: 100%;
 }
 
 .form-group {
