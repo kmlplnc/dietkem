@@ -550,4 +550,53 @@ export const consultationsRouter = router({
         });
       }
     }),
+
+  getVideoCalls: publicProcedure
+    .input(z.object({ dietitianId: z.number() }))
+    .query(async ({ input }) => {
+      try {
+        // Sadece ilgili diyetisyenin online (video) görüşmeleri
+        const videoConsultations = await db
+          .select({
+            id: consultations.id,
+            client_id: consultations.client_id,
+            consultation_date: consultations.consultation_date,
+            consultation_time: consultations.consultation_time,
+            consultation_type: consultations.consultation_type,
+            status: consultations.status,
+            notes: consultations.notes,
+            created_by: consultations.created_by
+          })
+          .from(consultations)
+          .where(
+            sql`${consultations.created_by} = ${input.dietitianId}
+                AND ${consultations.consultation_type} = 'online'`
+          )
+          .orderBy(consultations.consultation_date, consultations.consultation_time);
+
+        // Get client names for each consultation
+        const consultationsWithClientNames = await Promise.all(
+          videoConsultations.map(async (consultation) => {
+            const client = await db
+              .select({ name: sql`name` })
+              .from(sql`clients`)
+              .where(sql`id = ${consultation.client_id}`)
+              .limit(1);
+
+            return {
+              ...consultation,
+              client_name: client[0]?.name || 'Bilinmeyen Danışan'
+            };
+          })
+        );
+
+        return consultationsWithClientNames;
+      } catch (error) {
+        console.error('getVideoCalls error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Video görüşmeleri getirilirken bir hata oluştu',
+        });
+      }
+    }),
 }); 

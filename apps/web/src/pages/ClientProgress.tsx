@@ -59,35 +59,55 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
   const first = sortedMeasurements[0];
   const last = sortedMeasurements[sortedMeasurements.length - 1];
 
+  // En son ölçümü bul
+  const latestMeasurement = sortedMeasurements[sortedMeasurements.length - 1];
+  const previousMeasurement = sortedMeasurements.length > 1 ? sortedMeasurements[sortedMeasurements.length - 2] : null;
+
+  // Son ölçüm değişimlerini hesapla
+  const getChangeInfo = (current: number, previous: number | null | undefined, unit: string) => {
+    if (!previous) return { change: 0, isPositive: false, color: '#6b7280', sign: '' };
+    
+    const change = current - previous;
+    const isPositive = change < 0; // Azalma olumlu
+    const color = isPositive ? '#10b981' : '#ef4444'; // Yeşil azalma, kırmızı artma
+    const sign = change > 0 ? '+' : '';
+    
+    return { change, isPositive, color, sign };
+  };
+
+  const weightChange = getChangeInfo(latestMeasurement.weight_kg, previousMeasurement?.weight_kg, 'kg');
+  const waistChange = getChangeInfo(latestMeasurement.waist_cm || 0, previousMeasurement?.waist_cm || 0, 'cm');
+  const bodyFatChange = getChangeInfo(latestMeasurement.body_fat_percent || 0, previousMeasurement?.body_fat_percent || 0, '%');
+
   useEffect(() => {
     if (measurements.length >= 2) {
       const cards: ProgressCard[] = [
         {
           title: 'Kilo Değişimi',
-          icon: last.weight_kg < first.weight_kg ? '📉' : '📈',
+          icon: latestMeasurement.weight_kg < first.weight_kg ? '📉' : '📈',
           startValue: `${first.weight_kg} kg`,
-          endValue: `${last.weight_kg} kg`,
-          difference: `${last.weight_kg - first.weight_kg} kg`,
-          isPositive: last.weight_kg < first.weight_kg, // Kilo azalması olumlu
-          color: last.weight_kg < first.weight_kg ? '#10b981' : '#ef4444' // Azalma yeşil, artma kırmızı
+          endValue: `${latestMeasurement.weight_kg} kg`,
+          difference: `${latestMeasurement.weight_kg - first.weight_kg} kg`,
+          isPositive: latestMeasurement.weight_kg < first.weight_kg, // Kilo azalması olumlu
+          color: latestMeasurement.weight_kg < first.weight_kg ? '#10b981' : '#ef4444' // Azalma yeşil, artma kırmızı
         },
         {
           title: 'Bel Çevresi',
-          icon: last.waist_cm && first.waist_cm && last.waist_cm < first.waist_cm ? '📉' : '📈',
+          icon: latestMeasurement.waist_cm && first.waist_cm && latestMeasurement.waist_cm < first.waist_cm ? '📉' : '📈',
           startValue: `${first.waist_cm} cm`,
-          endValue: `${last.waist_cm} cm`,
-          difference: last.waist_cm && first.waist_cm ? `${last.waist_cm - first.waist_cm} cm` : 'N/A',
-          isPositive: last.waist_cm && first.waist_cm ? last.waist_cm < first.waist_cm : false,
-          color: last.waist_cm && first.waist_cm && last.waist_cm < first.waist_cm ? '#10b981' : '#ef4444'
+          endValue: `${latestMeasurement.waist_cm} cm`,
+          difference: latestMeasurement.waist_cm && first.waist_cm ? `${latestMeasurement.waist_cm - first.waist_cm} cm` : 'N/A',
+          isPositive: latestMeasurement.waist_cm && first.waist_cm ? latestMeasurement.waist_cm < first.waist_cm : false,
+          color: latestMeasurement.waist_cm && first.waist_cm && latestMeasurement.waist_cm < first.waist_cm ? '#10b981' : '#ef4444'
         },
         {
           title: 'Vücut Yağı',
-          icon: last.body_fat_percent && first.body_fat_percent && last.body_fat_percent < first.body_fat_percent ? '📉' : '📈',
+          icon: latestMeasurement.body_fat_percent && first.body_fat_percent && latestMeasurement.body_fat_percent < first.body_fat_percent ? '📉' : '📈',
           startValue: `${first.body_fat_percent}%`,
-          endValue: `${last.body_fat_percent}%`,
-          difference: last.body_fat_percent && first.body_fat_percent ? `${last.body_fat_percent - first.body_fat_percent}%` : 'N/A',
-          isPositive: last.body_fat_percent && first.body_fat_percent ? last.body_fat_percent < first.body_fat_percent : false,
-          color: last.body_fat_percent && first.body_fat_percent && last.body_fat_percent < first.body_fat_percent ? '#10b981' : '#ef4444'
+          endValue: `${latestMeasurement.body_fat_percent}%`,
+          difference: latestMeasurement.body_fat_percent && first.body_fat_percent ? `${latestMeasurement.body_fat_percent - first.body_fat_percent}%` : 'N/A',
+          isPositive: latestMeasurement.body_fat_percent && first.body_fat_percent ? latestMeasurement.body_fat_percent < first.body_fat_percent : false,
+          color: latestMeasurement.body_fat_percent && first.body_fat_percent && latestMeasurement.body_fat_percent < first.body_fat_percent ? '#10b981' : '#ef4444'
         }
       ];
 
@@ -149,8 +169,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
 
   if (isLoading) {
     return (
-      <div className="client-progress-page">
-        <Toaster />
+      <div className="client-detail-page">
         <div className="loading-state">
           <div className="loading-spinner"></div>
           <p>İlerleme verileri yükleniyor...</p>
@@ -161,8 +180,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
 
   if (error) {
     return (
-      <div className="client-progress-page">
-        <Toaster />
+      <div className="client-detail-page">
         <div className="loading-state">
           <p>Veriler yüklenirken hata oluştu.</p>
         </div>
@@ -172,8 +190,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
 
   if (measurements.length === 0) {
     return (
-      <div className="client-progress-page">
-        <Toaster />
+      <div className="client-detail-page">
         <div className="loading-state">
           <p>Bu danışana ait ölçüm bulunamadı.</p>
         </div>
@@ -182,50 +199,99 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
   }
 
   return (
-    <div className="client-progress-page">
+    <div className="client-detail-page">
       <Toaster />
       
       {/* Header */}
       <div className="page-header">
-        <div className="header-content">
-          <button onClick={handleBack} className="back-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Geri
-          </button>
+        <button onClick={handleBack} className="back-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Geri
+        </button>
+        <div className="header-title">
           <h1>İlerleme</h1>
-          <p>{clientName || 'Danışan'} - Ölçüm geçmişi ve ilerleme analizi</p>
         </div>
       </div>
 
       <div className="progress-content">
-        {/* Progress Cards */}
-        <div className="progress-cards">
-          {progressCards.map((card, index) => (
-            <div key={index} className="progress-card" style={{ borderLeftColor: card.color }}>
+        <div className="section-header">
+          <h2>Ölçüm Değişimleri</h2>
+        </div>
+
+        {/* Son Ölçüm Kartları */}
+        <div className="latest-measurements-section">
+          <div className="latest-measurements-grid">
+            <div className="latest-measurement-card">
               <div className="card-header">
-                <span className="card-icon">{card.icon}</span>
-                <h3>{card.title}</h3>
+                <span className="card-icon">⚖️</span>
+                <h4>Kilo</h4>
               </div>
               <div className="card-content">
-                <div className="value-row">
-                  <span className="label">Başlangıç:</span>
-                  <span className="value">{card.startValue}</span>
+                <div className="current-value">
+                  <span className="value">{latestMeasurement.weight_kg} kg</span>
+                  {previousMeasurement && (
+                    <span 
+                      className="change-indicator" 
+                      style={{ color: weightChange.color }}
+                    >
+                      {weightChange.sign}{weightChange.change} kg
+                    </span>
+                  )}
                 </div>
-                <div className="value-row">
-                  <span className="label">Son:</span>
-                  <span className="value">{card.endValue}</span>
-                </div>
-                <div className="difference-row">
-                  <span className="difference-label">Fark:</span>
-                  <span className="difference-value" style={{ color: card.color }}>
-                    ({card.difference})
-                  </span>
+                <div className="measurement-date">
+                  {formatDate(latestMeasurement.measured_at)}
                 </div>
               </div>
             </div>
-          ))}
+
+            <div className="latest-measurement-card">
+              <div className="card-header">
+                <span className="card-icon">📏</span>
+                <h4>Bel Çevresi</h4>
+              </div>
+              <div className="card-content">
+                <div className="current-value">
+                  <span className="value">{latestMeasurement.waist_cm || '-'} cm</span>
+                  {previousMeasurement && latestMeasurement.waist_cm && previousMeasurement.waist_cm && (
+                    <span 
+                      className="change-indicator" 
+                      style={{ color: waistChange.color }}
+                    >
+                      {waistChange.sign}{waistChange.change} cm
+                    </span>
+                  )}
+                </div>
+                <div className="measurement-date">
+                  {formatDate(latestMeasurement.measured_at)}
+                </div>
+              </div>
+            </div>
+
+            <div className="latest-measurement-card">
+              <div className="card-header">
+                <span className="card-icon">🔥</span>
+                <h4>Vücut Yağı</h4>
+              </div>
+              <div className="card-content">
+                <div className="current-value">
+                  <span className="value">{latestMeasurement.body_fat_percent || '-'}%</span>
+                  {previousMeasurement && latestMeasurement.body_fat_percent && previousMeasurement.body_fat_percent && (
+                    <span 
+                      className="change-indicator" 
+                      style={{ color: bodyFatChange.color }}
+                    >
+                      {bodyFatChange.sign}{bodyFatChange.change}%
+                    </span>
+                  )}
+                </div>
+                <div className="measurement-date">
+                  {formatDate(latestMeasurement.measured_at)}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Charts Section */}
@@ -249,7 +315,7 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
                 className={`tab-button ${activeTab === 'bodyfat' ? 'active' : ''}`}
                 onClick={() => setActiveTab('bodyfat')}
               >
-                🎯 Vücut Yağı
+                🔥 Vücut Yağı
               </button>
             </div>
           </div>
@@ -353,12 +419,43 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
       </div>
 
       <style>{`
-        .client-progress-page {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 2rem;
-          min-height: 100vh;
-          background: #f8fafc;
+        /* Force positioning with highest specificity */
+        body .client-detail-page,
+        html .client-detail-page,
+        #root .client-detail-page,
+        .client-detail-page {
+          margin-left: 140px !important;
+          margin-right: 2rem !important;
+          margin-top: 2rem !important;
+          margin-bottom: 2rem !important;
+          padding: 2rem !important;
+          background: white !important;
+          border-radius: 16px !important;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+          min-height: 100vh !important;
+          width: calc(100% - 140px - 2rem) !important;
+          max-width: 1200px !important;
+          position: relative !important;
+          left: 0 !important;
+          right: auto !important;
+          transform: none !important;
+          float: none !important;
+          display: block !important;
+        }
+
+        /* Override any other CSS that might be affecting positioning */
+        .client-detail-page * {
+          box-sizing: border-box !important;
+        }
+
+        /* Remove any centering from parent elements */
+        body > .client-detail-page,
+        html > .client-detail-page,
+        #root > .client-detail-page {
+          margin-left: 140px !important;
+          margin-right: 2rem !important;
+          width: calc(100% - 140px - 2rem) !important;
+          max-width: 1200px !important;
         }
 
         .loading-state {
@@ -386,17 +483,33 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
         }
 
         .page-header {
+          position: relative;
           margin-bottom: 2rem;
-        }
-
-        .header-content {
+          border-bottom: 1px solid #e2e8f0;
+          padding: 1rem 0;
+          text-align: center;
           display: flex;
+          justify-content: center;
           align-items: center;
-          gap: 1rem;
-          margin-bottom: 1rem;
         }
 
+        .header-title h1 {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin: 0;
+          text-align: center;
+        }
+        
+        .header-title p {
+          display: none;
+        }
+        
         .back-button {
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
           display: flex;
           align-items: center;
           gap: 0.5rem;
@@ -414,95 +527,102 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
           background: #334155;
         }
 
-        .page-header h1 {
-          font-size: 2rem;
-          font-weight: 700;
-          color: #1e293b;
-          margin: 0;
-        }
-
-        .page-header p {
-          color: #6b7280;
-          margin: 0;
-        }
-
         .progress-content {
           display: flex;
           flex-direction: column;
           gap: 2rem;
         }
 
-        .progress-cards {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 1.5rem;
+        .section-header {
+          margin-bottom: 0.5rem;
         }
 
-        .progress-card {
+        .section-header h2 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #1e293b;
+        }
+
+        .latest-measurements-section {
+          margin-bottom: 2rem;
+        }
+
+        .latest-measurements-section h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #1e293b;
+          margin-bottom: 1rem;
+        }
+
+        .latest-measurements-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+        }
+
+        .latest-measurement-card {
           background: white;
+          border: 1px solid #e5e7eb;
           border-radius: 12px;
           padding: 1.5rem;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          border-left: 4px solid;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
         }
 
-        .card-header {
+        .latest-measurement-card:hover {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+        }
+
+        .latest-measurement-card .card-header {
           display: flex;
           align-items: center;
           gap: 0.75rem;
           margin-bottom: 1rem;
         }
 
-        .card-icon {
+        .latest-measurement-card .card-icon {
           font-size: 1.5rem;
         }
 
-        .card-header h3 {
-          font-size: 1.1rem;
+        .latest-measurement-card h4 {
+          font-size: 1rem;
           font-weight: 600;
           color: #1e293b;
           margin: 0;
         }
 
-        .card-content {
+        .latest-measurement-card .card-content {
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
         }
 
-        .value-row {
+        .current-value {
           display: flex;
-          justify-content: space-between;
           align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
         }
 
-        .label {
-          color: #6b7280;
-          font-size: 0.9rem;
-        }
-
-        .value {
-          font-weight: 600;
+        .current-value .value {
+          font-size: 1.5rem;
+          font-weight: 700;
           color: #1e293b;
         }
 
-        .difference-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 0.5rem;
-          padding-top: 0.5rem;
-          border-top: 1px solid #e5e7eb;
-        }
-
-        .difference-label {
-          color: #6b7280;
+        .change-indicator {
           font-size: 0.9rem;
+          font-weight: 600;
+          padding: 0.25rem 0.5rem;
+          border-radius: 6px;
+          background: rgba(0, 0, 0, 0.05);
         }
 
-        .difference-value {
-          font-weight: 700;
-          font-size: 1rem;
+        .measurement-date {
+          font-size: 0.8rem;
+          color: #6b7280;
+          font-weight: 500;
         }
 
         .charts-section {
@@ -714,12 +834,8 @@ const ClientProgress: React.FC<ClientProgressProps> = ({ clientId, clientName, o
         }
 
         @media (max-width: 768px) {
-          .client-progress-page {
+          .client-detail-page {
             padding: 1rem;
-          }
-
-          .progress-cards {
-            grid-template-columns: 1fr;
           }
 
           .chart-header {

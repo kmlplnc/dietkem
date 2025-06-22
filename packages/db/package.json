@@ -11,6 +11,7 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "tsx src/migrate.ts",
     "db:manual-migrate": "tsx src/manual_migrate.ts",
+    "update-consultations": "tsx scripts/update-past-consultations.ts",
     "dev": "tsup --watch",
     "lint": "eslint src/",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"

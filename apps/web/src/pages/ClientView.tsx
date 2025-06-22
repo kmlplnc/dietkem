@@ -51,28 +51,62 @@ const ClientView = () => {
     
     const filtered = appointments
       .filter(appointment => {
-        const appointmentDate = new Date(appointment.consultation_date);
-        const appointmentTime = appointment.consultation_time;
-        const [hours, minutes] = appointmentTime.split(':');
-        appointmentDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-        
-        console.log('ClientView - appointment:', {
-          id: appointment.id,
-          date: appointment.consultation_date,
-          time: appointment.consultation_time,
-          type: appointment.consultation_type,
-          status: appointment.status,
-          appointmentDateTime: appointmentDate,
-          isFuture: appointmentDate > now,
-          isScheduled: appointment.status === 'scheduled'
-        });
-        
-        return appointmentDate > now && appointment.status === 'scheduled';
+        // Geçersiz değerler için kontrol
+        if (!appointment.consultation_date || !appointment.consultation_time) {
+          console.log('ClientView - Invalid appointment data:', appointment);
+          return false;
+        }
+
+        try {
+          const appointmentDate = new Date(appointment.consultation_date);
+          const appointmentTime = appointment.consultation_time;
+          
+          // Geçersiz tarih kontrolü
+          if (isNaN(appointmentDate.getTime())) {
+            console.log('ClientView - Invalid appointment date:', appointment.consultation_date);
+            return false;
+          }
+          
+          const [hours, minutes] = appointmentTime.split(':');
+          if (!hours || !minutes || isNaN(parseInt(hours)) || isNaN(parseInt(minutes))) {
+            console.log('ClientView - Invalid appointment time:', appointment.consultation_time);
+            return false;
+          }
+          
+          appointmentDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+          
+          console.log('ClientView - appointment:', {
+            id: appointment.id,
+            date: appointment.consultation_date,
+            time: appointment.consultation_time,
+            type: appointment.consultation_type,
+            status: appointment.status,
+            appointmentDateTime: appointmentDate,
+            isFuture: appointmentDate > now,
+            isScheduled: appointment.status === 'scheduled'
+          });
+          
+          return appointmentDate > now && appointment.status === 'scheduled';
+        } catch (error) {
+          console.error('ClientView - Error processing appointment:', error, appointment);
+          return false;
+        }
       })
       .sort((a, b) => {
-        const dateA = new Date(a.consultation_date + ' ' + a.consultation_time);
-        const dateB = new Date(b.consultation_date + ' ' + b.consultation_time);
-        return dateA.getTime() - dateB.getTime();
+        try {
+          const dateA = new Date(a.consultation_date + ' ' + a.consultation_time);
+          const dateB = new Date(b.consultation_date + ' ' + b.consultation_time);
+          
+          // Geçersiz tarih kontrolü
+          if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+            return 0;
+          }
+          
+          return dateA.getTime() - dateB.getTime();
+        } catch (error) {
+          console.error('ClientView - Error sorting appointments:', error);
+          return 0;
+        }
       });
     
     console.log('ClientView - filtered upcoming appointments:', filtered);
@@ -82,22 +116,58 @@ const ClientView = () => {
   // En son ölçümü bul
   const latestMeasurement = React.useMemo(() => {
     if (!measurements || measurements.length === 0) return null;
-    const sorted = [...measurements].sort((a, b) => 
-      new Date(b.measured_at as string).getTime() - new Date(a.measured_at as string).getTime()
-    );
-    return sorted[0];
+    
+    try {
+      const sorted = [...measurements].sort((a, b) => {
+        try {
+          const dateA = new Date(a.measured_at as string);
+          const dateB = new Date(b.measured_at as string);
+          
+          // Geçersiz tarih kontrolü
+          if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+            return 0;
+          }
+          
+          return dateB.getTime() - dateA.getTime();
+        } catch (error) {
+          console.error('Error sorting measurements:', error);
+          return 0;
+        }
+      });
+      return sorted[0];
+    } catch (error) {
+      console.error('Error processing measurements:', error);
+      return null;
+    }
   }, [measurements]);
 
   // Yaş hesaplama
   const calculateAge = (birthDate: string) => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
+    try {
+      // Geçersiz değerler için kontrol
+      if (!birthDate) {
+        return null;
+      }
+
+      const today = new Date();
+      const birth = new Date(birthDate);
+      
+      // Geçersiz tarih kontrolü
+      if (isNaN(birth.getTime())) {
+        console.error('Invalid birth date:', birthDate);
+        return null;
+      }
+      
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      return age;
+    } catch (error) {
+      console.error('calculateAge error:', error);
+      return null;
     }
-    return age;
   };
 
   // BMI hesaplama
@@ -120,14 +190,30 @@ const ClientView = () => {
 
   // Randevu formatı
   const formatDateTime = (date: string, time: string) => {
-    const appointmentDate = new Date(date);
-    const day = appointmentDate.toLocaleDateString('tr-TR', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    return `${day} - ${time}`;
+    try {
+      // Geçersiz değerler için kontrol
+      if (!date || !time) {
+        return 'Tarih bilgisi yok';
+      }
+
+      const appointmentDate = new Date(date);
+      
+      // Geçersiz tarih kontrolü
+      if (isNaN(appointmentDate.getTime())) {
+        return 'Geçersiz tarih';
+      }
+      
+      const day = appointmentDate.toLocaleDateString('tr-TR', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      return `${day} - ${time}`;
+    } catch (error) {
+      console.error('formatDateTime error:', error);
+      return 'Tarih formatlanamadı';
+    }
   };
 
   // Görüşme türü metni

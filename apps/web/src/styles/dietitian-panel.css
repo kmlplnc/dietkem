@@ -169,19 +169,19 @@
 .consultations-page,
 .video-calls-page,
 .clients-page {
-  width: 100%;
-  max-width: 1200px; /* Increased from 800px to 1200px */
-  margin-left: 140px; /* Reduced from 280px to center the wider content */
-  margin-right: auto; /* Push to the left, creating equal spacing on right */
+  width: 100% !important;
+  max-width: 1200px !important; /* Increased from 800px to 1200px */
+  margin-left: 140px !important; /* Reduced from 280px to center the wider content */
+  margin-right: 2rem !important; /* Fixed margin instead of auto */
   /* background, padding, etc. are already defined below */
 }
 
 /* Dashboard home - center it within the sidebar's right area */
 .dashboard-home {
-  width: 100%;
-  max-width: 1200px; /* Increased from 800px to 1200px */
-  margin-left: 140px; /* Reduced from 280px to center the wider content */
-  margin-right: auto; /* Push to the left, creating equal spacing on right */
+  width: 100% !important;
+  max-width: 1200px !important; /* Increased from 800px to 1200px */
+  margin-left: 140px !important; /* Reduced from 280px to center the wider content */
+  margin-right: 2rem !important; /* Fixed margin instead of auto */
   /* background, padding, etc. are already defined below */
 }
 
@@ -675,4 +675,72 @@
   font-size: 0.875rem;
   line-height: 1.5;
   max-width: 300px;
+}
+
+/* Client Detail Page - Use the same structure as other pages */
+.client-detail-page {
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin-left: 140px !important; /* Sidebar'ın yanından başla */
+  margin-right: 2rem !important; /* Sağ tarafta sabit boşluk bırak */
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
+  background: var(--card-bg, #fff) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.05)) !important;
+  padding: 2rem 2.5rem !important;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.header-actions button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--primary-color, #1e3a8a);
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.header-actions button:hover {
+  background: var(--primary-hover, #1d4ed8);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.personal-info-card {
+  background: var(--main-bg, #f3f4f6);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.05));
+}
+
+@media (max-width: 900px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  .client-detail-page {
+    padding: 1rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
 } 

@@ -460,7 +460,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
       <div className="page-header">
         <div className="header-content">
           <h1>Danışan Detayı</h1>
-          <p>Danışan bilgilerini görüntüleyebilir ve düzenleyebilirsiniz.</p>
         </div>
 
         <div className="header-actions">
@@ -845,13 +844,35 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
 
       <style>{`
         .client-detail-page {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 2rem;
-          background: #f8fafc;
+          width: 100%;
+          margin-left: 106px;
+          margin-right: 0;
           min-height: 100vh;
+          background: #f8fafc;
+          padding: 2rem;
         }
-
+        .client-detail-content-container {
+          width: 100%;
+          max-width: 1800px;
+          margin: 0 auto;
+          background: white;
+          border-radius: 16px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+          padding: 2rem;
+        }
+        @media (max-width: 1024px) {
+          .client-detail-page {
+            margin-left: 0;
+            padding: 1rem 0;
+          }
+          .client-detail-content-container {
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 100%;
+            border-radius: 10px;
+            padding: 1rem;
+          }
+        }
         .loading-state, .error-state {
           display: flex;
           flex-direction: column;
@@ -905,28 +926,21 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
 
         .page-header {
           display: flex;
-          justify-content: center;
+          justify-content: space-between;
           align-items: center;
           margin-bottom: 2rem;
           padding-bottom: 1rem;
           border-bottom: 2px solid #e2e8f0;
-          position: relative;
         }
 
         .header-content {
-          text-align: center;
+          text-align: right;
         }
 
         .header-content h1 {
           font-size: 2.5rem;
           font-weight: 700;
           color: #1e293b;
-          margin: 0 0 0.5rem 0;
-        }
-
-        .header-content p {
-          color: #6b7280;
-          font-size: 1rem;
           margin: 0;
         }
 
@@ -934,10 +948,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          position: absolute;
-          right: 0;
-          top: 50%;
-          transform: translateY(-50%);
         }
 
         .edit-button, .delete-button, .save-button, .cancel-button, .progress-button {
@@ -1151,7 +1161,7 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
         .info-grid {
           flex: 1;
           display: grid;
-          grid-template-columns: 1fr 1fr 2fr;
+          grid-template-columns: 1fr 1.5fr 1fr;
           gap: 1.5rem;
         }
 
@@ -1188,10 +1198,17 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
           align-items: center;
           padding: 0.75rem 0;
           border-bottom: 1px solid #f8fafc;
+          border-left: none !important;
+          background: transparent !important;
         }
 
         .info-item:last-child {
           border-bottom: none;
+        }
+
+        .info-item::before,
+        .info-item::after {
+          display: none !important;
         }
 
         .item-label {
@@ -1204,6 +1221,11 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
           font-weight: 600;
           color: #1e293b;
           font-size: 0.9rem;
+        }
+
+        .item-value::before,
+        .item-value::after {
+          display: none !important;
         }
 
         .bmi-value {
@@ -1479,84 +1501,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
 
         .text-gray-500 {
           color: #6b7280;
-        }
-
-        @media (max-width: 768px) {
-          .client-detail-page {
-            padding: 1rem;
-          }
-
-          .page-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: stretch;
-            position: static;
-          }
-
-          .header-content {
-            text-align: center;
-          }
-
-          .header-content h1 {
-            font-size: 2rem;
-          }
-
-          .header-actions {
-            position: static;
-            transform: none;
-            justify-content: center;
-          }
-
-          .info-content {
-            flex-direction: column;
-            gap: 1.5rem;
-          }
-
-          .avatar-section {
-            flex-direction: row;
-            text-align: left;
-            padding: 1rem;
-            min-width: auto;
-          }
-
-          .avatar {
-            width: 50px;
-            height: 50px;
-          }
-
-          .client-name {
-            font-size: 1.1rem;
-          }
-
-          .info-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-
-          .contact-group {
-            grid-column: span 1;
-          }
-
-          .info-group {
-            padding: 1rem;
-          }
-
-          .health-info-grid,
-          .notes-section,
-          .measurements-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .card-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
-          }
-
-          .status-toggle {
-            width: 100%;
-            justify-content: space-between;
-          }
         }
       `}</style>
     </div>
