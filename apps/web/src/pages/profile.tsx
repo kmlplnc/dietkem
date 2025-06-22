@@ -5,8 +5,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { trpc } from '../utils/trpc';
 import { useAuth } from '../lib/auth';
 
-const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dup6ahhjt/image/upload';
-const CLOUDINARY_UPLOAD_PRESET = 'dietkem';
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dup6ahhjt'}/image/upload`;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'dietkem';
 
 interface User {
   id: number;
@@ -91,7 +91,7 @@ const ProfilePage = () => {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'dietkem_avatars');
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
     try {
       const res = await fetch(CLOUDINARY_UPLOAD_URL, {

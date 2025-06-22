@@ -6,7 +6,8 @@ export interface Client {
   height_cm: number | null;
   email: string | null;
   phone: string | null;
-  notes: string | null;
+  notes: string | null;                    // Diyetisyen notları (dahili)
+  client_notes: string | null;             // Danışana gösterilecek notlar
   diseases: string | null; // JSON stringified array
   allergies: string | null; // JSON stringified array
   medications: string | null; // JSON stringified array

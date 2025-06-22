@@ -173,9 +173,9 @@ const CreateClientForm: React.FC = () => {
     const clientData = {
       ...data,
       height_cm: data.height_cm || 0,
-      diseases: JSON.stringify(diseases),
-      allergies: JSON.stringify(allergies),
-      medications: JSON.stringify(medications),
+      diseases: diseases,
+      allergies: allergies,
+      medications: medications,
       activity_level: data.activity_level,
     };
     createClientMutation.mutate(clientData);

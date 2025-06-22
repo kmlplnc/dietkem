@@ -210,10 +210,10 @@ export const consultationsRouter = router({
         if (!deletedConsultation || deletedConsultation.length === 0) {
           throw new TRPCError({
             code: 'NOT_FOUND',
-            message: 'Görüşme bulunamadı',
+            message: 'Silinecek görüşme bulunamadı',
           });
         }
-
+        
         return {
           success: true,
           message: 'Görüşme başarıyla silindi'
@@ -233,12 +233,11 @@ export const consultationsRouter = router({
   getVideoAppointments: publicProcedure
     .input(z.object({
       dietitian_id: z.number(),
-      date: z.string()
+      date: z.string().optional()
     }))
     .query(async ({ input }) => {
       try {
-        // Get consultations for the dietitian on the specified date
-        // Filter for video-enabled appointments (consultation_type = 'online')
+        // Get all online consultations for the dietitian (no date filter)
         const videoConsultations = await db
           .select({
             id: consultations.id,
@@ -252,12 +251,11 @@ export const consultationsRouter = router({
           })
           .from(consultations)
           .where(
-            sql`${consultations.created_by} = ${input.dietitian_id} 
-                AND DATE(${consultations.consultation_date}) = ${input.date}
+            sql`${consultations.created_by} = ${input.dietitian_id}
                 AND ${consultations.consultation_type} = 'online'
-                AND ${consultations.status} = 'scheduled'`
+                AND (${consultations.status} = 'scheduled' OR ${consultations.status} = 'in_progress')`
           )
-          .orderBy(consultations.consultation_time);
+          .orderBy(consultations.consultation_date, consultations.consultation_time);
 
         // Get client names for each consultation
         const consultationsWithClientNames = await Promise.all(
@@ -281,6 +279,274 @@ export const consultationsRouter = router({
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Video görüşmeleri getirilirken bir hata oluştu',
+        });
+      }
+    }),
+
+  getClientVideoAppointments: publicProcedure
+    .input(z.object({
+      client_id: z.number(),
+      date: z.string()
+    }))
+    .query(async ({ input }) => {
+      try {
+        // Get consultations for the client on the specified date
+        // Filter for video-enabled appointments (consultation_type = 'online')
+        const videoConsultations = await db
+          .select({
+            id: consultations.id,
+            client_id: consultations.client_id,
+            consultation_date: consultations.consultation_date,
+            consultation_time: consultations.consultation_time,
+            consultation_type: consultations.consultation_type,
+            status: consultations.status,
+            notes: consultations.notes,
+            created_by: consultations.created_by
+          })
+          .from(consultations)
+          .where(
+            sql`${consultations.client_id} = ${input.client_id} 
+                AND DATE(${consultations.consultation_date}) = ${input.date}
+                AND ${consultations.consultation_type} = 'online'
+                AND ${consultations.status} = 'scheduled'`
+          )
+          .orderBy(consultations.consultation_time);
+
+        // Get dietitian names for each consultation
+        const consultationsWithDietitianNames = await Promise.all(
+          videoConsultations.map(async (consultation) => {
+            const dietitian = await db
+              .select({ name: sql`name` })
+              .from(sql`users`)
+              .where(sql`id = ${consultation.created_by}`)
+              .limit(1);
+
+            return {
+              ...consultation,
+              dietitian_name: dietitian[0]?.name || 'Bilinmeyen Diyetisyen'
+            };
+          })
+        );
+
+        return consultationsWithDietitianNames;
+      } catch (error) {
+        console.error('Get client video appointments error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Video görüşmeleri getirilirken bir hata oluştu',
+        });
+      }
+    }),
+
+  startVideoCall: publicProcedure
+    .input(z.object({
+      consultation_id: z.number(),
+      started_by: z.number() // dietitian_id or client_id
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        // Update consultation status to indicate video call is active
+        const updatedConsultation = await db
+          .update(consultations)
+          .set({ 
+            status: 'in_progress',
+            updated_at: new Date()
+          })
+          .where(eq(consultations.id, input.consultation_id))
+          .returning();
+
+        if (!updatedConsultation || updatedConsultation.length === 0) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Görüşme bulunamadı',
+          });
+        }
+
+        return {
+          success: true,
+          consultation: updatedConsultation[0],
+          message: 'Video görüşme başlatıldı'
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        console.error('Start video call error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Video görüşme başlatılırken bir hata oluştu',
+        });
+      }
+    }),
+
+  endVideoCall: publicProcedure
+    .input(z.object({
+      consultation_id: z.number()
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        // Update consultation status to completed
+        const updatedConsultation = await db
+          .update(consultations)
+          .set({ 
+            status: 'completed',
+            updated_at: new Date()
+          })
+          .where(eq(consultations.id, input.consultation_id))
+          .returning();
+
+        if (!updatedConsultation || updatedConsultation.length === 0) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Görüşme bulunamadı',
+          });
+        }
+
+        return {
+          success: true,
+          consultation: updatedConsultation[0],
+          message: 'Video görüşme sonlandırıldı'
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        console.error('End video call error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Video görüşme sonlandırılırken bir hata oluştu',
+        });
+      }
+    }),
+
+  getActiveVideoCall: publicProcedure
+    .input(z.object({
+      consultation_id: z.number()
+    }))
+    .query(async ({ input }) => {
+      try {
+        const consultation = await db
+          .select()
+          .from(consultations)
+          .where(eq(consultations.id, input.consultation_id))
+          .limit(1);
+
+        if (!consultation || consultation.length === 0) {
+          return null;
+        }
+
+        return {
+          isActive: consultation[0].status === 'in_progress',
+          consultation: consultation[0]
+        };
+      } catch (error) {
+        console.error('Get active video call error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Video görüşme durumu getirilirken bir hata oluştu',
+        });
+      }
+    }),
+
+  createDailyRoom: publicProcedure
+    .input(z.object({
+      consultation_id: z.number()
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        console.log('Creating Jitsi Meet room for consultation:', input.consultation_id);
+        
+        // Get consultation details
+        const consultation = await db
+          .select()
+          .from(consultations)
+          .where(eq(consultations.id, input.consultation_id))
+          .limit(1);
+
+        if (!consultation || consultation.length === 0) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Görüşme bulunamadı',
+          });
+        }
+
+        // Check if room already exists for this consultation
+        if (consultation[0].room_url) {
+          console.log('Room already exists for consultation:', input.consultation_id);
+          return {
+            success: true,
+            roomUrl: consultation[0].room_url,
+            roomName: `dietkem-consultation-${input.consultation_id}`,
+            message: 'Mevcut oda URL\'si döndürüldü'
+          };
+        }
+
+        const roomName = `dietkem-consultation-${input.consultation_id}`;
+        const jitsiUrl = `https://meet.jit.si/${roomName}`;
+        
+        console.log('Creating Jitsi Meet room:', roomName);
+        console.log('Jitsi Meet URL:', jitsiUrl);
+
+        // Update consultation with room URL
+        const updatedConsultation = await db
+          .update(consultations)
+          .set({ 
+            room_url: jitsiUrl,
+            updated_at: new Date()
+          })
+          .where(eq(consultations.id, input.consultation_id))
+          .returning();
+
+        console.log('Jitsi Meet room created successfully for consultation:', input.consultation_id);
+
+        return {
+          success: true,
+          roomUrl: jitsiUrl,
+          roomName: roomName,
+          message: 'Jitsi Meet oda başarıyla oluşturuldu'
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        console.error('Create Jitsi Meet room error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Jitsi Meet oda oluşturulurken bir hata oluştu',
+        });
+      }
+    }),
+
+  getActiveVideoCalls: publicProcedure
+    .input(z.object({ client_id: z.number() }))
+    .query(async ({ input }) => {
+      try {
+        // Get active video calls for the client
+        const activeCalls = await db
+          .select({
+            id: consultations.id,
+            client_id: consultations.client_id,
+            consultation_date: consultations.consultation_date,
+            consultation_time: consultations.consultation_time,
+            consultation_type: consultations.consultation_type,
+            status: consultations.status,
+            notes: consultations.notes,
+            created_by: consultations.created_by
+          })
+          .from(consultations)
+          .where(
+            sql`${consultations.client_id} = ${input.client_id}
+                AND ${consultations.consultation_type} = 'online'
+                AND ${consultations.status} = 'in_progress'`
+          )
+          .orderBy(consultations.consultation_date, consultations.consultation_time);
+
+        return activeCalls;
+      } catch (error) {
+        console.error('Get active video calls error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Aktif video görüşmeleri getirilirken bir hata oluştu',
         });
       }
     }),

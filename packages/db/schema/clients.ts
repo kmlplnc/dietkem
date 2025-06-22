@@ -8,7 +8,8 @@ export const clients = pgTable('clients', {
   height_cm: decimal('height_cm', { precision: 5, scale: 2 }),
   email: varchar('email', { length: 255 }),
   phone: varchar('phone', { length: 20 }),
-  notes: text('notes'),
+  notes: text('notes'),                    // Diyetisyen notları (dahili)
+  client_notes: text('client_notes'),      // Danışana gösterilecek notlar
   diseases: text('diseases'),        // JSON stringified array (string[])
   allergies: text('allergies'),      // JSON stringified array (string[])
   medications: text('medications'),  // JSON stringified array (string[])
@@ -16,4 +17,5 @@ export const clients = pgTable('clients', {
   status: varchar('status', { length: 10 }).notNull().default('active'),
   created_at: timestamp('created_at').defaultNow().notNull(),
   activity_level: varchar('activity_level', { length: 32 }),
+  user_id: integer('user_id'),             // Diyetisyen ID'si (foreign key)
 }); 

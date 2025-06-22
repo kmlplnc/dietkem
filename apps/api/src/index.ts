@@ -38,7 +38,12 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // Allow localhost and network IP addresses for development
+    if (allowedOrigins.indexOf(origin) !== -1 || 
+        origin.startsWith('http://192.168.') ||
+        origin.startsWith('http://10.') ||
+        origin.startsWith('http://172.') ||
+        origin.startsWith('http://127.0.0.1:')) {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
@@ -275,9 +280,10 @@ app.get('/test', (req, res) => {
   });
 });
 
-const port = process.env.PORT ? Number(process.env.PORT) : 3001;
-app.listen(port, () => {
-  console.log(`API server listening on port ${port}`);
-  console.log(`Health check: http://localhost:${port}/health`);
-  console.log(`tRPC endpoint: http://localhost:${port}/trpc`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`API server listening on port ${PORT}`);
+  console.log(`Health check: http://0.0.0.0:${PORT}/health`);
+  console.log(`tRPC endpoint: http://0.0.0.0:${PORT}/trpc`);
+  console.log(`Network access: http://[YOUR_IP]:${PORT}`);
 }); 

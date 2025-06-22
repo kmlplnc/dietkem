@@ -3,7 +3,9 @@ import { router, publicProcedure } from '../trpc';
 import { clients } from '@dietkem/db/schema';
 import { TRPCError } from '@trpc/server';
 import { db } from '@dietkem/db';
-import { sql, eq } from 'drizzle-orm';
+import { sql, eq, desc } from 'drizzle-orm';
+import { users } from '@dietkem/db/schema';
+import { consultations } from '@dietkem/db/schema';
 
 const clientSchema = z.object({
   name: z.string().min(2),
@@ -12,7 +14,8 @@ const clientSchema = z.object({
   height_cm: z.union([z.string(), z.number()]).optional(), // decimal can be string or number
   email: z.string().email().optional(),
   phone: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().optional(),                    // Diyetisyen notları (dahili)
+  client_notes: z.string().optional(),             // Danışana gösterilecek notlar
   diseases: z.array(z.string()).optional(),
   allergies: z.array(z.string()).optional(),
   medications: z.array(z.string()).optional(),
@@ -32,6 +35,7 @@ export const clientsRouter = router({
           email: input.email || null,
           phone: input.phone || null,
           notes: input.notes || null,
+          client_notes: input.client_notes || null,
           diseases: input.diseases ? JSON.stringify(input.diseases) : null,
           allergies: input.allergies ? JSON.stringify(input.allergies) : null,
           medications: input.medications ? JSON.stringify(input.medications) : null,
@@ -57,6 +61,7 @@ export const clientsRouter = router({
         const allClients = await db.select().from(clients).where(eq(clients.status, 'active')).orderBy(clients.created_at);
         return allClients;
       } catch (error) {
+        console.error('clients.getAll error:', error); // Log the real error
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Danışanlar getirilirken bir hata oluştu',
@@ -85,6 +90,44 @@ export const clientsRouter = router({
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Danışan getirilirken bir hata oluştu',
+        });
+      }
+    }),
+
+  getDietitianInfo: publicProcedure
+    .input(z.object({ clientId: z.number() }))
+    .query(async ({ input }) => {
+      try {
+        const lastConsultation = await db
+          .select({
+            dietitianId: consultations.created_by,
+          })
+          .from(consultations)
+          .where(eq(consultations.client_id, input.clientId))
+          .orderBy(desc(consultations.consultation_date))
+          .limit(1);
+
+        if (!lastConsultation || lastConsultation.length === 0) {
+          return null; // No dietitian found
+        }
+
+        const dietitianId = lastConsultation[0].dietitianId;
+        const dietitian = await db
+          .select({
+            id: users.id,
+            name: sql<string>`concat(${users.first_name}, ' ', ${users.last_name})`,
+            email: users.email,
+            avatar_url: users.avatar_url,
+          })
+          .from(users)
+          .where(eq(users.id, dietitianId))
+          .limit(1);
+
+        return dietitian[0] || null;
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Diyetisyen bilgisi getirilirken bir hata oluştu.',
         });
       }
     }),
@@ -133,6 +176,7 @@ export const clientsRouter = router({
       email: z.string().email().optional(),
       phone: z.string().optional(),
       notes: z.string().optional(),
+      client_notes: z.string().optional(),
       diseases: z.string().optional(), // JSON string
       allergies: z.string().optional(), // JSON string
       medications: z.string().optional(), // JSON string

@@ -1,30 +1,29 @@
-import { db } from '../src/index';
-import { users } from '../src/schema';
+import { db } from '../src';
+import { users } from '../schema';
 
 async function checkUsers() {
   try {
-    console.log('Checking users in database...');
+    console.log('🔍 Checking users in database...\\n');
     
-    const allUsers = await db.query.users.findMany();
+    const allUsers = await db.select().from(users);
     
-    console.log(`Found ${allUsers.length} users:`);
-    allUsers.forEach(user => {
-      console.log(`- ID: ${user.id}, Email: ${user.email}, Name: ${user.first_name} ${user.last_name}, Role: ${user.role}`);
-    });
-    
-    // Check specifically for user with ID 3
-    const user3 = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, 3)
-    });
-    
-    if (user3) {
-      console.log('\nUser with ID 3 found:', user3);
-    } else {
-      console.log('\nNo user found with ID 3');
+    if (allUsers.length === 0) {
+        console.log('No users found in the database.');
+        return;
     }
+
+    console.log(`📊 Total users: ${allUsers.length}\\n`);
+    
+    console.table(allUsers.map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        created_at: user.created_at
+    })));
     
   } catch (error) {
-    console.error('Error checking users:', error);
+    console.error('❌ Error checking users:', error);
   } finally {
     process.exit(0);
   }

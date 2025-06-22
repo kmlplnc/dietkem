@@ -30,6 +30,7 @@
   display: flex;
   min-height: 100vh;
   background: var(--main-bg);
+  position: relative; /* For absolute positioning of sidebar */
 }
 
 /* Sidebar Styles */
@@ -138,9 +139,90 @@
 /* Main Content */
 .main-content {
   flex: 1;
-  margin-left: 280px;
   padding: 2rem;
   transition: margin-left 0.3s ease;
+  
+  /* Use flexbox for better control */
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+/* Topbar Styles */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.greeting {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Page containers - center them within the available space */
+.consultations-page,
+.video-calls-page,
+.clients-page {
+  width: 100%;
+  max-width: 1200px; /* Increased from 800px to 1200px */
+  margin-left: 140px; /* Reduced from 280px to center the wider content */
+  margin-right: auto; /* Push to the left, creating equal spacing on right */
+  /* background, padding, etc. are already defined below */
+}
+
+/* Dashboard home - center it within the sidebar's right area */
+.dashboard-home {
+  width: 100%;
+  max-width: 1200px; /* Increased from 800px to 1200px */
+  margin-left: 140px; /* Reduced from 280px to center the wider content */
+  margin-right: auto; /* Push to the left, creating equal spacing on right */
+  /* background, padding, etc. are already defined below */
+}
+
+/* Grid containers within pages - ensure they take full width */
+.consultations-grid,
+.dpanel-video-grid,
+.action-cards,
+.stat-cards {
+  width: 100%;
+  max-width: 1200px; /* Limit maximum width for better readability */
+  margin: 0 auto; /* Center the grid within the page container */
+}
+
+.consultations-page {
+  padding: 2rem;
+  min-height: 100vh;
+  background: var(--main-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  border-radius: 12px;
+}
+
+.video-calls-page {
+  padding: 2rem;
+  min-height: 100vh;
+  background: var(--main-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  border-radius: 12px;
+}
+
+.clients-page {
+  padding: 2rem;
+  min-height: 100vh;
+  background: var(--main-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  border-radius: 12px;
 }
 
 /* Mobile Menu Button */
@@ -164,20 +246,293 @@
   stroke-width: 2;
 }
 
-/* Topbar Styles */
-.topbar {
+/* Video Calls Page Styles */
+.video-calls-page {
+  padding: 2rem;
+  min-height: 100vh;
+  background: var(--main-bg);
   display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  border-radius: 12px;
+  /* box-shadow: 0 4px 16px rgba(0,0,0,0.07); - Removed shadow */
+}
+
+.consultations-page {
+  padding: 2rem;
+  min-height: 100vh;
+  background: var(--main-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  border-radius: 12px;
+}
+
+/* Video Calls Container */
+.video-calls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1200px;
+}
+
+/* Video Calls Info Banner */
+.video-calls-info-banner {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.video-calls-info-banner .info-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.video-calls-info-banner .info-content h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.video-calls-info-banner .info-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #1e3a8a;
+  line-height: 1.4;
+}
+
+/* Clean up old conflicting styles */
+.video-calls-grid, .video-call-card, .video-call-header, .client-info, .appointment-details, .join-call-btn {
+  /* This block is intentionally left empty to be replaced by the new styles below */
+}
+
+/* NEW, ISOLATED STYLES FOR DIETITIAN PANEL VIDEO CALLS */
+
+.dpanel-video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.dpanel-video-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+  overflow: hidden; /* Ensures child elements respect border-radius */
+}
+
+.dpanel-video-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-color: #3b82f6;
+}
+
+.dpanel-video-card-header {
+  display: flex;
+  align-items: flex-start; /* Align to the top */
   justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.dpanel-video-client-info {
+  flex: 1; /* Grow to fill available space */
+  min-width: 0; /* Critical for flexbox wrapping */
+}
+
+.dpanel-video-client-name {
+  font-size: 1.15rem; /* ~18px */
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+  margin: 0 0 16px 0;
+  
+  /* Text wrapping rules */
+  white-space: normal;
+  word-break: break-all; /* More aggressive wrapping */
+}
+
+.dpanel-video-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dpanel-video-detail-item {
+  display: flex;
   align-items: center;
-  padding: 1rem 0;
-  margin-bottom: 2rem;
+  gap: 8px;
+  font-size: 0.9rem; /* ~14px */
+  color: #4b5563;
+}
+
+.dpanel-video-detail-item span[role="img"] {
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.dpanel-video-join-btn {
+  flex-shrink: 0; /* Prevent button from shrinking */
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background-color: #3b82f6;
+  color: white;
+  white-space: nowrap;
+}
+
+.dpanel-video-join-btn:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.dpanel-video-join-btn.active {
+  background-color: #16a34a;
+}
+.dpanel-video-join-btn.active:hover:not(:disabled) {
+  background-color: #15803d;
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+}
+
+.dpanel-video-join-btn:disabled,
+.dpanel-video-join-btn.completed {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .dpanel-video-grid {
+    grid-template-columns: 1fr;
+  }
+  .dpanel-video-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dpanel-video-join-btn {
+    width: 100%;
+    margin-top: 16px;
+  }
+}
+
+.topbar-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  width: 100%;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.page-header {
+  display: flex;
+  justify-content: center; /* Center the header */
+  align-items: center;
+  margin-bottom: 2rem; /* Increased from 1rem to 2rem */
+  padding-bottom: 1rem;
+  text-align: center; /* Center the text */
   border-bottom: 1px solid var(--border-color);
 }
 
-.greeting {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  text-align: center; /* Center the heading */
+}
+
+.consultations-page .page-header,
+.video-calls-page .page-header {
+  justify-content: center;
+}
+
+.consultations-page .page-header h1,
+.video-calls-page .page-header h1 {
+  text-align: center;
+}
+
+.video-call-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.video-call-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.leave-call-btn.temporary {
+  background: #f59e0b; /* Amber */
+}
+
+.leave-call-btn.temporary:hover {
+  background: #d97706;
+}
+
+.leave-call-btn.final {
+  background: #ef4444; /* Red */
+}
+
+.leave-call-btn.final:hover {
+  background: #dc2626;
+}
+
+.rejoin-call-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: var(--main-bg);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  text-align: center;
+  margin: 40px auto;
+  max-width: 450px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.rejoin-call-container p {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #475569;
+}
+
+.rejoin-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rejoin-btn:hover {
+  background: #1d4ed8;
 }
 
 /* Dashboard Content */
@@ -320,131 +675,4 @@
   font-size: 0.875rem;
   line-height: 1.5;
   max-width: 300px;
-}
-
-/* Video Calls Page Styles */
-.video-calls-page {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  padding: 0;
-}
-
-.video-calls-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-/* Appointment Square Card Styles */
-.appointment-square-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 220px;
-  min-width: 220px;
-  max-width: 260px;
-  aspect-ratio: 1/1;
-  margin: 0 auto;
-  text-align: center;
-  gap: 12px;
-  padding: 1.25rem 1rem;
-}
-
-.appointment-date {
-  font-weight: 700;
-  font-size: 20px;
-  color: #3b82f6;
-  margin-bottom: 2px;
-}
-
-.appointment-day-time {
-  font-size: 13px;
-  color: #64748b;
-  margin-bottom: 2px;
-}
-
-.appointment-type-text {
-  font-weight: 600;
-  font-size: 15px;
-  color: #374151;
-  margin-bottom: 2px;
-}
-
-.appointment-notes {
-  font-size: 14px;
-  color: #6b7280;
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin-top: 4px;
-  max-height: 48px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Video Appointment Card Styles */
-.video-appointment-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 220px;
-  min-width: 220px;
-  max-width: 260px;
-  aspect-ratio: 1/1;
-  margin: 0 auto;
-  text-align: center;
-  gap: 12px;
-  padding: 1.25rem 1rem;
-}
-
-.video-appointment-card .appointment-time {
-  font-weight: 700;
-  font-size: 20px;
-  color: #3b82f6;
-  margin-bottom: 2px;
-}
-
-.video-appointment-card .appointment-type {
-  font-size: 13px;
-  color: #64748b;
-  margin-bottom: 2px;
-}
-
-.video-appointment-card .client-name {
-  font-weight: 600;
-  font-size: 15px;
-  color: #374151;
-  margin-bottom: 2px;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .mobile-menu-button {
-    display: block;
-  }
-
-  .main-content {
-    margin-left: 0;
-    padding: 1rem;
-  }
-
-  .topbar {
-    padding-left: 4rem;
-  }
-
-  .action-cards,
-  .stat-cards {
-    grid-template-columns: 1fr;
-  }
 } 

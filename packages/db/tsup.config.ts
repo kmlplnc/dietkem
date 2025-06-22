@@ -7,4 +7,6 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
+  noExternal: ['drizzle-orm'],
+  ignoreWatch: ['dist', 'node_modules'],
 }); 

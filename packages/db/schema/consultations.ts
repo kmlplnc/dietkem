@@ -13,4 +13,5 @@ export const consultations = pgTable('consultations', {
   created_by: integer('created_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
+  room_url: varchar('room_url', { length: 255 }), // Daily.co oda URL'si (opsiyonel)
 }); 

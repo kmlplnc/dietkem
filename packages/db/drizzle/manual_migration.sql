@@ -51,15 +51,6 @@ BEGIN
     END IF;
 END $$;
 
--- Add client_notes column if it doesn't exist
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'clients' AND column_name = 'client_notes') THEN
-        ALTER TABLE clients ADD COLUMN client_notes text;
-        RAISE NOTICE 'client_notes column added';
-    END IF;
-END $$;
-
 -- Verify the final table structure
 SELECT 
     column_name, 
@@ -71,4 +62,7 @@ SELECT
     numeric_scale
 FROM information_schema.columns 
 WHERE table_name = 'clients' 
-ORDER BY ordinal_position; 
+ORDER BY ordinal_position;
+
+-- Add room_url column to consultations table
+ALTER TABLE consultations ADD COLUMN room_url VARCHAR(255); 

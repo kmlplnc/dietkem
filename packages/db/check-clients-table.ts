@@ -39,8 +39,8 @@ const checkClientsTable = async () => {
     `;
     
     console.log('\nAll client data:');
-    allClients.forEach((row: any) => {
-      console.log(`- ID: ${row.id}, Name: ${row.name}, Activity Level: ${row.activity_level}, Created: ${row.created_at}`);
+    allClients.forEach(client => {
+      console.log(`- ID: ${client.id}, Name: ${client.name}, Activity Level: ${client.activity_level}, User ID: ${client.user_id}, Created: ${client.created_at}`);
     });
 
     // Count clients with null activity_level

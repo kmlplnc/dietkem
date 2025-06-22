@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { LanguageProvider } from "./context/LanguageContext";
+import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 // CLERK_DISABLED_TEMP: import { useAuth, useUser } from "@clerk/clerk-react";
 import './styles/animations.css';
 import LandingPage from "./pages/landing";
@@ -47,6 +47,9 @@ import ClientsPage from './pages/ClientsPage';
 import ClientDetail from './pages/ClientDetail';
 import ClientAccess from './pages/client-access';
 import ClientDashboard from './pages/client-dashboard';
+import ClientView from './pages/ClientView';
+import FullScreenCallPage from './pages/FullScreenCallPage';
+import TestJitsiPage from './pages/test-jitsi';
 
 function AppRoutes() {
   return (
@@ -62,7 +65,7 @@ function AppRoutes() {
         <Route path="/sign-up/verify-email-address" element={<VerifyEmailPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dietitian-panel" element={<DietitianPanel />} />
+        <Route path="/dietitian-panel" element={<ProtectedRoute role="org:admin"><DietitianPanel /></ProtectedRoute>} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/complete-profile" element={<CompleteProfilePage />} />
@@ -138,10 +141,14 @@ function AppRoutes() {
         <Route path="/recipes" element={<RecipesPage />} />
         <Route path="/recipes/:id" element={<RecipeDetailPage />} />
         <Route path="/calorimatik" element={<CalorieCalculator />} />
-        <Route path="/clients" element={<ClientsPage />} />
-        <Route path="/client-detail/:id" element={<ClientDetail />} />
+        <Route path="/clients" element={<ProtectedRoute role="org:admin"><ClientsPage /></ProtectedRoute>} />
+        <Route path="/clients/:clientId" element={<ProtectedRoute role="org:admin"><ClientDetail /></ProtectedRoute>} />
         <Route path="/client-access" element={<ClientAccess />} />
         <Route path="/client/:clientId" element={<ClientDashboard />} />
+        <Route path="/client-dashboard/:clientId/:dietitianId" element={<ClientDashboard />} />
+        <Route path="/client-view/:clientId" element={<ProtectedRoute role="org:admin"><ClientView /></ProtectedRoute>} />
+        <Route path="/call/:consultationId" element={<FullScreenCallPage />} />
+        <Route path="/test-jitsi" element={<TestJitsiPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>

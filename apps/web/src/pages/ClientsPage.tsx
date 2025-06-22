@@ -6,7 +6,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import ConsultationsButton from '../components/ConsultationsButton';
 
 interface ClientsPageProps {
-  onClientDetail?: (clientId: number) => void;
+  onClientDetail?: (clientId: number, clientName: string | undefined) => void;
 }
 
 const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
@@ -57,7 +57,8 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
 
   const handleClientDetail = (clientId: number) => {
     if (onClientDetail) {
-      onClientDetail(clientId);
+      const client = clients?.find(c => c.id === clientId);
+      onClientDetail(clientId, client?.name);
     } else {
       // Fallback: Eğer prop yoksa eski yöntemi kullan
       navigate(`/client-detail/${clientId}`);
@@ -205,11 +206,12 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
 
       <style>{`
         .clients-page {
-          max-width: 1200px;
-          margin: 0 auto;
+          max-width: 1136px;
+          margin-left: 106px;
+          margin-right: auto;
           padding: 2rem;
           min-height: 100vh;
-          background: #f8fafc;
+          background: var(--main-bg);
         }
 
         .loading-state, .error-state {
@@ -310,17 +312,21 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
 
         .clients-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
           gap: 1.5rem;
         }
 
         .client-card {
           background: white;
           border-radius: 12px;
-          padding: 1.5rem;
+          padding: 1.25rem;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
           transition: all 0.2s ease;
           border: 1px solid #e5e7eb;
+          aspect-ratio: 1.2;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
         }
 
         .client-card:hover {
@@ -332,24 +338,29 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 1rem;
+          margin-bottom: 0.75rem;
+          gap: 0.5rem;
         }
 
         .client-name {
-          font-size: 1.25rem;
+          font-size: 1.1rem;
           font-weight: 600;
           color: #1e293b;
           margin: 0;
           flex: 1;
+          word-break: break-word;
+          line-height: 1.3;
         }
 
         .plan-status {
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
-          font-size: 0.8rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.7rem;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          flex-shrink: 0;
+          white-space: nowrap;
         }
 
         .plan-status.active {
@@ -363,7 +374,8 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
         }
 
         .client-info {
-          margin-bottom: 1.5rem;
+          margin-bottom: 0.75rem;
+          flex: 1;
         }
 
         .info-row {
@@ -371,6 +383,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 0.5rem;
+          gap: 0.5rem;
         }
 
         .info-row:last-child {
@@ -378,15 +391,19 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
         }
 
         .info-label {
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           color: #6b7280;
           font-weight: 500;
+          flex-shrink: 0;
         }
 
         .info-value {
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           color: #1e293b;
           font-weight: 600;
+          text-align: right;
+          word-break: break-word;
+          line-height: 1.2;
         }
 
         .client-actions {
@@ -394,24 +411,26 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
           justify-content: space-between;
           align-items: center;
           gap: 0.5rem;
+          margin-top: auto;
         }
 
         .detail-btn, .measurement-btn {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.5rem;
-          padding: 0.75rem;
+          gap: 0.4rem;
+          padding: 0.6rem 0.8rem;
           background: #f8fafc;
           color: #1e293b;
           border: 1px solid #e2e8f0;
           border-radius: 8px;
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
           flex: 1;
           min-width: 0;
+          white-space: nowrap;
         }
 
         .detail-btn:hover, .measurement-btn:hover {
@@ -436,12 +455,13 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
           }
 
           .clients-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 1rem;
           }
 
           .client-card {
             padding: 1rem;
+            aspect-ratio: 1.2;
           }
 
           .client-header {
@@ -452,6 +472,20 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ onClientDetail }) => {
 
           .plan-status {
             align-self: flex-start;
+          }
+
+          .client-name {
+            font-size: 1rem;
+          }
+
+          .info-label, .info-value {
+            font-size: 0.75rem;
+          }
+
+          .detail-btn, .measurement-btn {
+            padding: 0.5rem 0.6rem;
+            font-size: 0.75rem;
+            gap: 0.3rem;
           }
         }
       `}</style>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { trpc } from '../utils/trpc';
-import toast, { Toaster } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import ClientProgress from './ClientProgress';
 
 interface ClientDetailProps {
@@ -11,18 +11,18 @@ interface ClientDetailProps {
 
 const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   
-  // Props'tan gelen clientId'yi kullan
-  const clientId = propClientId;
+  // URL parametresinden veya prop'tan clientId'yi al
+  const clientId = propClientId || (id ? parseInt(id) : null);
   
   console.log('ClientDetail - propClientId:', propClientId);
+  console.log('ClientDetail - URL id param:', id);
   console.log('ClientDetail - Final clientId:', clientId);
   console.log('ClientDetail - clientId type:', typeof clientId);
   console.log('ClientDetail - clientId truthy:', !!clientId);
   
   const [isActive, setIsActive] = useState(true);
-  const [dietitianNotes, setDietitianNotes] = useState('');
-  const [clientNotes, setClientNotes] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   
@@ -44,8 +44,8 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
     { enabled: !!clientId }
   );
 
-  // Ölçümleri API'den çek
-  const { data: measurementsData = [], isLoading: measurementsLoading } = trpc.measurements.getByClientId.useQuery(
+  // Ölçümleri çek
+  const { data: measurements, isLoading: measurementsLoading } = trpc.measurements.getByClientId.useQuery(
     { client_id: Number(clientId) },
     { enabled: !!clientId }
   );
@@ -53,19 +53,48 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
   // Update mutation
   const updateClientMutation = trpc.clients.update.useMutation();
 
-  console.log('ClientDetail - measurementsData:', measurementsData);
+  console.log('ClientDetail - measurementsData:', measurements);
   console.log('ClientDetail - clientId:', clientId);
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      // Standalone sayfa olarak açıldıysa önceki sayfaya dön
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        // Fallback: Diyetisyen paneline dön
+        navigate('/dietitian-panel?tab=clients');
+      }
+    }
+  };
+
+  // clientId null kontrolü
+  if (!clientId) {
+    return (
+      <div className="client-detail-page">
+        <div className="error-state">
+          <h3>Danışan ID'si bulunamadı</h3>
+          <p>Lütfen geçerli bir danışan seçin.</p>
+          <button onClick={handleBack} className="back-button">
+            Geri Dön
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // En son ölçümü bul (tarih bazında)
   const latestMeasurement = React.useMemo(() => {
-    if (!measurementsData || measurementsData.length === 0) {
+    if (!measurements || measurements.length === 0) {
       console.log('ClientDetail - No measurements data');
       return null;
     }
     
-    console.log('ClientDetail - Raw measurements:', measurementsData);
+    console.log('ClientDetail - Raw measurements:', measurements);
     
-    const sorted = [...measurementsData].sort((a, b) => 
+    const sorted = [...measurements].sort((a, b) => 
       new Date(b.measured_at as string).getTime() - new Date(a.measured_at as string).getTime()
     );
     
@@ -73,7 +102,7 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
     console.log('ClientDetail - Latest measurement:', sorted[0]);
     
     return sorted[0];
-  }, [measurementsData]);
+  }, [measurements]);
 
   // Status güncelleme mutation'ı
   const updateStatusMutation = trpc.clients.updateStatus.useMutation({
@@ -89,10 +118,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
   // Component mount olduğunda notes'ları ve düzenlenebilir alanları set et
   React.useEffect(() => {
     if (client) {
-      setDietitianNotes(client.notes || '');
-      setClientNotes(''); // Client notes şimdilik boş
-      
-      // Düzenlenebilir alanları set et
       setEditableName(client.name || '');
       setEditableGender(client.gender || '');
       setEditableHeight(client.height_cm?.toString() || '');
@@ -189,15 +214,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
   // Danışan erişim kodunu oluştur
   const accessCode = client ? generateAccessCode(client.id) : '';
 
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      // Fallback: Eğer onBack prop'u yoksa dietitian panel'e geri dön
-      navigate('/dietitian-panel?tab=clients');
-    }
-  };
-
   const handleShowProgress = () => {
     setShowProgress(true);
   };
@@ -256,8 +272,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
         setEditableMedications('');
       }
       
-      setDietitianNotes(client.notes || '');
-      setClientNotes('');
       setEditableActivityLevel(client.activity_level || 'sedentary');
     }
   };
@@ -279,7 +293,7 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
         height_cm: editableHeight,
         email: editableEmail,
         phone: editablePhone,
-        notes: dietitianNotes,
+        notes: '',
         diseases: JSON.stringify(diseasesArray),
         allergies: JSON.stringify(allergiesArray),
         medications: JSON.stringify(medicationsArray),
@@ -359,8 +373,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
         setEditableMedications('');
       }
       
-      setDietitianNotes(client.notes || '');
-      setClientNotes('');
       setEditableActivityLevel(client.activity_level || 'sedentary');
     }
   };
@@ -392,6 +404,9 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
         <div className="error-state">
           <h3>Hata oluştu</h3>
           <p>{error.message}</p>
+          <button onClick={handleBack} className="back-button">
+            Geri Dön
+          </button>
         </div>
       </div>
     );
@@ -441,7 +456,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
 
   return (
     <div className="client-detail-page">
-      <Toaster />
       {/* Header */}
       <div className="page-header">
         <div className="header-content">
@@ -559,11 +573,27 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
                     <span className="item-label">Danışan Kodu</span>
                     <span className="item-value access-code">
                       <span className="code-display">{accessCode}</span>
-                      <button 
+                      <button
                         className="copy-btn"
-                        onClick={() => {
-                          navigator.clipboard.writeText(accessCode);
-                          toast.success('Kod kopyalandı!');
+                        onClick={async () => {
+                          try {
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                              await navigator.clipboard.writeText(accessCode);
+                              toast.success('Kod kopyalandı!');
+                            } else {
+                              // Fallback for older browsers
+                              const textArea = document.createElement('textarea');
+                              textArea.value = accessCode;
+                              document.body.appendChild(textArea);
+                              textArea.select();
+                              document.execCommand('copy');
+                              document.body.removeChild(textArea);
+                              toast.success('Kod kopyalandı!');
+                            }
+                          } catch (error) {
+                            console.error('Copy failed:', error);
+                            toast.error('Kopyalama başarısız oldu');
+                          }
                         }}
                         title="Kodu kopyala"
                       >
@@ -787,31 +817,6 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
           </div>
         </div>
 
-        {/* Notlar Bölümü */}
-        <div className="notes-section">
-          <div className="notes-card">
-            <h3>📝 Diyetisyen Notları</h3>
-            <textarea
-              value={dietitianNotes}
-              onChange={(e) => setDietitianNotes(e.target.value)}
-              placeholder="Diyetisyen notları..."
-              className="notes-textarea"
-              readOnly={!isEditing}
-            />
-          </div>
-
-          <div className="notes-card">
-            <h3>📋 Danışana Görünen Not</h3>
-            <textarea
-              value={clientNotes}
-              onChange={(e) => setClientNotes(e.target.value)}
-              placeholder="Danışana görünecek notlar..."
-              className="notes-textarea"
-              readOnly={!isEditing}
-            />
-          </div>
-        </div>
-
         {/* Ölçümler */}
         <div className="measurements-grid">
           <div className="measurement-card">
@@ -874,10 +879,28 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
         .error-state h3 {
           color: #dc2626;
           margin-bottom: 0.5rem;
+          font-size: 1.5rem;
         }
 
         .error-state p {
           color: #6b7280;
+          margin-bottom: 1.5rem;
+        }
+
+        .back-button {
+          background: #1e293b;
+          color: white;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+          background: #334155;
+          transform: translateY(-1px);
         }
 
         .page-header {
@@ -1381,6 +1404,81 @@ const ClientDetail = ({ clientId: propClientId, onBack }: ClientDetailProps) => 
           background: #f3f4f6;
           color: #374151;
           transform: scale(1.1);
+        }
+
+        .dietitian-info {
+          background: white;
+          border-radius: 12px;
+          padding: 1.5rem;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          border: 1px solid #e5e7eb;
+        }
+
+        .dietitian-info h3 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #1e293b;
+          margin: 0 0 1rem 0;
+        }
+
+        .flex {
+          display: flex;
+        }
+
+        .items-center {
+          align-items: center;
+        }
+
+        .space-x-4 {
+          gap: 1rem;
+        }
+
+        .w-16 {
+          width: 4rem;
+        }
+
+        .h-16 {
+          height: 4rem;
+        }
+
+        .rounded-full {
+          border-radius: 9999px;
+        }
+
+        .object-cover {
+          object-fit: cover;
+        }
+
+        .border-2 {
+          border-width: 2px;
+        }
+
+        .border-white {
+          border-color: white;
+        }
+
+        .shadow-md {
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .font-semibold {
+          font-weight: 600;
+        }
+
+        .text-lg {
+          font-size: 1.25rem;
+        }
+
+        .text-gray-800 {
+          color: #1e293b;
+        }
+
+        .text-sm {
+          font-size: 0.875rem;
+        }
+
+        .text-gray-500 {
+          color: #6b7280;
         }
 
         @media (max-width: 768px) {

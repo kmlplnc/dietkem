@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../lib/auth';
 import { trpc } from '../utils/trpc';
 import { useTranslation } from '../hooks/useTranslation';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { 
   User, 
   Users, 
@@ -12,7 +13,8 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
 import CreateClientForm from '../components/CreateClientForm';
 import ClientsPage from './ClientsPage';
@@ -20,6 +22,7 @@ import ClientDetail from './ClientDetail';
 import Toast from '../components/Toast';
 import VideoCallPanel from '../components/VideoCallPanel';
 import "../styles/dietitian-panel.css";
+import ConfirmationModal from '../components/ConfirmationModal';
 
 // Helper functions
 const formatDate = (dateString: string) => {
@@ -123,63 +126,35 @@ const ClientConsultationStats: React.FC<{ clientId: number }> = ({ clientId }) =
 
 // Client Appointments Component
 const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = ({ clientId, clientName }) => {
-  const { data: consultations, isLoading, refetch } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
-
+  const { data: consultations, isLoading } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
+  const [showAll, setShowAll] = useState(false);
+  
   const truncate = (str: string, n: number) => {
-    return str.length > n ? str.slice(0, n) + '…' : str;
+    return str?.length > n ? str.substr(0, n - 1) + "..." : str;
   };
 
   if (isLoading) {
     return (
-      <div className="appointments-content">
-        <div className="loading-appointments">
-          <div className="loading-spinner"></div>
-          <p>Randevular yükleniyor...</p>
-        </div>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Randevular yükleniyor...</p>
       </div>
     );
   }
 
   if (!consultations || consultations.length === 0) {
-    return (
-      <div className="appointments-content">
-        <div className="empty-appointments">
-          <div className="empty-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-          </div>
-          <h3>Henüz randevu yok</h3>
-          <p>Bu danışan için henüz randevu oluşturulmamış.</p>
-        </div>
-      </div>
-    );
+    return <p>Bu danışan için randevu bulunmamaktadır.</p>;
   }
+
+  const visibleConsultations = showAll ? consultations : consultations.slice(0, 4);
 
   return (
     <div className="appointments-content">
       <div className="consultations-grid">
-        {consultations.map((consultation) => (
+        {visibleConsultations.map((consultation) => (
           <div
             key={consultation.id}
             className="consultation-client-card appointment-square-card"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 220,
-              minWidth: 220,
-              maxWidth: 260,
-              aspectRatio: '1/1',
-              margin: '0 auto',
-              textAlign: 'center',
-              gap: 12,
-              padding: '1.25rem 1rem',
-            }}
           >
             <div style={{fontWeight: 700, fontSize: 20, color: '#3b82f6', marginBottom: 2}}>{formatDate(consultation.consultation_date)}</div>
             <div style={{fontSize: 13, color: '#64748b', marginBottom: 2}}>{getDayOfWeek(consultation.consultation_date)} - {formatTime(consultation.consultation_time)}</div>
@@ -195,6 +170,11 @@ const ClientAppointments: React.FC<{ clientId: number; clientName: string }> = (
           </div>
         ))}
       </div>
+      {consultations.length > 4 && (
+        <button onClick={() => setShowAll(!showAll)} className="show-all-btn">
+          {showAll ? 'Daha Az Göster' : 'Tümünü Göster'}
+        </button>
+      )}
     </div>
   );
 };
@@ -354,20 +334,18 @@ const UpcomingAppointments: React.FC<{ clientId: number; clientName: string }> =
 // Past Appointments Component
 const PastAppointments: React.FC<{ clientId: number; clientName: string }> = ({ clientId, clientName }) => {
   const { data: consultations, isLoading, refetch } = trpc.consultations.getByClientId.useQuery({ client_id: clientId });
-  const updateConsultation = trpc.consultations.update.useMutation({
+  
+  const deleteConsultation = trpc.consultations.delete.useMutation({
     onSuccess: () => {
       refetch();
-      showToast('Randevu başarıyla güncellendi!', 'success');
+      toast.success('Görüşme başarıyla silindi!');
     },
     onError: (error) => {
-      showToast('Randevu güncellenirken hata oluştu: ' + error.message, 'error');
+      toast.error('Hata: ' + error.message);
     }
   });
 
-  const [editModal, setEditModal] = useState<{ isOpen: boolean; consultation: any }>({
-    isOpen: false,
-    consultation: null
-  });
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, consultationId: null as number | null });
 
   const now = new Date();
 
@@ -381,19 +359,15 @@ const PastAppointments: React.FC<{ clientId: number; clientName: string }> = ({ 
     return dt <= now;
   });
 
-  const handleEdit = (consultation: any) => {
-    setEditModal({ isOpen: true, consultation });
+  const handleDelete = (consultationId: number) => {
+    setConfirmModal({ isOpen: true, consultationId: consultationId });
   };
 
-  const handleSave = (updatedConsultation: any) => {
-    updateConsultation.mutate({
-      id: updatedConsultation.id,
-      consultation_date: updatedConsultation.consultation_date,
-      consultation_time: updatedConsultation.consultation_time,
-      consultation_type: updatedConsultation.consultation_type,
-      status: updatedConsultation.status,
-      notes: updatedConsultation.notes
-    });
+  const confirmDelete = () => {
+    if (confirmModal.consultationId) {
+      deleteConsultation.mutate({ id: confirmModal.consultationId });
+    }
+    setConfirmModal({ isOpen: false, consultationId: null });
   };
 
   if (isLoading) {
@@ -405,67 +379,46 @@ const PastAppointments: React.FC<{ clientId: number; clientName: string }> = ({ 
     );
   }
 
-  if (past.length === 0) {
-    return (
-      <div className="empty-state">
-        <div className="empty-icon">📋</div>
-        <h3>Geçmiş Görüşme Yok</h3>
-        <p>Bu danışan için henüz gerçekleşmiş bir görüşme bulunmuyor.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="appointments-container">
-      <div className="consultations-grid">
-        {past.map((consultation) => (
-          <div key={consultation.id} className="consultation-client-card">
-            <div className="card-header">
-              <div className="date-info">
-                <div className="date-icon">📅</div>
-                <div className="date-details">
-                  <div className="date">{formatDate(consultation.consultation_date)}</div>
-                  <div className="day">{getDayOfWeek(consultation.consultation_date)}</div>
-                </div>
-              </div>
+      {past.length === 0 ? (
+        <div className="empty-state">
+         <div className="empty-icon">📋</div>
+         <h3>Geçmiş Görüşme Yok</h3>
+         <p>Bu danışan için henüz gerçekleşmiş bir görüşme bulunmuyor.</p>
+       </div>
+      ) : (
+        <div className="consultations-grid">
+          {past.map((consultation) => (
+            <div key={consultation.id} className="consultation-client-card appointment-square-card">
               <button 
-                onClick={() => handleEdit(consultation)}
-                className="edit-btn"
-                title="Düzenle"
+                className="delete-btn" 
+                onClick={() => handleDelete(consultation.id)}
+                title="Görüşmeyi Sil"
               >
-                ✏️
+                <Trash2 size={16} />
               </button>
-            </div>
-            <div className="card-content">
-              <div className="time-info">
-                <span className="time-icon">🕐</span>
-                <span className="time">{formatTime(consultation.consultation_time)}</span>
-              </div>
-              <div className="type-info">
-                <span className="type-icon">🏥</span>
-                <span className="type">{getConsultationTypeText(consultation.consultation_type)}</span>
-              </div>
-              <div className="status-info">
-                <span className={`status-badge status-${consultation.status}`}>
-                  {getStatusText(consultation.status)}
-                </span>
-              </div>
+              <div style={{fontWeight: 700, fontSize: 20, color: '#3b82f6', marginBottom: 2}}>{formatDate(consultation.consultation_date)}</div>
+              <div style={{fontSize: 13, color: '#64748b', marginBottom: 2}}>{getDayOfWeek(consultation.consultation_date)} - {formatTime(consultation.consultation_time)}</div>
+              <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>{getConsultationTypeText(consultation.consultation_type)}</div>
+              <span className={`appointment-status status-completed`} style={{margin: '8px 0'}}>
+                Tamamlandı
+              </span>
               {consultation.notes && (
-                <div className="notes-info">
-                  <span className="notes-icon">📝</span>
-                  <span className="notes">{consultation.notes.length > 50 ? consultation.notes.substring(0, 50) + '...' : consultation.notes}</span>
+                <div style={{fontSize: 14, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginTop: 4, maxHeight: 48, overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                  {consultation.notes}
                 </div>
               )}
             </div>
-          </div>
-        ))}
-      </div>
-
-      <EditConsultationModal
-        consultation={editModal.consultation}
-        isOpen={editModal.isOpen}
-        onClose={() => setEditModal({ isOpen: false, consultation: null })}
-        onSave={handleSave}
+          ))}
+        </div>
+      )}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, consultationId: null })}
+        onConfirm={confirmDelete}
+        title="Görüşmeyi Sil"
+        message="Bu görüşmeyi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
       />
     </div>
   );
@@ -711,41 +664,58 @@ const ClientCard: React.FC<{
   );
 };
 
+declare global {
+  interface Window {
+    JitsiMeetExternalAPI: any;
+  }
+}
+
 // Video Call Panel Content Component (Full Page)
 const VideoCallPanelContent: React.FC<{ dietitianId: number }> = ({ dietitianId }) => {
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
-  const [isVideoVisible, setIsVideoVisible] = useState(false);
-
-  // Fetch video-enabled appointments for today
-  const { data: appointments, isLoading } = trpc.consultations.getVideoAppointments.useQuery({
-    dietitian_id: dietitianId,
-    date: new Date().toISOString().split('T')[0]
-  });
+  const { data: appointments, isLoading } = trpc.consultations.getVideoCalls.useQuery({ dietitianId });
 
   const formatTime = (timeString: string) => timeString;
 
   const getConsultationTypeText = (type: string) => {
     switch (type) {
       case 'initial': return 'İlk Görüşme';
-      case 'follow-up': return 'Takip Görüşmesi';
-      case 'emergency': return 'Acil Görüşme';
+      case 'follow_up': return 'Takip Görüşmesi';
       case 'online': return 'Online Görüşme';
       default: return type;
     }
   };
 
-  const handleJoinCall = (appointment: any) => {
-    setSelectedAppointment(appointment);
-    setIsVideoVisible(true);
+  const handleJoinCall = async (appointment: any) => {
+    // Video call logic here
+    console.log('Joining call for appointment:', appointment);
   };
 
-  const handleLeaveCall = () => {
-    setIsVideoVisible(false);
-    setSelectedAppointment(null);
+  const getCallStatusText = (appointment: any) => {
+    const now = new Date();
+    const appointmentTime = new Date(`${appointment.consultation_date} ${appointment.consultation_time}`);
+    const timeDiff = appointmentTime.getTime() - now.getTime();
+    const minutesDiff = Math.floor(timeDiff / (1000 * 60));
+
+    if (minutesDiff < 0) {
+      return <span style={{ color: '#ef4444' }}>⏰ Süresi dolmuş</span>;
+    } else if (minutesDiff <= 15) {
+      return <span style={{ color: '#f59e0b' }}>⏰ {minutesDiff} dakika kaldı</span>;
+    } else {
+      return <span style={{ color: '#10b981' }}>⏰ {Math.floor(minutesDiff / 60)} saat {minutesDiff % 60} dakika kaldı</span>;
+    }
   };
 
-  const generateRoomId = (appointment: any) => {
-    return `dietkem-${appointment.client_name.toLowerCase().replace(/\s+/g, '')}-${appointment.id}`;
+  const getCallButtonText = (appointment: any) => {
+    switch (appointment.status) {
+      case 'scheduled': return 'Görüşmeye Katıl';
+      case 'in_progress': return 'Görüşmede';
+      case 'completed': return 'Tamamlandı';
+      default: return 'Görüşmeye Katıl';
+    }
+  };
+
+  const isCallButtonDisabled = (appointment: any) => {
+    return appointment.status === 'completed';
   };
 
   if (isLoading) {
@@ -759,16 +729,6 @@ const VideoCallPanelContent: React.FC<{ dietitianId: number }> = ({ dietitianId 
 
   return (
     <div className="video-calls-container">
-      {/* Info Banner */}
-      <div className="video-calls-info-banner">
-        <div className="info-icon">ℹ️</div>
-        <div className="info-content">
-          <h4>Görüntülü Görüşmeler</h4>
-          <p>Sadece <strong>"Online Görüşme"</strong> seçeneği ile oluşturulan randevular burada görünür. 
-          Danışanlarınızla görüntülü görüşme yapmak için yeni randevu eklerken "Online Görüşme" seçeneğini seçin.</p>
-        </div>
-      </div>
-
       {!appointments || appointments.length === 0 ? (
         <div className="video-call-empty">
           <div className="empty-icon">📹</div>
@@ -784,85 +744,40 @@ const VideoCallPanelContent: React.FC<{ dietitianId: number }> = ({ dietitianId 
           </div>
         </div>
       ) : (
-        <>
-          <div className="video-calls-grid">
-            {appointments.map((appointment) => (
-              <div
-                key={appointment.id}
-                className="consultation-client-card appointment-square-card"
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: 220,
-                  minWidth: 220,
-                  maxWidth: 260,
-                  aspectRatio: '1/1',
-                  margin: '0 auto',
-                  textAlign: 'center',
-                  gap: 12,
-                  padding: '1.25rem 1rem',
-                }}
-              >
-                <div style={{fontWeight: 700, fontSize: 20, color: '#3b82f6', marginBottom: 2}}>
-                  {formatTime(appointment.consultation_time)}
-                </div>
-                <div style={{fontSize: 13, color: '#64748b', marginBottom: 2}}>
-                  {getConsultationTypeText(appointment.consultation_type)}
-                </div>
-                <div style={{fontWeight: 600, fontSize: 15, color: '#374151', marginBottom: 2}}>
-                  {appointment.client_name}
+        <div className="dpanel-video-grid">
+          {appointments.map((appointment) => (
+            <div
+              key={appointment.id}
+              className="dpanel-video-card"
+            >
+              <div className="dpanel-video-card-header">
+                <div className="dpanel-video-client-info">
+                  <h4 className="dpanel-video-client-name">{appointment.client_name}</h4>
+                  <div className="dpanel-video-details">
+                    <div className="dpanel-video-detail-item">
+                      <span role="img" aria-label="time">🕐</span>
+                      <span>{formatTime(appointment.consultation_time)}</span>
+                    </div>
+                    <div className="dpanel-video-detail-item">
+                      <span role="img" aria-label="type">🏥</span>
+                      <span>{getConsultationTypeText(appointment.consultation_type)}</span>
+                    </div>
+                    <div className="dpanel-video-detail-item">
+                      {getCallStatusText(appointment)}
+                    </div>
+                  </div>
                 </div>
                 <button
-                  className={`join-call-btn ${selectedAppointment?.id === appointment.id && isVideoVisible ? 'active' : ''}`}
+                  className={`dpanel-video-join-btn ${appointment.status === 'in_progress' ? 'active' : ''} ${appointment.status === 'completed' ? 'completed' : ''}`}
                   onClick={() => handleJoinCall(appointment)}
-                  style={{
-                    background: selectedAppointment?.id === appointment.id && isVideoVisible ? '#ef4444' : '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    width: '100%',
-                    marginTop: '8px'
-                  }}
+                  disabled={isCallButtonDisabled(appointment)}
                 >
-                  {selectedAppointment?.id === appointment.id && isVideoVisible ? 'Görüşmede' : 'Görüşmeye Katıl'}
+                  {getCallButtonText(appointment)}
                 </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Video Call Section */}
-          {selectedAppointment && isVideoVisible && (
-            <div className="video-call-section">
-              <div className="video-call-header">
-                <h4>📹 {selectedAppointment.client_name} ile Görüşme</h4>
-                <button onClick={handleLeaveCall} className="leave-call-btn">
-                  Görüşmeyi Sonlandır
-                </button>
-              </div>
-              <div className="video-call-container">
-                <iframe
-                  src={`https://meet.jit.si/${generateRoomId(selectedAppointment)}`}
-                  allow="camera; microphone; fullscreen; speaker; display-capture"
-                  width="100%"
-                  height="500"
-                  style={{ border: 'none', borderRadius: '10px' }}
-                  title="Video Call"
-                />
-              </div>
-              <div className="video-call-info">
-                <p>🔗 Oda ID: {generateRoomId(selectedAppointment)}</p>
-                <p>⏰ Başlangıç: {formatTime(selectedAppointment.consultation_time)}</p>
               </div>
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -939,9 +854,11 @@ const DietitianPanel = () => {
       setConsultationView(view);
     }
     
-    if (clientId && clientName) {
+    if (clientId) {
       setSelectedClientId(parseInt(clientId));
-      setSelectedClientName(clientName);
+      if (clientName) {
+        setSelectedClientName(clientName);
+      }
     }
   }, [location.search]);
 
@@ -954,16 +871,17 @@ const DietitianPanel = () => {
       searchParams.set('view', view);
     }
     
-    if (clientId && clientName) {
+    if (clientId) {
       searchParams.set('clientId', clientId.toString());
-      searchParams.set('clientName', clientName);
+      if (clientName) {
+        searchParams.set('clientName', clientName);
+      }
     }
     
     navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
   };
 
   const handleSignOut = async () => {
-    logout();
     navigate('/');
   };
 
@@ -988,17 +906,24 @@ const DietitianPanel = () => {
   };
 
   // Danışan detayına git
-  const handleClientDetail = (clientId: number) => {
+  const handleClientDetail = (clientId: number, clientName?: string) => {
     setSelectedClientId(clientId);
+    if (clientName) {
+      setSelectedClientName(clientName);
+    }
     setActiveTab('client-detail');
-    updateURL('client-detail', undefined, clientId);
+    updateURL('client-detail', undefined, clientId, clientName);
   };
 
   // Danışanlar listesine geri dön
   const handleBackToClients = () => {
     setSelectedClientId(null);
+    setSelectedClientName('');
     setActiveTab('clients');
-    updateURL('clients');
+    // URL'den clientId ve clientName parametrelerini temizle
+    const searchParams = new URLSearchParams();
+    searchParams.set('tab', 'clients');
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
   };
 
   // Görüşme paneli handler'ları
@@ -1173,6 +1098,9 @@ const DietitianPanel = () => {
           <div className="consultations-page">
             {consultationView === 'list' && (
               <>
+                <div className="page-header">
+                  <h1>Görüşmeler</h1>
+                </div>
                 {!clients || clients.length === 0 ? (
                   <div className="empty-state">
                     <div className="empty-icon">
@@ -1199,7 +1127,7 @@ const DietitianPanel = () => {
               </>
             )}
 
-            {consultationView === 'appointments' && (
+            {consultationView === 'appointments' && selectedClientId && (
               <div className="consultation-detail-view">
                 <div className="detail-header">
                   <h2>Randevular</h2>
@@ -1207,12 +1135,12 @@ const DietitianPanel = () => {
                 </div>
                 
                 <div className="appointments-content">
-                  <UpcomingAppointments clientId={selectedClientId} clientName={selectedClientName} />
+                  <ClientAppointments clientId={selectedClientId} clientName={selectedClientName} />
                 </div>
               </div>
             )}
 
-            {consultationView === 'new' && (
+            {consultationView === 'new' && selectedClientId && (
               <div className="consultation-detail-view">
                 <div className="detail-header">
                   <h2>Yeni Görüşme Ekle</h2>
@@ -1288,7 +1216,7 @@ const DietitianPanel = () => {
               </div>
             )}
 
-            {consultationView === 'recent' && (
+            {consultationView === 'recent' && selectedClientId && (
               <div className="consultation-detail-view">
                 <div className="detail-header">
                   <h2>Son Görüşmeler</h2>
@@ -1305,6 +1233,9 @@ const DietitianPanel = () => {
       case 'video-calls':
         return (
           <div className="video-calls-page">
+            <div className="page-header">
+              <h1>Görüntülü Görüşmeler</h1>
+            </div>
             <VideoCallPanelContent dietitianId={user.id} />
           </div>
         );
@@ -1434,15 +1365,12 @@ const DietitianPanel = () => {
           <header className="topbar">
             <div className="user-info">
               <span className="greeting">
-                {activeTab === 'dashboard' && `Hoş geldiniz, ${getUserDisplayName()}!`}
                 {activeTab === 'consultations' && (
-                  consultationView === 'list' ? 'Görüşmeler' :
                   consultationView === 'appointments' ? `Randevular - ${selectedClientName}` :
                   consultationView === 'new' ? `Yeni Görüşme - ${selectedClientName}` :
-                  `Son Görüşmeler - ${selectedClientName}`
+                  consultationView === 'recent' ? `Son Görüşmeler - ${selectedClientName}` :
+                  null
                 )}
-                {activeTab === 'video-calls' && 'Görüntülü Görüşmeler'}
-                {activeTab === 'clients' && 'Danışanlarım'}
                 {activeTab === 'new-client' && 'Yeni Danışan Ekle'}
                 {activeTab === 'client-detail' && 'Danışan Detayları'}
               </span>

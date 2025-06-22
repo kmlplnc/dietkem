@@ -78,7 +78,8 @@ export const clients = pgTable('clients', {
   height_cm: decimal('height_cm', { precision: 5, scale: 2 }),
   email: varchar('email', { length: 255 }),
   phone: varchar('phone', { length: 20 }),
-  notes: text('notes'),
+  notes: text('notes'),                    // Diyetisyen notları (dahili)
+  client_notes: text('client_notes'),      // Danışana gösterilecek notlar
   diseases: text('diseases'),
   allergies: text('allergies'),
   medications: text('medications'),

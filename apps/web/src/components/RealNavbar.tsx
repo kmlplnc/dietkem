@@ -124,7 +124,7 @@ const RealNavbar = () => {
           padding: 0 1.5rem;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: center;
           gap: 1rem;
           min-width: 0;
           flex-wrap: nowrap !important;
@@ -168,9 +168,16 @@ const RealNavbar = () => {
           position: relative;
           padding: 0.75rem 1rem;
           white-space: nowrap;
+          background-color: transparent !important;
         }
         .nav-link:hover {
           color: var(--text-color) !important;
+          background-color: transparent !important;
+        }
+        .nav-link.active {
+          font-weight: 600;
+          color: var(--primary-color) !important;
+          background-color: transparent !important;
         }
         .nav-link::after {
           content: '';
@@ -270,7 +277,7 @@ const RealNavbar = () => {
         }
         
         .user-trigger:hover {
-          background-color: rgba(0, 0, 0, 0.05);
+          background-color: transparent !important;
         }
         
         .user-avatar {
@@ -337,7 +344,7 @@ const RealNavbar = () => {
         }
         
         .dropdown-item:hover {
-          background-color: #f9fafb;
+          background-color: transparent !important;
           color: var(--text-color);
         }
         
@@ -347,7 +354,7 @@ const RealNavbar = () => {
         }
         
         .logout-item:hover {
-          background-color: #fef2f2;
+          background-color: transparent !important;
           color: #dc2626;
         }
         
