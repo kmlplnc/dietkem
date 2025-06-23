@@ -67,6 +67,8 @@ const KvkkInfo: React.FC = () => {
           min-height: 100vh;
           background: #f9fafb;
           padding: 2rem 0;
+          padding-top: 100px; /* Navbar'ın altında kalması için */
+          margin-bottom: 2rem; /* Footer için boşluk */
           overflow-y: auto;
         }
         .kvkk-container {

@@ -187,6 +187,8 @@ const BlogPage = () => {
           padding: 2rem;
           background: #f9fafb;
           min-height: 100vh;
+          padding-top: 100px; /* Navbar'ın altında kalması için */
+          margin-bottom: 2rem; /* Footer için boşluk */
         }
 
         .hero {

@@ -15,41 +15,33 @@ const ClinicInfo: React.FC = () => {
         <p>{t('clinicInfo.description')}</p>
         <hr className="divider" />
         <section>
-          <h2>{t('clinicInfo.multiExpertManagement.title')}</h2>
+          <h2>{t('clinicInfo.features.title')}</h2>
           <ul>
-            {t('clinicInfo.multiExpertManagement.items', { returnObjects: true }).map((item: string, index: number) => (
+            {t('clinicInfo.features.items', { returnObjects: true }).map((item: string, index: number) => (
               <li key={index}>{item}</li>
             ))}
           </ul>
         </section>
         <section>
-          <h2>{t('clinicInfo.patientTracking.title')}</h2>
+          <h2>{t('clinicInfo.benefits.title')}</h2>
           <ul>
-            {t('clinicInfo.patientTracking.items', { returnObjects: true }).map((item: string, index: number) => (
+            {t('clinicInfo.benefits.items', { returnObjects: true }).map((item: string, index: number) => (
               <li key={index}>{item}</li>
             ))}
           </ul>
         </section>
         <section>
-          <h2>{t('clinicInfo.clinicAnalytics.title')}</h2>
+          <h2>{t('clinicInfo.integration.title')}</h2>
           <ul>
-            {t('clinicInfo.clinicAnalytics.items', { returnObjects: true }).map((item: string, index: number) => (
+            {t('clinicInfo.integration.items', { returnObjects: true }).map((item: string, index: number) => (
               <li key={index}>{item}</li>
             ))}
           </ul>
         </section>
         <section>
-          <h2>{t('clinicInfo.sharedCalendar.title')}</h2>
+          <h2>{t('clinicInfo.support.title')}</h2>
           <ul>
-            {t('clinicInfo.sharedCalendar.items', { returnObjects: true }).map((item: string, index: number) => (
-              <li key={index}>{item}</li>
-            ))}
-          </ul>
-        </section>
-        <section>
-          <h2>{t('clinicInfo.corporateIdentity.title')}</h2>
-          <ul>
-            {t('clinicInfo.corporateIdentity.items', { returnObjects: true }).map((item: string, index: number) => (
+            {t('clinicInfo.support.items', { returnObjects: true }).map((item: string, index: number) => (
               <li key={index}>{item}</li>
             ))}
           </ul>

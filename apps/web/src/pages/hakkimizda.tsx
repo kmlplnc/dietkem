@@ -45,7 +45,8 @@ const Hakkimizda = () => {
           min-height: 60vh;
           padding: 32px 0 48px 0;
           background: #f9fafb;
-          padding-top: 64px;
+          padding-top: 100px;
+          margin-bottom: 2rem;
         }
         .about-container {
           background: #fff;

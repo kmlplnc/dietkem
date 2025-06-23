@@ -51,22 +51,29 @@ const BlogPost = () => {
             setAllPosts(postsData);
           }
         } else {
-          // Use tRPC in development
-          const [postResponse, postsResponse] = await Promise.all([
-            fetch(`/api/trpc/blogs.getById?batch=1&input=%22${id}%22`),
-            fetch('/api/trpc/blogs.getAll?batch=1&input=%7B%7D')
-          ]);
+          // Use direct API calls in development
+          try {
+            const [postResponse, postsResponse] = await Promise.all([
+              fetch(`/api/blogs/${id}`),
+              fetch('/api/blogs')
+            ]);
 
-          if (postResponse.ok) {
-            const postData = await postResponse.json();
-            setPost(postData[0]?.result?.data || null);
-          } else {
+            if (postResponse.ok) {
+              const postData = await postResponse.json();
+              console.log('Post data:', postData);
+              setPost(postData);
+            } else {
+              setIsError(true);
+            }
+
+            if (postsResponse.ok) {
+              const postsData = await postsResponse.json();
+              console.log('Posts data:', postsData);
+              setAllPosts(postsData);
+            }
+          } catch (error) {
+            console.error('API error:', error);
             setIsError(true);
-          }
-
-          if (postsResponse.ok) {
-            const postsData = await postsResponse.json();
-            setAllPosts(postsData[0]?.result?.data || []);
           }
         }
       } catch (error) {
@@ -99,11 +106,32 @@ const BlogPost = () => {
   };
 
   if (isLoading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading" style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        fontSize: '1.2rem'
+      }}>
+        {currentLang === 'tr' ? 'Yükleniyor...' : 'Loading...'}
+      </div>
+    );
   }
 
   if (isError || !post) {
-    return <div className="error">Post not found</div>;
+    return (
+      <div className="error" style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '50vh',
+        fontSize: '1.2rem',
+        color: '#e74c3c'
+      }}>
+        {currentLang === 'tr' ? 'Blog yazısı bulunamadı.' : 'Blog post not found.'}
+      </div>
+    );
   }
 
   return (
@@ -146,16 +174,18 @@ const BlogPost = () => {
             </div>
           </header>
 
-          <div className="post-image">
-            <img 
-              src={post.image} 
-              alt={post.title}
-              onError={handleImageError}
-            />
-          </div>
+          {post.image && (
+            <div className="post-image">
+              <img 
+                src={post.image} 
+                alt={post.title}
+                onError={handleImageError}
+              />
+            </div>
+          )}
 
           <div className="post-body">
-            <p>{post.content}</p>
+            <div dangerouslySetInnerHTML={{ __html: post.content }} />
           </div>
         </article>
 

@@ -169,7 +169,8 @@ const RecipesPage: React.FC = () => {
           max-width: 1200px;
           margin: 0 auto;
           min-height: 60vh;
-          padding-top: 64px;
+          padding-top: 100px; /* Navbar'ın altında kalması için */
+          margin-bottom: 2rem; /* Footer için boşluk */
         }
         
         .recipes-header {

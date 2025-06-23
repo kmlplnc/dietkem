@@ -291,9 +291,10 @@ const CalorieCalculator = () => {
 
       <style>{`
         .calorie-calculator-page {
-          background: #f9f9f9;
           min-height: 100vh;
+          background: #ffffff; /* Beyaz arka plan */
           padding: 2rem 1rem;
+          padding-top: 100px; /* Navbar'ın altında kalması için */
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
@@ -301,9 +302,10 @@ const CalorieCalculator = () => {
           max-width: 800px;
           margin: 0 auto;
           background: #fff;
-          border-radius: 1rem;
+          border-radius: 16px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
           padding: 2rem;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          margin-bottom: 2rem; /* Footer için boşluk */
         }
 
         /* Üst Başlık */

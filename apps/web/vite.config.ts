@@ -16,6 +16,12 @@ export default defineConfig(({ mode }) => {
       port: 3003,
       strictPort: true,
       proxy: {
+        '/api/trpc': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+          rewrite: path => path.replace(/^\/api\/trpc/, '/trpc'),
+        },
         '/api': {
           target: 'http://localhost:3001',
           changeOrigin: true,

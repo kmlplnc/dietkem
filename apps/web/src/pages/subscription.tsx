@@ -152,7 +152,7 @@ const SubscriptionPage = () => {
           align-items: flex-start;
           min-height: 60vh;
           background: #f9fafb;
-          padding-top: 64px;
+          padding-top: 100px;
         }
         .subscription-container {
           background: #fff;
@@ -162,6 +162,7 @@ const SubscriptionPage = () => {
           width: 100%;
           padding: 32px 24px;
           margin: 0 16px;
+          margin-bottom: 2rem;
         }
         .subscription-cards {
           display: flex;

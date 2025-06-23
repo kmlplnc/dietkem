@@ -74,14 +74,9 @@ const getRemainingTime = (dateString: string, timeString: string, consultationTy
     // Tarih formatını kontrol et
     let consultationDateTime: Date;
     
-    // Eğer dateString bir Date objesi ise
-    if (dateString instanceof Date) {
-      consultationDateTime = new Date(dateString);
-    } else {
-      // String ise parse et
-      const dateStr = dateString.toString();
-      consultationDateTime = new Date(dateStr);
-    }
+    // String ise parse et
+    const dateStr = dateString.toString();
+    consultationDateTime = new Date(dateStr);
     
     // Geçersiz tarih kontrolü
     if (isNaN(consultationDateTime.getTime())) {
@@ -355,10 +350,10 @@ const UpcomingAppointments: React.FC<{ clientId: number; clientName: string }> =
   const updateConsultation = trpc.consultations.update.useMutation({
     onSuccess: () => {
       refetch();
-      showToast('Randevu başarıyla güncellendi!', 'success');
+      toast.success('Randevu başarıyla güncellendi!');
     },
     onError: (error) => {
-      showToast('Randevu güncellenirken hata oluştu: ' + error.message, 'error');
+      toast.error('Randevu güncellenirken hata oluştu: ' + error.message);
     }
   });
 
@@ -385,7 +380,7 @@ const UpcomingAppointments: React.FC<{ clientId: number; clientName: string }> =
               !notifiedConsultations.has(consultation.id)) {
             playNotificationSound();
             setNotifiedConsultations(prev => new Set(prev).add(consultation.id));
-            showToast(`⚠️ ${clientName} için randevu 5 dakika içinde başlayacak!`, 'info');
+            toast(`⚠️ ${clientName} için randevu 5 dakika içinde başlayacak!`);
           }
         });
       }
@@ -1252,7 +1247,7 @@ const VideoCallPanelContent: React.FC<{ dietitianId: number }> = ({ dietitianId 
             >
               <div className="dpanel-video-card-header">
                 <div className="dpanel-video-client-info">
-                  <h4 className="dpanel-video-client-name">{appointment.client_name}</h4>
+                  <h4 className="dpanel-video-client-name">{appointment.client_name as string}</h4>
                   <div className="dpanel-video-details">
                     <div className="dpanel-video-detail-item">
                       <span role="img" aria-label="time">🕐</span>
@@ -1536,7 +1531,7 @@ const DietitianPanel = () => {
   const handleConsultationViewChange = (view: 'list' | 'appointments' | 'new' | 'recent') => {
     console.log('🔍 Debug - handleConsultationViewChange called with view:', view, 'selectedClientId:', selectedClientId, 'selectedClientName:', selectedClientName);
     setConsultationView(view);
-    updateURL('consultations', view, selectedClientId, selectedClientName);
+    updateURL('consultations', view, selectedClientId || undefined, selectedClientName);
   };
 
   // Client Card handlers
@@ -2020,6 +2015,7 @@ const DietitianPanel = () => {
         <Toast
           message={toast.message}
           type={toast.type}
+          isVisible={toast.isVisible}
           onClose={hideToast}
         />
       )}

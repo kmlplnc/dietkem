@@ -1,5 +1,6 @@
 import React from "react";
 import RealNavbar from "./RealNavbar.tsx";
+import Footer from "./Footer.tsx";
 import { useLocation } from "react-router-dom";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -20,6 +21,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     }}>
       {!isDietitianPanel && <RealNavbar />}
       <main style={{ flex: 1 }}>{children}</main>
+      {!isDietitianPanel && <Footer />}
     </div>
   );
 };
